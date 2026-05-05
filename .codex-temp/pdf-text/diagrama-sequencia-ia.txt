@@ -1,0 +1,59 @@
+                                            Twilio (WhatsApp)                   OdontoCloud API (Webhook)                   Motor de IA (Qualificação)        PostgreSQL
+Paciente
+
+           "Oi, estou com muita dor de dente!"
+   1
+
+                                                        POST /webhook/whatsapp (Mensagem)
+                                                    2
+
+                                                                                                                  Busca paciente pelo Telefone
+                                                                                            3
+
+                                                                                                                Paciente Encontrado (ID, Histórico)
+                                                                                                                                                                  4
+
+                                                                                                     Analisar intenção e urgência
+                                                                                            5
+
+                                                                                                                         IA detecta palavras "muita dor"
+                                                                                                                              Classifica Urgência = 5
+
+                                                                                                Retorna intenção: "Agendamento Urgente"
+                                                                                                                                         6
+
+                                                                                                        Busca horários livres hoje (HasOverlapping = false)
+                                                                                            7
+
+                                                                                                                 Retorna Slots (ex: 14h30, 16h00)
+                                                                                                                                                                  8
+
+                                                              Dispara opções de horário
+                                                                                            9
+
+   "Temos horários urgentes hoje: 1) 14h30 2) 16h00"
+                                                   10
+
+                       "Opção 1"
+   11
+
+                                                          POST /webhook/whatsapp ("1")
+                                                   12
+
+                                                                                                           INSERT Agendamento (Status = Confirmado)
+                                                                                            13
+
+                                                                                                                              Sucesso
+                                                                                                                                                                  14
+
+                                                              Dispara confirmação final
+                                                                                            15
+
+           "Agendamento confirmado para 14h30!"
+                                                   16
+
+
+
+                                            Twilio (WhatsApp)                   OdontoCloud API (Webhook)                   Motor de IA (Qualificação)        PostgreSQL
+Paciente
+

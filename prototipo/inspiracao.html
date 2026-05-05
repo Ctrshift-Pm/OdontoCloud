@@ -1,0 +1,2704 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OdontoCloud — SaaS para Clínicas Odontológicas</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #1D9E75;
+  --green-dark: #0F6E56;
+  --green-light: #E1F5EE;
+  --green-mid: #9FE1CB;
+  --blue: #185FA5;
+  --blue-light: #E6F1FB;
+  --blue-mid: #378ADD;
+  --amber: #854F0B;
+  --amber-light: #FAEEDA;
+  --amber-mid: #EF9F27;
+  --red: #A32D2D;
+  --red-light: #FCEBEB;
+  --red-mid: #E24B4A;
+  --pink: #72243E;
+  --pink-light: #FBEAF0;
+  --pink-mid: #D4537E;
+  --coral: #712B13;
+  --coral-light: #FAECE7;
+  --coral-mid: #D85A30;
+  --gray-50: #F8F7F4;
+  --gray-100: #F1EFE8;
+  --gray-200: #D3D1C7;
+  --gray-400: #888780;
+  --gray-600: #5F5E5A;
+  --gray-800: #2C2C2A;
+  --white: #FFFFFF;
+  --text: #1a1918;
+  --text-2: #4a4946;
+  --text-3: #888780;
+  --border: rgba(0,0,0,0.09);
+  --border-2: rgba(0,0,0,0.15);
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --radius-lg: 14px;
+  --font: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --sidebar-w: 228px;
+  --topbar-h: 56px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--font); background: var(--gray-50); color: var(--text); -webkit-font-smoothing: antialiased; overflow: hidden; height: 100vh; }
+a { text-decoration: none; cursor: pointer; }
+button { font-family: var(--font); cursor: pointer; border: none; outline: none; }
+input, select, textarea { font-family: var(--font); outline: none; }
+svg { stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.hidden { display: none !important; }
+
+/* ====== LOGIN ====== */
+.login-screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.login-bg { position: absolute; inset: 0; background: linear-gradient(135deg, #0a3d2b 0%, #0F6E56 50%, #1D9E75 100%); }
+.login-bg::before { content:''; position:absolute; inset:0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+.login-card { position:relative; background: var(--white); border-radius: 20px; padding: 40px; width: 400px; box-shadow: var(--shadow-lg); }
+.login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+.logo-mark { width: 42px; height: 42px; border-radius: 12px; background: var(--green); display: flex; align-items: center; justify-content: center; }
+.login-brand { font-size: 20px; font-weight: 600; color: var(--text); }
+.login-title { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.login-sub { font-size: 14px; color: var(--text-3); margin-bottom: 24px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text-2); margin-bottom: 6px; }
+.input { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border-2); border-radius: var(--radius-sm); font-size: 14.5px; color: var(--text); background: var(--white); transition: border-color .15s; }
+.input:focus { border-color: var(--green); }
+select.input { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 32px; }
+textarea.input { resize: vertical; min-height: 80px; line-height: 1.5; }
+.btn-login { width: 100%; padding: 12px; background: var(--green); color: var(--white); border-radius: var(--radius-sm); font-size: 15px; font-weight: 500; transition: background .15s, transform .1s; margin-top: 4px; }
+.btn-login:hover { background: var(--green-dark); }
+.btn-login:active { transform: scale(.99); }
+.login-hint { text-align: center; font-size: 12px; color: var(--text-3); margin-top: 14px; }
+
+/* ====== LAYOUT ====== */
+.main-app { display: flex; height: 100vh; overflow: hidden; }
+
+/* ====== SIDEBAR ====== */
+.sidebar { width: var(--sidebar-w); min-width: var(--sidebar-w); background: var(--gray-800); display: flex; flex-direction: column; overflow: hidden; }
+.sidebar-logo { padding: 20px 16px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,.06); }
+.logo-mark-sm { width: 32px; height: 32px; border-radius: 9px; background: var(--green); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.brand-name { font-size: 17px; font-weight: 600; color: var(--white); }
+.sidebar-nav { flex: 1; padding: 12px 8px; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; }
+.nav-label { font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.3); padding: 8px 8px 4px; }
+.nav-item { display: flex; align-items: center; gap: 9px; padding: 9px 11px; border-radius: var(--radius-sm); font-size: 14.5px; color: rgba(255,255,255,.55); transition: all .15s; position: relative; }
+.nav-item svg { width: 16px; height: 16px; opacity: .7; flex-shrink: 0; }
+.nav-item:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.85); }
+.nav-item.active { background: var(--green); color: var(--white); }
+.nav-item.active svg { opacity: 1; }
+.nav-badge { margin-left: auto; background: rgba(255,255,255,.2); color: white; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 20px; font-family: var(--mono); }
+.nav-badge-green { background: var(--green) !important; }
+.sidebar-user { padding: 12px; border-top: 1px solid rgba(255,255,255,.06); display: flex; align-items: center; gap: 10px; }
+.user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: white; flex-shrink: 0; }
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 13px; font-weight: 500; color: rgba(255,255,255,.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-role { font-size: 11px; color: rgba(255,255,255,.35); }
+.btn-logout { width: 28px; height: 28px; border-radius: var(--radius-sm); background: rgba(255,255,255,.06); color: rgba(255,255,255,.4); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .15s; }
+.btn-logout:hover { background: rgba(255,255,255,.12); color: rgba(255,255,255,.7); }
+
+/* ====== CONTENT ====== */
+.content-area { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.page { display: none; flex-direction: column; height: 100%; overflow: hidden; }
+.page.active { display: flex; }
+
+/* ====== TOPBAR ====== */
+.topbar { height: var(--topbar-h); min-height: var(--topbar-h); background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; gap: 16px; flex-shrink: 0; }
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.topbar-title { font-size: 18px; font-weight: 600; color: var(--text); }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.topbar-date { font-size: 13px; color: var(--text-3); }
+
+/* ====== BUTTONS ====== */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s; border: 1.5px solid var(--border-2); background: var(--white); color: var(--text-2); }
+.btn:hover { background: var(--gray-100); border-color: var(--border-2); }
+.btn:active { transform: scale(.98); }
+.btn svg { width: 14px; height: 14px; }
+.btn-primary { background: var(--green); color: white; border-color: var(--green); }
+.btn-primary:hover { background: var(--green-dark); border-color: var(--green-dark); }
+.btn-sm { padding: 6px 12px; font-size: 13px; }
+.btn-danger { background: var(--red-light); color: var(--red); border-color: transparent; }
+.btn-danger:hover { background: #f7c1c1; }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--text-3); }
+.btn-ghost:hover { background: var(--gray-100); color: var(--text-2); }
+.btn-icon { width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); }
+
+/* ====== PAGE BODY ====== */
+.page-body { flex: 1; overflow-y: auto; padding: 24px; }
+
+/* ====== CARDS ====== */
+.card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; }
+.card-sm { padding: 16px; }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.card-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.card-action { font-size: 13px; color: var(--green); cursor: pointer; font-weight: 500; }
+.card-action:hover { color: var(--green-dark); }
+
+/* ====== GRID ====== */
+.grid { display: grid; gap: 16px; }
+.grid-2 { grid-template-columns: 1fr 1fr; }
+.grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.grid-5 { grid-template-columns: repeat(5, 1fr); }
+
+/* ====== METRIC CARDS ====== */
+.metric-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; }
+.metric-label { font-size: 13px; color: var(--text-3); font-weight: 500; margin-bottom: 8px; }
+.metric-value { font-size: 28px; font-weight: 600; color: var(--text); line-height: 1; margin-bottom: 6px; font-variant-numeric: tabular-nums; }
+.metric-delta { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+.delta-up { color: var(--green-dark); }
+.delta-down { color: var(--red); }
+.metric-sub { font-size: 13px; color: var(--text-3); margin-top: 4px; }
+
+/* ====== BADGES ====== */
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; padding: 4px 9px; border-radius: 20px; white-space: nowrap; }
+.badge-green { background: var(--green-light); color: var(--green-dark); }
+.badge-blue { background: var(--blue-light); color: var(--blue); }
+.badge-amber { background: var(--amber-light); color: var(--amber); }
+.badge-red { background: var(--red-light); color: var(--red); }
+.badge-pink { background: var(--pink-light); color: var(--pink); }
+.badge-coral { background: var(--coral-light); color: var(--coral); }
+.badge-gray { background: var(--gray-100); color: var(--gray-600); }
+.badge-wa { background: #dcf8c6; color: #1a7c4e; }
+
+/* ====== TABLE ====== */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+th { text-align: left; padding: 11px 14px; font-size: 12px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 12px 14px; border-bottom: 1px solid var(--border); color: var(--text-2); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tbody tr { transition: background .1s; cursor: pointer; }
+tbody tr:hover td { background: var(--gray-50); }
+
+/* ====== SEARCH BAR ====== */
+.search-bar { display: flex; align-items: center; gap: 8px; background: var(--white); border: 1.5px solid var(--border-2); border-radius: var(--radius-sm); padding: 8px 12px; }
+.search-bar:focus-within { border-color: var(--green); }
+.search-bar svg { width: 15px; height: 15px; color: var(--text-3); flex-shrink: 0; }
+.search-bar input { border: none; background: none; font-size: 14.5px; color: var(--text); flex: 1; min-width: 0; }
+.search-bar input::placeholder { color: var(--text-3); }
+
+/* ====== TABS ====== */
+.tabs { display: flex; border-bottom: 1.5px solid var(--border); margin-bottom: 20px; gap: 0; }
+.tab { padding: 11px 20px; font-size: 14.5px; font-weight: 500; color: var(--text-3); border-bottom: 2px solid transparent; margin-bottom: -1.5px; cursor: pointer; transition: all .15s; white-space: nowrap; }
+.tab:hover { color: var(--text-2); }
+.tab.active { color: var(--green); border-bottom-color: var(--green); }
+
+/* ====== FORM ====== */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.form-row-3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-full { grid-column: 1 / -1; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group label { font-size: 13px; font-weight: 500; color: var(--text-2); }
+
+/* ====== AGENDA ====== */
+.agenda-wrap { overflow: auto; flex: 1; }
+.agenda-grid { display: grid; min-width: 700px; }
+.agenda-header-row { display: contents; }
+.agenda-cell { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.agenda-time-col { background: var(--gray-50); border-right: 1px solid var(--border); font-size: 11px; color: var(--text-3); padding: 6px 10px; text-align: right; font-variant-numeric: tabular-nums; }
+.agenda-day-header { background: var(--white); border-bottom: 2px solid var(--border); padding: 11px 10px; text-align: center; font-size: 13px; font-weight: 600; color: var(--text-2); position: sticky; top: 0; z-index: 2; }
+.agenda-day-header.today { color: var(--green); }
+.agenda-slot { min-height: 44px; padding: 2px 3px; position: relative; background: var(--white); cursor: pointer; transition: background .1s; }
+.agenda-slot:hover { background: var(--gray-50); }
+.agenda-event { border-radius: 5px; padding: 5px 8px; font-size: 12px; font-weight: 500; cursor: pointer; height: 100%; min-height: 38px; display: flex; flex-direction: column; justify-content: center; transition: opacity .15s; }
+.agenda-event:hover { opacity: .85; }
+.ev-green { background: var(--green-light); color: var(--green-dark); border-left: 3px solid var(--green); }
+.ev-blue { background: var(--blue-light); color: var(--blue); border-left: 3px solid var(--blue-mid); }
+.ev-amber { background: var(--amber-light); color: var(--amber); border-left: 3px solid var(--amber-mid); }
+.ev-pink { background: var(--pink-light); color: var(--pink); border-left: 3px solid var(--pink-mid); }
+.ev-coral { background: var(--coral-light); color: var(--coral); border-left: 3px solid var(--coral-mid); }
+
+/* ====== ODONTOGRAM ====== */
+.odontogram { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.odo-row { display: flex; gap: 3px; }
+.tooth { width: 34px; height: 38px; border: 1.5px solid var(--border-2); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; color: var(--text-3); transition: all .15s; background: var(--white); font-weight: 500; }
+.tooth:hover { border-color: var(--green); color: var(--green-dark); transform: translateY(-1px); }
+.tooth.ok { background: var(--green-light); border-color: var(--green); color: var(--green-dark); }
+.tooth.trat { background: var(--blue-light); border-color: var(--blue-mid); color: var(--blue); }
+.tooth.carie { background: var(--amber-light); border-color: var(--amber-mid); color: var(--amber); }
+.tooth.ext { background: var(--red-light); border-color: var(--red-mid); color: var(--red); }
+.tooth.implante { background: var(--pink-light); border-color: var(--pink-mid); color: var(--pink); }
+.tooth.ausente { background: var(--gray-100); border-color: var(--gray-200); color: var(--text-3); }
+
+/* ====== CHAT ====== */
+.chat-area { display: flex; flex-direction: column; height: 100%; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.msg { display: flex; gap: 8px; align-items: flex-end; max-width: 80%; }
+.msg-right { align-self: flex-end; flex-direction: row-reverse; }
+.msg-av { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+.msg-av-ia { background: var(--green-light); color: var(--green-dark); }
+.msg-av-user { background: var(--blue-light); color: var(--blue); }
+.bubble { padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.5; }
+.bubble-ia { background: var(--gray-100); color: var(--text); border-radius: 4px 14px 14px 14px; }
+.bubble-user { background: #dcf8c6; color: #1a3d26; border-radius: 14px 4px 14px 14px; }
+.msg-time { font-size: 10px; color: var(--text-3); margin-top: 3px; padding: 0 4px; }
+.chat-input-bar { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+.chat-input { flex: 1; padding: 9px 14px; border: 1.5px solid var(--border-2); border-radius: 22px; font-size: 13px; transition: border-color .15s; }
+.chat-input:focus { border-color: var(--green); }
+.btn-send { width: 38px; height: 38px; border-radius: 50%; background: var(--green); color: white; display: flex; align-items: center; justify-content: center; transition: background .15s; flex-shrink: 0; }
+.btn-send:hover { background: var(--green-dark); }
+.btn-send svg { width: 16px; height: 16px; }
+
+/* ====== CHARTS ====== */
+.bar-chart { display: flex; flex-direction: column; gap: 10px; }
+.bar-row { display: flex; align-items: center; gap: 10px; }
+.bar-label { font-size: 13px; color: var(--text-3); width: 90px; text-align: right; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-track { flex: 1; height: 8px; background: var(--gray-100); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+.bar-val { font-size: 13px; font-weight: 600; color: var(--text-2); width: 70px; flex-shrink: 0; }
+
+.mini-chart { display: flex; align-items: flex-end; gap: 3px; height: 36px; }
+.mini-bar { flex: 1; border-radius: 2px 2px 0 0; transition: height .4s; }
+
+/* ====== CASHFLOW CHART ====== */
+.cf-chart { display: flex; align-items: flex-end; gap: 8px; height: 120px; padding-top: 8px; }
+.cf-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+.cf-bars { display: flex; gap: 2px; align-items: flex-end; width: 100%; }
+.cf-bar { flex: 1; border-radius: 3px 3px 0 0; min-height: 4px; transition: height .5s; }
+.cf-month { font-size: 10px; color: var(--text-3); margin-top: 4px; }
+
+/* ====== DONUT ====== */
+.donut-wrap { display: flex; align-items: center; gap: 16px; }
+.legend { display: flex; flex-direction: column; gap: 7px; }
+.legend-item { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text-2); }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ====== APPT LIST ====== */
+.appt-list { display: flex; flex-direction: column; gap: 6px; }
+.appt-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); background: var(--gray-50); transition: background .1s; cursor: pointer; }
+.appt-item:hover { background: var(--gray-100); }
+.appt-time { font-size: 13px; font-weight: 600; color: var(--green); width: 44px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.appt-info { flex: 1; min-width: 0; }
+.appt-name { font-size: 14.5px; font-weight: 500; color: var(--text); }
+.appt-proc { font-size: 12.5px; color: var(--text-3); }
+.appt-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ====== PATIENT ROW ====== */
+.patient-av { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+
+/* ====== MODAL ====== */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 900; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(2px); }
+.modal { background: var(--white); border-radius: var(--radius-lg); width: 100%; max-width: 560px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--shadow-lg); }
+.modal-lg { max-width: 780px; }
+.modal-header { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.modal-header h3 { font-size: 16px; font-weight: 600; color: var(--text); }
+.modal-close { width: 28px; height: 28px; border-radius: var(--radius-sm); background: var(--gray-100); color: var(--text-3); font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.modal-close:hover { background: var(--gray-200); color: var(--text); }
+.modal-body { padding: 20px; overflow-y: auto; }
+.modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0; }
+
+/* ====== TOAST ====== */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { background: var(--gray-800); color: var(--white); padding: 12px 16px; border-radius: var(--radius-sm); font-size: 14px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; animation: slideIn .25s ease; max-width: 320px; }
+.toast-success { background: var(--green-dark); }
+.toast-error { background: var(--red); }
+.toast-icon { width: 18px; height: 18px; flex-shrink: 0; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* ====== MISC ====== */
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+.text-muted { color: var(--text-3); font-size: 13px; }
+.text-green { color: var(--green-dark); }
+.text-red { color: var(--red); }
+.fw-600 { font-weight: 600; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-12 { margin-bottom: 12px; }
+.stat-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.stat-row:last-child { border-bottom: none; }
+.stat-label { color: var(--text-3); }
+.stat-value { font-weight: 600; color: var(--text); }
+.section-label { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; }
+.avatar-colors { background: var(--green-light); color: var(--green-dark); }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text-3); }
+.empty-state svg { width: 40px; height: 40px; margin: 0 auto 12px; display: block; opacity: .3; }
+.scroll-y { overflow-y: auto; }
+.color-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+/* ====== SCROLLBAR ====== */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+
+/* ====== SIGNATURE PAD ====== */
+.sig-pad { border: 2px dashed var(--border-2); border-radius: var(--radius); background: var(--gray-50); position: relative; cursor: crosshair; }
+.sig-pad canvas { display: block; border-radius: var(--radius); }
+.sig-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--text-3); pointer-events: none; }
+
+/* ====== PLAN BADGE ====== */
+.plan-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; background: var(--amber-light); color: var(--amber); letter-spacing: .04em; }
+
+/* ====== RESPONSIVE HELPERS ====== */
+@media (max-width: 1100px) { .grid-4 { grid-template-columns: 1fr 1fr; } }
+
+
+/* ====== ANIMATIONS & MICRO-INTERACTIONS ====== */
+
+/* Page fade-in */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.06); }
+}
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+@keyframes bounceIn {
+  0%   { transform: scale(.85); opacity: 0; }
+  60%  { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(1); }
+}
+@keyframes spinIn {
+  from { transform: rotate(-90deg) scale(.7); opacity: 0; }
+  to   { transform: rotate(0deg) scale(1); opacity: 1; }
+}
+
+/* Apply page animation when .page becomes .active */
+.page.active {
+  animation: fadeInUp .28s cubic-bezier(.4,0,.2,1) both;
+}
+
+/* Stagger metric cards */
+.metric-card {
+  animation: fadeInUp .32s cubic-bezier(.4,0,.2,1) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+.metric-card:nth-child(1) { --i: 0; }
+.metric-card:nth-child(2) { --i: 1; }
+.metric-card:nth-child(3) { --i: 2; }
+.metric-card:nth-child(4) { --i: 3; }
+
+/* Cards float in */
+.card {
+  animation: fadeInUp .3s cubic-bezier(.4,0,.2,1) both;
+  transition: box-shadow .2s, transform .2s;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* Nav items slide in */
+.nav-item {
+  animation: slideInLeft .22s cubic-bezier(.4,0,.2,1) both;
+}
+.nav-item:nth-child(1) { animation-delay: 0ms; }
+.nav-item:nth-child(2) { animation-delay: 40ms; }
+.nav-item:nth-child(3) { animation-delay: 80ms; }
+.nav-item:nth-child(4) { animation-delay: 120ms; }
+.nav-item:nth-child(5) { animation-delay: 160ms; }
+.nav-item:nth-child(6) { animation-delay: 200ms; }
+.nav-item:nth-child(7) { animation-delay: 240ms; }
+.nav-item:nth-child(8) { animation-delay: 280ms; }
+.nav-item:nth-child(9) { animation-delay: 320ms; }
+
+/* Buttons spring on hover */
+.btn {
+  transition: background .15s, border-color .15s, transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .15s;
+}
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0,0,0,.1);
+}
+.btn:active {
+  transform: scale(.97) translateY(0);
+  box-shadow: none;
+}
+.btn-primary:hover {
+  box-shadow: 0 4px 12px rgba(29,158,117,.35);
+}
+
+/* Appointment items slide in */
+.appt-item {
+  animation: fadeInUp .25s cubic-bezier(.4,0,.2,1) both;
+  transition: background .15s, transform .15s;
+}
+.appt-item:hover { transform: translateX(3px); }
+.appt-item:nth-child(1) { animation-delay: 50ms; }
+.appt-item:nth-child(2) { animation-delay: 100ms; }
+.appt-item:nth-child(3) { animation-delay: 150ms; }
+.appt-item:nth-child(4) { animation-delay: 200ms; }
+.appt-item:nth-child(5) { animation-delay: 250ms; }
+
+/* Badge pop */
+.badge {
+  transition: transform .15s cubic-bezier(.34,1.56,.64,1);
+}
+.badge:hover { transform: scale(1.08); }
+
+/* Table rows */
+tbody tr {
+  transition: background .12s, transform .12s;
+}
+tbody tr:hover {
+  transform: translateX(2px);
+}
+
+/* Modal entrance */
+.modal {
+  animation: scaleIn .22s cubic-bezier(.4,0,.2,1) both;
+}
+.modal-overlay {
+  animation: fadeIn .18s ease both;
+}
+
+/* Toast slide */
+.toast {
+  animation: slideIn .25s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+/* Agenda events */
+.agenda-event {
+  transition: transform .15s cubic-bezier(.34,1.56,.64,1), opacity .15s, box-shadow .15s;
+}
+.agenda-event:hover {
+  transform: scale(1.02) translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,.12);
+  opacity: 1 !important;
+  z-index: 10;
+  position: relative;
+}
+
+/* Tooth hover spring */
+.tooth {
+  transition: all .18s cubic-bezier(.34,1.56,.64,1);
+}
+.tooth:hover {
+  transform: translateY(-3px) scale(1.08);
+  box-shadow: 0 4px 10px rgba(0,0,0,.12);
+}
+
+/* Bar fill animation */
+.bar-fill {
+  animation: growWidth .7s cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes growWidth {
+  from { width: 0 !important; }
+}
+
+/* Mini bar animation */
+.mini-bar {
+  animation: growHeight .6s cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes growHeight {
+  from { height: 0 !important; }
+}
+
+/* Donut SVG spin-in */
+svg circle[stroke-dasharray] {
+  animation: spinIn .8s cubic-bezier(.4,0,.2,1) both;
+  transform-origin: center;
+}
+
+/* Chat bubble pop */
+.bubble {
+  animation: bounceIn .25s cubic-bezier(.4,0,.2,1) both;
+}
+
+/* Active nav indicator pulse */
+.nav-item.active {
+  position: relative;
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 60%; border-radius: 0 3px 3px 0;
+  background: rgba(255,255,255,.8);
+  animation: fadeIn .2s ease both;
+}
+
+/* Sidebar logo pulse on load */
+.logo-mark-sm {
+  animation: bounceIn .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+/* WA badge glow */
+.badge-wa {
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+/* Metric value count-up feel */
+.metric-value {
+  animation: scaleIn .4s cubic-bezier(.34,1.56,.64,1) both;
+  animation-delay: 100ms;
+}
+
+/* Kanban columns stagger */
+[style*="width:240px"] {
+  animation: fadeInUp .3s cubic-bezier(.4,0,.2,1) both;
+}
+
+/* Input focus glow */
+.input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(29,158,117,.15);
+  transition: border-color .15s, box-shadow .15s;
+}
+
+/* Scrollbar accent */
+::-webkit-scrollbar-thumb { background: var(--gray-200); }
+::-webkit-scrollbar-thumb:hover { background: var(--green-mid); }
+
+/* Sidebar gradient background */
+.sidebar {
+  background: linear-gradient(160deg, #1a1918 0%, #2C2C2A 100%);
+}
+
+/* Topbar subtle shadow */
+.topbar {
+  box-shadow: 0 1px 0 var(--border), 0 2px 8px rgba(0,0,0,.04);
+}
+
+/* Page body scroll fade */
+.page-body::after {
+  content: '';
+  display: block;
+  height: 40px;
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- LOGIN SCREEN -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-bg"></div>
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="logo-mark">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M14 2C7.37 2 2 7.37 2 14s5.37 12 12 12 12-5.37 12-12S20.63 2 14 2z" fill="#fff" opacity=".15"/><path d="M14 6c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 13c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" fill="#fff"/></svg>
+        </div>
+        <span class="login-brand">OdontoCloud</span>
+      </div>
+      <h1 class="login-title">Bem-vindo de volta</h1>
+      <p class="login-sub">Faça login para acessar sua clínica</p>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" class="input" value="admin@clinicasorrir.com.br" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" class="input" value="••••••••" placeholder="Sua senha">
+      </div>
+      <button class="btn-login" onclick="App.login()">Entrar no sistema</button>
+      <p class="login-hint">Demo: qualquer senha funciona</p>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="main-app" class="main-app hidden">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-mark-sm">
+          <svg width="18" height="18" viewBox="0 0 28 28" fill="none"><path d="M14 6c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 13c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" fill="#fff"/></svg>
+        </div>
+        <span class="brand-name">OdontoCloud</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-label">Principal</div>
+        <a class="nav-item active" data-page="dashboard" onclick="App.navigate('dashboard')">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a class="nav-item" data-page="agenda" onclick="App.navigate('agenda')">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Agenda
+          <span class="nav-badge">3</span>
+        </a>
+        <a class="nav-item" data-page="ia" onclick="App.navigate('ia')">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          IA Atendimento
+          <span class="nav-badge nav-badge-green">7</span>
+        </a>
+
+        <div class="nav-label" style="margin-top:8px">Clínica</div>
+        <a class="nav-item" data-page="pacientes" onclick="App.navigate('pacientes')">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Pacientes / CRM
+        </a>
+        <a class="nav-item" data-page="prontuario" onclick="App.navigate('prontuario')">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          Prontuário
+        </a>
+        <a class="nav-item" data-page="assinatura" onclick="App.navigate('assinatura')">
+          <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Assinatura Digital
+        </a>
+
+        <div class="nav-label" style="margin-top:8px">Gestão</div>
+        <a class="nav-item" data-page="financeiro" onclick="App.navigate('financeiro')">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Financeiro
+        </a>
+        <a class="nav-item" data-page="configuracoes" onclick="App.navigate('configuracoes')">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Configurações
+        </a>
+      </nav>
+
+      <div class="sidebar-user">
+        <div class="user-avatar">CS</div>
+        <div class="user-info">
+          <div class="user-name">Clínica Sorrir</div>
+          <div class="user-role">Admin · Plano Pro</div>
+        </div>
+        <button class="btn-logout" onclick="App.logout()" title="Sair">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- CONTENT AREA -->
+    <div class="content-area">
+      <div id="page-dashboard" class="page active"></div>
+      <div id="page-agenda" class="page"></div>
+      <div id="page-ia" class="page"></div>
+      <div id="page-pacientes" class="page"></div>
+      <div id="page-prontuario" class="page"></div>
+      <div id="page-assinatura" class="page"></div>
+      <div id="page-financeiro" class="page"></div>
+      <div id="page-configuracoes" class="page"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay" class="modal-overlay hidden" onclick="App.closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modal-title"></h3>
+      <button class="modal-close" onclick="App.closeModal()">✕</button>
+    </div>
+    <div id="modal-body" class="modal-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-container" class="toast-container"></div>
+<script>
+// ============================================================
+// OdontoCloud — Data Store
+// ============================================================
+const DB = {
+  clinic: { name: 'Clínica Sorrir', plan: 'Pro', dentistas: 5 },
+
+  dentistas: [
+    { id: 1, nome: 'Dr. Carlos Mendes', cor: '#1D9E75', bgCor: '#E1F5EE', especialidade: 'Clínico Geral / Endodontia', comissao: 40 },
+    { id: 2, nome: 'Dra. Ana Oliveira', cor: '#378ADD', bgCor: '#E6F1FB', especialidade: 'Implantodontia', comissao: 40 },
+    { id: 3, nome: 'Dra. Paula Santos', cor: '#D4537E', bgCor: '#FBEAF0', especialidade: 'Ortodontia', comissao: 35 },
+    { id: 4, nome: 'Dr. Rodrigo Alves', cor: '#EF9F27', bgCor: '#FAEEDA', especialidade: 'Cirurgia Oral', comissao: 35 },
+    { id: 5, nome: 'Dr. Bruno Ferreira', cor: '#D85A30', bgCor: '#FAECE7', especialidade: 'Prótese Dentária', comissao: 30 },
+  ],
+
+  pacientes: [
+    { id: 1, nome: 'Ana Lima', cpf: '123.456.789-00', nascimento: '12/03/1992', telefone: '(11) 99234-1234', email: 'ana.lima@email.com', convenio: 'Particular', dentista: 1, ultimaConsulta: '01/04/2026', status: 'Ativo', whatsapp: true, cidade: 'São Paulo', iniciais: 'AL', corBg: '#E1F5EE', corText: '#0F6E56' },
+    { id: 2, nome: 'Carlos Souza', cpf: '987.654.321-00', nascimento: '05/07/1985', telefone: '(11) 98765-4321', email: 'carlos.s@email.com', convenio: 'Unimed', dentista: 2, ultimaConsulta: '15/03/2026', status: 'Ativo', whatsapp: true, cidade: 'São Paulo', iniciais: 'CS', corBg: '#E6F1FB', corText: '#185FA5' },
+    { id: 3, nome: 'Fernanda Costa', cpf: '456.789.123-00', nascimento: '22/11/1990', telefone: '(21) 97654-3210', email: 'fe.costa@email.com', convenio: 'Particular', dentista: 1, ultimaConsulta: '20/02/2026', status: 'Retorno', whatsapp: true, cidade: 'Rio de Janeiro', iniciais: 'FC', corBg: '#FBEAF0', corText: '#72243E' },
+    { id: 4, nome: 'João Pedro Ramos', cpf: '321.654.987-00', nascimento: '15/04/1998', telefone: '(11) 94321-8765', email: 'joao.p@email.com', convenio: 'Amil', dentista: 3, ultimaConsulta: '10/01/2026', status: 'Ativo', whatsapp: false, cidade: 'São Paulo', iniciais: 'JP', corBg: '#FAEEDA', corText: '#854F0B' },
+    { id: 5, nome: 'Mariana Rocha', cpf: '654.321.987-00', nascimento: '08/09/1987', telefone: '(11) 93210-9876', email: 'm.rocha@email.com', convenio: 'Particular', dentista: 2, ultimaConsulta: '05/04/2026', status: 'Ativo', whatsapp: true, cidade: 'São Paulo', iniciais: 'MR', corBg: '#E1F5EE', corText: '#0F6E56' },
+    { id: 6, nome: 'Roberto Lima', cpf: '789.123.456-00', nascimento: '30/06/1975', telefone: '(11) 92109-8765', email: 'rob.lima@email.com', convenio: 'Bradesco Saúde', dentista: 4, ultimaConsulta: '12/03/2026', status: 'Ativo', whatsapp: true, cidade: 'São Paulo', iniciais: 'RL', corBg: '#E6F1FB', corText: '#185FA5' },
+    { id: 7, nome: 'Tatiana Cunha', cpf: '111.222.333-44', nascimento: '17/02/1993', telefone: '(11) 99887-6655', email: 'tati.c@email.com', convenio: 'Particular', dentista: 3, ultimaConsulta: '28/02/2026', status: 'Inativo', whatsapp: true, cidade: 'Campinas', iniciais: 'TC', corBg: '#FAECE7', corText: '#712B13' },
+    { id: 8, nome: 'Diego Monteiro', cpf: '555.666.777-88', nascimento: '03/12/1980', telefone: '(11) 97766-5544', email: 'diego.m@email.com', convenio: 'SulAmérica', dentista: 5, ultimaConsulta: '22/01/2026', status: 'Ativo', whatsapp: false, cidade: 'São Paulo', iniciais: 'DM', corBg: '#FBEAF0', corText: '#72243E' },
+  ],
+
+  agendamentos: [
+    { id: 1, pacienteId: 1, dentistaId: 1, data: '2026-04-08', hora: '08:00', procedimento: 'Limpeza', duracao: 60, status: 'Confirmado', obs: '' },
+    { id: 2, pacienteId: 2, dentistaId: 2, data: '2026-04-08', hora: '09:30', procedimento: 'Implante', duracao: 90, status: 'Agendado', obs: 'Paciente ansioso, precisará anestesia extra' },
+    { id: 3, pacienteId: 3, dentistaId: 1, data: '2026-04-08', hora: '10:00', procedimento: 'Canal', duracao: 90, status: 'Pendente', obs: '' },
+    { id: 4, pacienteId: 4, dentistaId: 3, data: '2026-04-08', hora: '11:30', procedimento: 'Ortodontia', duracao: 45, status: 'Confirmado', obs: '' },
+    { id: 5, pacienteId: 5, dentistaId: 2, data: '2026-04-08', hora: '14:00', procedimento: 'Clareamento', duracao: 60, status: 'Confirmado', obs: '' },
+    { id: 6, pacienteId: 6, dentistaId: 4, data: '2026-04-09', hora: '09:00', procedimento: 'Cirurgia de Siso', duracao: 120, status: 'Confirmado', obs: '' },
+    { id: 7, pacienteId: 1, dentistaId: 1, data: '2026-04-09', hora: '10:30', procedimento: 'Retorno', duracao: 30, status: 'Agendado', obs: '' },
+    { id: 8, pacienteId: 7, dentistaId: 3, data: '2026-04-10', hora: '08:30', procedimento: 'Aparelho Ortodôntico', duracao: 60, status: 'Agendado', obs: '' },
+    { id: 9, pacienteId: 8, dentistaId: 5, data: '2026-04-10', hora: '14:00', procedimento: 'Prótese', duracao: 60, status: 'Confirmado', obs: '' },
+    { id: 10, pacienteId: 2, dentistaId: 2, data: '2026-04-11', hora: '09:00', procedimento: 'Retorno Implante', duracao: 30, status: 'Agendado', obs: '' },
+    { id: 11, pacienteId: 5, dentistaId: 2, data: '2026-04-07', hora: '09:00', procedimento: 'Consulta', duracao: 30, status: 'Atendido', obs: '' },
+    { id: 12, pacienteId: 3, dentistaId: 1, data: '2026-04-07', hora: '11:00', procedimento: 'Limpeza', duracao: 60, status: 'Falta', obs: '' },
+  ],
+
+  leads: [
+    { id: 1, nome: 'Maria Fernanda', telefone: '(11) 98877-1234', motivo: 'Dor de dente intensa há 3 dias', urgencia: 5, procedimento: 'Endodontia', status: 'Urgente', hora: '09:16', conversa: [
+      { lado: 'user', texto: 'Olá, estou com dor de dente há 3 dias, preciso de uma consulta urgente', hora: '09:14' },
+      { lado: 'ia', texto: 'Olá, Maria Fernanda! Sou a assistente virtual da Clínica Sorrir. Lamento que esteja com dor. Para priorizarmos seu atendimento, pode me dizer onde está a dor e se está pulsando ou constante?', hora: '09:14' },
+      { lado: 'user', texto: 'É no lado direito, dor pulsante, piora de noite', hora: '09:15' },
+      { lado: 'ia', texto: 'Entendido. Pelo que descreve, pode ser necessário um atendimento prioritário. Temos uma vaga ainda hoje às 17h com o Dr. Mendes. Deseja confirmar?', hora: '09:15' },
+      { lado: 'user', texto: 'Sim, pode agendar!', hora: '09:16' },
+      { lado: 'ia', texto: 'Pronto! Agendamento confirmado para hoje às 17h com Dr. Mendes. Você receberá um lembrete 1h antes. Cuide-se! 😊', hora: '09:16' },
+    ]},
+    { id: 2, nome: 'Roberto Lima', telefone: '(11) 97755-3344', motivo: 'Interesse em limpeza semestral', urgencia: 2, procedimento: 'Profilaxia', status: 'Qualificado', hora: '10:22', conversa: [
+      { lado: 'user', texto: 'Bom dia! Quero marcar uma limpeza', hora: '10:20' },
+      { lado: 'ia', texto: 'Bom dia! Fico feliz em ajudar. Você é paciente da clínica ou é a primeira vez?', hora: '10:20' },
+      { lado: 'user', texto: 'Primeira vez', hora: '10:21' },
+      { lado: 'ia', texto: 'Seja bem-vindo! Temos horários disponíveis esta semana. Qual período prefere: manhã ou tarde?', hora: '10:21' },
+      { lado: 'user', texto: 'Manhã, de preferência', hora: '10:22' },
+      { lado: 'ia', texto: 'Perfeito! Temos quinta-feira às 09h ou sexta às 08h30. Qual prefere?', hora: '10:22' },
+    ]},
+    { id: 3, nome: 'Tatiana Cunha', telefone: '(11) 99887-6655', motivo: 'Interesse em ortodontia', urgencia: 1, procedimento: 'Ortodontia', status: 'Follow-up', hora: '08:45', conversa: [
+      { lado: 'user', texto: 'Olá, tenho interesse em colocar aparelho ortodôntico', hora: '08:43' },
+      { lado: 'ia', texto: 'Que ótimo! A Dra. Paula Santos é nossa especialista em ortodontia. Você prefere aparelho metálico, estético ou alinhadores invisíveis?', hora: '08:43' },
+      { lado: 'user', texto: 'Invisível se possível', hora: '08:44' },
+      { lado: 'ia', texto: 'Trabalhamos com alinhadores! O primeiro passo é uma avaliação gratuita. Posso agendar para você. Quando seria melhor?', hora: '08:44' },
+    ]},
+    { id: 4, nome: 'Paulo Henrique', telefone: '(11) 96644-2233', motivo: 'Dente quebrado', urgencia: 4, procedimento: 'Restauração', status: 'Agendado', hora: '11:05', conversa: [
+      { lado: 'user', texto: 'Meu dente quebrou ontem', hora: '11:03' },
+      { lado: 'ia', texto: 'Vou te ajudar! Está sentindo dor? O dente quebrou na região frontal ou nos molares?', hora: '11:03' },
+      { lado: 'user', texto: 'Dói um pouco, é um molar', hora: '11:04' },
+      { lado: 'ia', texto: 'Entendido. Temos horário hoje às 15h para avaliação de urgência com o Dr. Mendes. Confirmo?', hora: '11:04' },
+      { lado: 'user', texto: 'Sim!', hora: '11:05' },
+      { lado: 'ia', texto: 'Confirmado! Consulta às 15h hoje. Traga uma foto do dente se possível. Até logo!', hora: '11:05' },
+    ]},
+  ],
+
+  financeiro: {
+    receber: [
+      { id: 1, pacienteId: 1, procedimento: 'Limpeza', dentistaId: 1, valor: 280, desconto: 0, parcelas: 1, vencimento: '08/04/2026', status: 'Pendente', forma: 'Pix' },
+      { id: 2, pacienteId: 2, procedimento: 'Implante', dentistaId: 2, valor: 4800, desconto: 0, parcelas: 6, vencimento: '10/04/2026', status: 'Pendente', forma: 'Parcelado' },
+      { id: 3, pacienteId: 3, procedimento: 'Canal', dentistaId: 1, valor: 1200, desconto: 100, parcelas: 2, vencimento: '15/04/2026', status: 'Parcial', forma: 'Cartão Crédito' },
+      { id: 4, pacienteId: 5, procedimento: 'Clareamento', dentistaId: 2, valor: 900, desconto: 0, parcelas: 1, vencimento: '07/04/2026', status: 'Pago', forma: 'Pix' },
+      { id: 5, pacienteId: 4, procedimento: 'Ortodontia', dentistaId: 3, valor: 350, desconto: 0, parcelas: 1, vencimento: '01/04/2026', status: 'Pago', forma: 'Débito' },
+      { id: 6, pacienteId: 6, procedimento: 'Cirurgia', dentistaId: 4, valor: 2200, desconto: 200, parcelas: 4, vencimento: '20/04/2026', status: 'Pendente', forma: 'Parcelado' },
+    ],
+    pagar: [
+      { id: 1, destinatario: 'Aluguel Clínica', categoria: 'Aluguel', valor: 4200, vencimento: '10/04/2026', status: 'Pendente', recorrencia: 'Mensal' },
+      { id: 2, destinatario: 'DentalPro Materiais', categoria: 'Material', valor: 1850, vencimento: '12/04/2026', status: 'Pendente', recorrencia: 'Único' },
+      { id: 3, destinatario: 'Conta de Luz', categoria: 'Outros', valor: 380, vencimento: '15/04/2026', status: 'Pendente', recorrencia: 'Mensal' },
+      { id: 4, destinatario: 'Plano de Saúde Equipe', categoria: 'Salário', valor: 1200, vencimento: '05/04/2026', status: 'Pago', recorrencia: 'Mensal' },
+      { id: 5, destinatario: 'Manutenção Equipamentos', categoria: 'Outros', valor: 650, vencimento: '20/04/2026', status: 'Pendente', recorrencia: 'Único' },
+    ],
+    faturamentoDentista: [
+      { dentistaId: 1, producao: 16200, comissao: 6480 },
+      { dentistaId: 2, producao: 13400, comissao: 5360 },
+      { dentistaId: 3, producao: 10500, comissao: 3675 },
+      { dentistaId: 4, producao: 7600, comissao: 2660 },
+      { dentistaId: 5, producao: 4800, comissao: 1440 },
+    ],
+    fluxoCaixa: [
+      { mes: 'Jan', entrada: 38200, saida: 12400 },
+      { mes: 'Fev', entrada: 41500, saida: 13200 },
+      { mes: 'Mar', entrada: 43800, saida: 14100 },
+      { mes: 'Abr', entrada: 48720, saida: 14000 },
+    ]
+  },
+
+  documentos: [
+    { id: 1, tipo: 'Termo de Consentimento', pacienteId: 1, dentistaId: 1, data: '07/04/2026', status: 'Assinado', procedimento: 'Limpeza + Profilaxia' },
+    { id: 2, tipo: 'Contrato de Implante', pacienteId: 2, dentistaId: 2, data: '06/04/2026', status: 'Assinado', procedimento: 'Implante dente 36' },
+    { id: 3, tipo: 'Contrato Ortodontia', pacienteId: 4, dentistaId: 3, data: '08/04/2026', status: 'Pendente', procedimento: 'Aparelho Ortodôntico' },
+    { id: 4, tipo: 'Termo Clareamento', pacienteId: 5, dentistaId: 2, data: '08/04/2026', status: 'Pendente', procedimento: 'Clareamento Dental' },
+    { id: 5, tipo: 'Autorização Cirurgia', pacienteId: 6, dentistaId: 4, data: '05/04/2026', status: 'Assinado', procedimento: 'Extração Sisos' },
+    { id: 6, tipo: 'Plano de Tratamento', pacienteId: 3, dentistaId: 1, data: '01/04/2026', status: 'Assinado', procedimento: 'Tratamento Canal + Coroa' },
+  ],
+
+  odontograma: {
+    1: { // paciente id 1 - Ana Lima
+      11:'ok',12:'ok',13:'ok',14:'trat',15:'trat',16:'ok',17:'ok',18:'ok',
+      21:'ok',22:'ok',23:'carie',24:'ok',25:'ok',26:'ok',27:'ok',28:'ausente',
+      31:'ok',32:'ok',33:'ok',34:'ok',35:'ok',36:'carie',37:'ok',38:'ok',
+      41:'ok',42:'trat',43:'ok',44:'ok',45:'ok',46:'ok',47:'ok',48:'ok',
+    }
+  },
+
+  procedimentos: ['Limpeza','Canal','Implante','Clareamento','Ortodontia','Prótese','Cirurgia','Restauração','Avaliação','Retorno','Extração','Radiografia','Aparelho Ortodôntico'],
+
+  nextId: { agendamento: 13, paciente: 9, documento: 7 },
+};
+
+// Helpers
+DB.getPaciente = (id) => DB.pacientes.find(p => p.id === id);
+DB.getDentista = (id) => DB.dentistas.find(d => d.id === id);
+DB.getAgendamentosHoje = () => DB.agendamentos.filter(a => a.data === '2026-04-08');
+DB.getAgendamentosSemana = () => DB.agendamentos.filter(a => a.data >= '2026-04-07' && a.data <= '2026-04-11');
+DB.formatCurrency = (v) => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 0 });
+DB.getStatusBadge = (status) => {
+  const map = { 'Confirmado':'green','Agendado':'blue','Pendente':'amber','Falta':'red','Cancelado':'gray','Atendido':'green','Remarcado':'pink','Urgente':'red','Qualificado':'blue','Follow-up':'amber','Ativo':'green','Inativo':'gray','Retorno':'amber','Pago':'green','Parcial':'amber','Atrasado':'red' };
+  return `<span class="badge badge-${map[status]||'gray'}">${status}</span>`;
+};
+
+const DashboardPage = {
+  render() {
+    const hoje = DB.getAgendamentosHoje();
+    const total = DB.financeiro.faturamentoDentista.reduce((s,d)=>s+d.producao,0);
+
+    const faltas = DB.agendamentos.filter(a=>a.status==='Falta').length;
+    const totalAg = DB.agendamentos.filter(a=>a.status!=='').length;
+    const taxaFaltas = ((faltas/totalAg)*100).toFixed(1);
+
+    return `
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <span class="topbar-date">Quarta-feira, 08 de abril de 2026</span>
+        <button class="btn btn-primary" onclick="AgendaPage.openNovoAgendamento()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Novo agendamento
+        </button>
+      </div>
+    </div>
+    <div class="page-body">
+
+      <div class="grid grid-4 mb-16">
+        <div class="metric-card">
+          <div class="metric-label">Faturamento (abr)</div>
+          <div class="metric-value">${DB.formatCurrency(total)}</div>
+          <div class="metric-delta delta-up">▲ 12% vs março</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Consultas hoje</div>
+          <div class="metric-value">${hoje.length}</div>
+          <div class="metric-sub">${hoje.filter(a=>a.status==='Pendente').length} aguardando confirmação</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Taxa de faltas</div>
+          <div class="metric-value">${taxaFaltas}%</div>
+          <div class="metric-delta delta-up">▼ 3,1% vs mês anterior</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Taxa de conversão IA</div>
+          <div class="metric-value">71%</div>
+          <div class="metric-delta delta-up">▲ 5% vs mês anterior</div>
+        </div>
+      </div>
+
+      <div class="grid grid-2 mb-16">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Consultas de hoje</div>
+            <span class="card-action" onclick="App.navigate('agenda')">Ver agenda →</span>
+          </div>
+          <div class="appt-list">
+            ${hoje.map(a => {
+              const p = DB.getPaciente(a.pacienteId);
+              const d = DB.getDentista(a.dentistaId);
+              return `<div class="appt-item" onclick="App.navigate('agenda')">
+                <div class="appt-time">${a.hora}</div>
+                <div class="appt-dot" style="background:${d.cor}"></div>
+                <div class="appt-info">
+                  <div class="appt-name">${p.nome}</div>
+                  <div class="appt-proc">${a.procedimento} · ${d.nome.split(' ')[0]} ${d.nome.split(' ')[1]}</div>
+                </div>
+                ${DB.getStatusBadge(a.status)}
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Faturamento por dentista</div>
+            <span class="text-muted">Abril 2026</span>
+          </div>
+          <div class="bar-chart">
+            ${DB.financeiro.faturamentoDentista.map((f,i) => {
+              const d = DB.getDentista(f.dentistaId);
+              const max = DB.financeiro.faturamentoDentista[0].producao;
+              const pct = Math.round((f.producao/max)*100);
+              return `<div class="bar-row">
+                <div class="bar-label">${d.nome.replace('Dr. ','').replace('Dra. ',' ').split(' ')[0]}</div>
+                <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${d.cor}"></div></div>
+                <div class="bar-val">${DB.formatCurrency(f.producao)}</div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-3">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">IA Atendimento — hoje</div>
+            <span class="badge badge-wa">WhatsApp ativo</span>
+          </div>
+          <div style="font-size:28px;font-weight:600;margin-bottom:6px">${DB.leads.length}</div>
+          <div class="text-muted mb-12">${DB.leads.filter(l=>l.status==='Qualificado'||l.status==='Agendado').length} qualificados · ${DB.leads.filter(l=>l.status==='Follow-up').length} em follow-up</div>
+          <div class="mini-chart">
+            ${[40,55,48,72,61,85,70].map((h,i)=>`<div class="mini-bar" style="height:${h}%;background:${i===6?'#1D9E75':'#9FE1CB'}"></div>`).join('')}
+          </div>
+          <button class="btn btn-sm" style="margin-top:12px;width:100%" onclick="App.navigate('ia')">Ver conversas</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Procedimentos do mês</div></div>
+          <div class="donut-wrap">
+            <svg width="80" height="80" viewBox="0 0 80 80" style="flex-shrink:0">
+              <circle cx="40" cy="40" r="30" fill="none" stroke="#F1EFE8" stroke-width="12"/>
+              <circle cx="40" cy="40" r="30" fill="none" stroke="#1D9E75" stroke-width="12" stroke-dasharray="75 114" stroke-dashoffset="0" stroke-linecap="butt"/>
+              <circle cx="40" cy="40" r="30" fill="none" stroke="#378ADD" stroke-width="12" stroke-dasharray="48 141" stroke-dashoffset="-75" stroke-linecap="butt"/>
+              <circle cx="40" cy="40" r="30" fill="none" stroke="#D4537E" stroke-width="12" stroke-dasharray="32 157" stroke-dashoffset="-123" stroke-linecap="butt"/>
+              <circle cx="40" cy="40" r="30" fill="none" stroke="#EF9F27" stroke-width="12" stroke-dasharray="34 155" stroke-dashoffset="-155" stroke-linecap="butt"/>
+            </svg>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div>Limpeza 40%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#378ADD"></div>Implante 26%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#D4537E"></div>Ortodontia 18%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#EF9F27"></div>Canal 16%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">WhatsApp Automações</div></div>
+          <div class="stat-row"><span class="stat-label">Confirmações enviadas</span><span class="stat-value">22</span></div>
+          <div class="stat-row"><span class="stat-label">Confirmadas</span><span class="stat-value text-green">17</span></div>
+          <div class="stat-row"><span class="stat-label">Reagendadas</span><span class="stat-value" style="color:var(--amber)">3</span></div>
+          <div class="stat-row"><span class="stat-label">Sem resposta</span><span class="stat-value text-red">2</span></div>
+          <div class="stat-row"><span class="stat-label">Follow-ups ativos</span><span class="stat-value">11</span></div>
+          <div class="stat-row" style="border:none"><span class="stat-label">NPS do mês</span><span class="stat-value text-green">⭐ 4.8/5</span></div>
+        </div>
+      </div>
+
+    </div>`;
+  }
+};
+
+
+const AgendaPage = {
+  modo: 'semana',
+  dentistaSelecionado: 0,
+  diaAtual: '2026-04-08',
+
+  render() {
+    return `
+    <div class="topbar">
+      <div class="topbar-left"><div class="topbar-title">Agenda</div></div>
+      <div class="topbar-right">
+        <div style="display:flex;background:var(--gray-100);border-radius:var(--radius-sm);padding:2px;gap:2px">
+          ${['dia','semana','mes'].map(m=>`<button onclick="AgendaPage.setModo('${m}')" style="padding:5px 14px;border-radius:5px;font-size:13px;font-weight:500;border:none;cursor:pointer;transition:all .15s;background:${this.modo===m?'var(--white)':'transparent'};color:${this.modo===m?'var(--text)':'var(--text-3)'};box-shadow:${this.modo===m?'var(--shadow)':'none'}">${m==='dia'?'Dia':m==='semana'?'Semana':'Mês'}</button>`).join('')}
+        </div>
+        <select class="input" style="width:auto;font-size:13px" onchange="AgendaPage.dentistaSelecionado=+this.value;AgendaPage.refresh()">
+          <option value="0">Todos os dentistas</option>
+          ${DB.dentistas.map(d=>`<option value="${d.id}">${d.nome}</option>`).join('')}
+        </select>
+        <button class="btn btn-primary" onclick="AgendaPage.openNovoAgendamento()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Novo agendamento
+        </button>
+      </div>
+    </div>
+    ${this.renderNav()}
+    <div style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+      ${this.modo==='dia'?this.renderDia():this.modo==='semana'?this.renderSemana():this.renderMes()}
+    </div>`;
+  },
+
+  renderNav() {
+    const dias=this.getSemana();
+    const label=this.modo==='dia'
+      ?new Date(this.diaAtual+'T12:00').toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
+      :this.modo==='semana'?`${dias[0].label} — ${dias[4].label} · Abr 2026`:'Abril 2026';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 24px;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0">
+      <button class="btn btn-sm btn-icon" onclick="AgendaPage.navPrev()"><svg viewBox="0 0 24 24" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <button class="btn btn-sm" onclick="AgendaPage.goHoje()">Hoje</button>
+      <button class="btn btn-sm btn-icon" onclick="AgendaPage.navNext()"><svg viewBox="0 0 24 24" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg></button>
+      <span style="font-size:13px;font-weight:500;color:var(--text-2)">${label}</span>
+      <div style="margin-left:auto;display:flex;gap:10px;flex-wrap:wrap">
+        ${DB.dentistas.filter(d=>!this.dentistaSelecionado||d.id===this.dentistaSelecionado).map(d=>`<div style="display:flex;align-items:center;gap:5px;font-size:12px"><span class="color-dot" style="background:${d.cor}"></span>${d.nome}</div>`).join('')}
+        <div style="display:flex;gap:6px;font-size:11px">${[['Confirmado','green'],['Agendado','blue'],['Pendente','amber'],['Falta','red']].map(([s,c])=>`<span class="badge badge-${c}">${s}</span>`).join('')}</div>
+      </div>
+    </div>`;
+  },
+
+  getSemana() {
+    const base=new Date(this.diaAtual+'T12:00');
+    const day=base.getDay();
+    const mon=new Date(base);
+    mon.setDate(base.getDate()-(day===0?6:day-1));
+    return Array.from({length:5},(_,i)=>{
+      const d=new Date(mon); d.setDate(mon.getDate()+i);
+      const iso=d.toISOString().split('T')[0];
+      return{data:iso,label:['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][d.getDay()]+' '+d.getDate(),hoje:iso==='2026-04-08'};
+    });
+  },
+
+  getHorarios(){return['07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00'];},
+
+  renderDia() {
+    const horarios=this.getHorarios();
+    const ags=DB.agendamentos.filter(a=>a.data===this.diaAtual&&(!this.dentistaSelecionado||a.dentistaId===this.dentistaSelecionado));
+    return `<div class="agenda-wrap"><div style="display:grid;grid-template-columns:64px 1fr;min-width:400px">
+      <div style="background:var(--gray-50);border-bottom:2px solid var(--border);border-right:1px solid var(--border);padding:10px;text-align:center;font-size:11px;font-weight:600;color:var(--text-3);position:sticky;top:0;z-index:3">Hora</div>
+      <div style="background:var(--white);border-bottom:2px solid var(--border);padding:10px;text-align:center;font-size:13px;font-weight:600;color:${this.diaAtual==='2026-04-08'?'var(--green)':'var(--text)'};position:sticky;top:0;z-index:3">
+        ${new Date(this.diaAtual+'T12:00').toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}
+        ${this.diaAtual==='2026-04-08'?'<span style="margin-left:8px;background:var(--green);color:white;border-radius:10px;padding:1px 8px;font-size:11px">Hoje</span>':''}
+      </div>
+      ${horarios.map(h=>{
+        const slot=ags.filter(a=>a.hora===h);
+        return `<div class="agenda-time-col" style="min-height:52px">${h}</div>
+        <div class="agenda-slot" style="min-height:52px;border-right:none" onclick="AgendaPage.openNovoAgendamentoHora('${this.diaAtual}','${h}')">
+          ${slot.map(a=>{
+            const p=DB.getPaciente(a.pacienteId);const d=DB.getDentista(a.dentistaId);
+            const cls={1:'ev-green',2:'ev-blue',3:'ev-pink',4:'ev-amber',5:'ev-coral'}[a.dentistaId]||'ev-green';
+            return `<div class="agenda-event ${cls}" style="flex-direction:row;gap:8px;align-items:center" onclick="event.stopPropagation();AgendaPage.openAgendamento(${a.id})">
+              <div><div style="font-size:11px;font-weight:700">${a.hora}</div><div style="font-size:10px;opacity:.7">${a.duracao}min</div></div>
+              <div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.nome}</div><div style="font-size:10px;opacity:.8">${a.procedimento} · ${d.nome.split(' ').slice(-1)[0]}</div></div>
+              ${DB.getStatusBadge(a.status)}
+            </div>`;
+          }).join('')}
+        </div>`;
+      }).join('')}
+    </div></div>`;
+  },
+
+  renderSemana() {
+    const dias=this.getSemana();
+    const hs=this.getHorarios();
+    return `<div class="agenda-wrap"><div style="display:grid;grid-template-columns:64px repeat(5,1fr);min-width:700px">
+      <div style="background:var(--gray-50);border-bottom:2px solid var(--border);border-right:1px solid var(--border);padding:10px;text-align:center;font-size:11px;font-weight:600;color:var(--text-3);position:sticky;top:0;z-index:3"></div>
+      ${dias.map(d=>`<div class="agenda-day-header${d.hoje?' today':''}" style="position:sticky;top:0;z-index:3">
+        ${d.label}${d.hoje?`<span style="margin-left:5px;background:var(--green);color:white;border-radius:10px;padding:1px 6px;font-size:10px">Hoje</span>`:''}
+      </div>`).join('')}
+      ${hs.map(h=>`
+        <div class="agenda-time-col" style="min-height:44px">${h}</div>
+        ${dias.map(d=>{
+          const ags=DB.agendamentos.filter(a=>a.data===d.data&&a.hora===h&&(!this.dentistaSelecionado||a.dentistaId===this.dentistaSelecionado));
+          if(ags.length){
+            const a=ags[0];const p=DB.getPaciente(a.pacienteId);const den=DB.getDentista(a.dentistaId);
+            const cls={1:'ev-green',2:'ev-blue',3:'ev-pink',4:'ev-amber',5:'ev-coral'}[a.dentistaId]||'ev-green';
+            return `<div class="agenda-slot" onclick="AgendaPage.openAgendamento(${a.id})"><div class="agenda-event ${cls}"><div style="font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.nome.split(' ')[0]}</div><div style="font-size:10px;opacity:.8">${a.procedimento}</div></div></div>`;
+          }
+          return `<div class="agenda-slot" onclick="AgendaPage.openNovoAgendamentoHora('${d.data}','${h}')"></div>`;
+        }).join('')}
+      `).join('')}
+    </div></div>`;
+  },
+
+  renderMes() {
+    const dias=[];
+    const primeiro=new Date('2026-04-01T12:00');
+    const ini=new Date(primeiro);
+    ini.setDate(ini.getDate()-ini.getDay());
+    for(let i=0;i<42;i++){
+      const d=new Date(ini);d.setDate(ini.getDate()+i);
+      dias.push(d);
+      if(i>=27&&d.getMonth()!==3) break;
+    }
+    const semanas=[];
+    for(let i=0;i<dias.length;i+=7) semanas.push(dias.slice(i,i+7));
+    return `<div class="agenda-wrap"><div style="display:grid;grid-template-columns:repeat(7,1fr);min-width:700px">
+      ${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d=>`<div style="padding:8px;text-align:center;font-size:12px;font-weight:600;color:var(--text-3);background:var(--gray-50);border-bottom:1px solid var(--border);border-right:1px solid var(--border)">${d}</div>`).join('')}
+      ${semanas.flatMap(sem=>sem.map(dia=>{
+        const iso=dia.toISOString().split('T')[0];
+        const doDia=DB.agendamentos.filter(a=>a.data===iso&&(!this.dentistaSelecionado||a.dentistaId===this.dentistaSelecionado));
+        const eHoje=iso==='2026-04-08';const doMes=dia.getMonth()===3;
+        return `<div style="min-height:90px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:6px;background:${eHoje?'var(--green-light)':doMes?'var(--white)':'var(--gray-50)'};cursor:pointer" onclick="AgendaPage.diaAtual='${iso}';AgendaPage.setModo('dia')">
+          <div style="font-size:12px;font-weight:${eHoje?'700':'500'};color:${eHoje?'white':doMes?'var(--text)':'var(--text-3)'};margin-bottom:4px;${eHoje?'background:var(--green);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;':''}">${dia.getDate()}</div>
+          ${doDia.slice(0,3).map(a=>{const p=DB.getPaciente(a.pacienteId);const d=DB.getDentista(a.dentistaId);return`<div style="font-size:10px;padding:2px 4px;border-radius:3px;margin-bottom:2px;border-left:2px solid ${d.cor};background:${d.bgCor};color:${d.cor};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.hora} ${p.nome.split(' ')[0]}</div>`;}).join('')}
+          ${doDia.length>3?`<div style="font-size:10px;color:var(--text-3)">+${doDia.length-3} mais</div>`:''}
+        </div>`;
+      })).join('')}
+    </div></div>`;
+  },
+
+  setModo(m){this.modo=m;this.refresh();},
+  navPrev(){if(this.modo==='dia'){const d=new Date(this.diaAtual+'T12:00');d.setDate(d.getDate()-1);this.diaAtual=d.toISOString().split('T')[0];}else if(this.modo==='semana'){const d=new Date(this.diaAtual+'T12:00');d.setDate(d.getDate()-7);this.diaAtual=d.toISOString().split('T')[0];}this.refresh();},
+  navNext(){if(this.modo==='dia'){const d=new Date(this.diaAtual+'T12:00');d.setDate(d.getDate()+1);this.diaAtual=d.toISOString().split('T')[0];}else if(this.modo==='semana'){const d=new Date(this.diaAtual+'T12:00');d.setDate(d.getDate()+7);this.diaAtual=d.toISOString().split('T')[0];}this.refresh();},
+  goHoje(){this.diaAtual='2026-04-08';this.refresh();},
+  refresh(){document.getElementById('page-agenda').innerHTML=this.render();},
+
+  openAgendamento(id){
+    const a=DB.agendamentos.find(x=>x.id===id);
+    const p=DB.getPaciente(a.pacienteId);const d=DB.getDentista(a.dentistaId);
+    App.openModal('Agendamento',`
+      <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--gray-50);border-radius:var(--radius);margin-bottom:16px">
+        <div class="patient-av" style="background:${p.corBg};color:${p.corText};width:44px;height:44px;font-size:15px">${p.iniciais}</div>
+        <div style="flex:1"><div style="font-size:16px;font-weight:600">${p.nome}</div><div class="text-muted">${p.telefone}</div></div>
+        ${DB.getStatusBadge(a.status)}
+      </div>
+      <div class="form-row">
+        <div><div class="section-label">Data / Hora</div><div style="font-weight:500">${a.data.split('-').reverse().join('/')} às ${a.hora}</div></div>
+        <div><div class="section-label">Duração</div><div style="font-weight:500">${a.duracao} min</div></div>
+      </div>
+      <div class="form-row">
+        <div><div class="section-label">Dentista</div><div style="display:flex;align-items:center;gap:6px;font-weight:500"><span class="color-dot" style="background:${d.cor}"></span>${d.nome}</div></div>
+        <div><div class="section-label">Procedimento</div><div style="font-weight:500">${a.procedimento}</div></div>
+      </div>
+      ${a.obs?`<div class="divider"></div><div class="section-label">Obs</div><div style="font-size:13px;color:var(--text-2)">${a.obs}</div>`:''}
+      <div class="divider"></div>
+      <div class="section-label" style="margin-bottom:8px">Alterar status</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+        ${['Confirmado','Atendido','Falta','Cancelado','Remarcado'].map(s=>`<button class="btn btn-sm${a.status===s?' btn-primary':''}" onclick="AgendaPage.updateStatus(${a.id},'${s}')">${s}</button>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="flex:1" onclick="App.toast('📱 WhatsApp enviado!','success');App.closeModal()">Enviar WhatsApp</button>
+        <button class="btn" onclick="ProntuarioPage.pacienteAtual=${p.id};App.closeModal();App.navigate('prontuario')">Prontuário</button>
+      </div>
+    `);
+  },
+
+  openNovoAgendamento(){this.openNovoAgendamentoHora(this.diaAtual,'09:00');},
+  openNovoAgendamentoHora(data,hora){
+    window._agNovoPac=false;
+    App.openModal('Novo Agendamento',`
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button class="btn btn-sm btn-primary" id="btn-existente" onclick="AgendaPage._togglePac(false)">Paciente existente</button>
+        <button class="btn btn-sm" id="btn-novo" onclick="AgendaPage._togglePac(true)">+ Novo paciente</button>
+      </div>
+      <div id="ag-pac-existente">
+        <div class="form-group" style="margin-bottom:14px"><label>Paciente</label><select class="input" id="ag-pac">${DB.pacientes.map(p=>`<option value="${p.id}">${p.nome} — ${p.telefone}</option>`).join('')}</select></div>
+      </div>
+      <div id="ag-pac-novo" style="display:none">
+        <div style="padding:10px;background:var(--blue-light);border-radius:var(--radius-sm);font-size:12px;color:var(--blue);margin-bottom:12px">Dados do novo paciente</div>
+        <div class="form-row"><div class="form-group"><label>Nome *</label><input class="input" id="np-nome" placeholder="Nome completo"></div><div class="form-group"><label>Telefone *</label><input class="input" id="np-tel" placeholder="(11) 99999-9999"></div></div>
+        <div class="form-row"><div class="form-group"><label>CPF</label><input class="input" id="np-cpf" placeholder="000.000.000-00"></div><div class="form-group"><label>E-mail</label><input class="input" id="np-email" placeholder="email@exemplo.com"></div></div>
+        <div class="form-row"><div class="form-group"><label>Data de nascimento</label><input class="input" type="date" id="np-nasc"></div><div class="form-group"><label>Convênio</label><select class="input" id="np-conv"><option>Particular</option><option>Unimed</option><option>Amil</option><option>Bradesco Saúde</option><option>SulAmérica</option></select></div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="form-row"><div class="form-group"><label>Dentista</label><select class="input" id="ag-den">${DB.dentistas.map(d=>`<option value="${d.id}">${d.nome}</option>`).join('')}</select></div><div class="form-group"><label>Procedimento</label><select class="input" id="ag-proc">${DB.procedimentos.map(p=>`<option>${p}</option>`).join('')}</select></div></div>
+      <div class="form-row"><div class="form-group"><label>Data</label><input type="date" class="input" id="ag-data" value="${data}"></div><div class="form-group"><label>Horário</label><select class="input" id="ag-hora">${this.getHorarios().map(h=>`<option${h===hora?' selected':''}>${h}</option>`).join('')}</select></div></div>
+      <div class="form-row"><div class="form-group"><label>Duração</label><select class="input" id="ag-dur">${[15,30,45,60,75,90,105,120,135,150].map(d=>`<option value="${d}"${d===60?' selected':''}>${d} min</option>`).join('')}</select></div><div class="form-group"><label>Status</label><select class="input" id="ag-status"><option>Agendado</option><option>Confirmado</option></select></div></div>
+      <div class="form-group" style="margin-bottom:14px"><label>Observações</label><textarea class="input" id="ag-obs" placeholder="Notas internas..."></textarea></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--green-light);border-radius:var(--radius-sm);margin-bottom:14px">
+        <input type="checkbox" id="ag-wa" checked style="accent-color:var(--green)">
+        <label for="ag-wa" style="font-size:13px;color:var(--green-dark);cursor:pointer">Enviar confirmação via WhatsApp</label>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px">
+        <button class="btn" onclick="App.closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="AgendaPage.salvarAgendamento()">Confirmar</button>
+      </div>
+    `);
+  },
+
+  _togglePac(b){
+    window._agNovoPac=b;
+    document.getElementById('ag-pac-existente').style.display=b?'none':'block';
+    document.getElementById('ag-pac-novo').style.display=b?'block':'none';
+    document.getElementById('btn-existente').className='btn btn-sm'+(b?'':' btn-primary');
+    document.getElementById('btn-novo').className='btn btn-sm'+(b?' btn-primary':'');
+  },
+
+  salvarAgendamento(){
+    let pacienteId;
+    if(window._agNovoPac){
+      const nome=document.getElementById('np-nome')?.value?.trim();
+      if(!nome){App.toast('Informe o nome do paciente','error');return;}
+      const cores=[['#E1F5EE','#0F6E56'],['#E6F1FB','#185FA5'],['#FBEAF0','#72243E'],['#FAEEDA','#854F0B']];
+      const[bg,tx]=cores[DB.pacientes.length%cores.length];
+      const np={id:DB.nextId.paciente++,nome,cpf:document.getElementById('np-cpf')?.value||'—',nascimento:document.getElementById('np-nasc')?.value||'—',telefone:document.getElementById('np-tel')?.value||'—',email:document.getElementById('np-email')?.value||'—',convenio:document.getElementById('np-conv')?.value||'Particular',dentista:+document.getElementById('ag-den').value,ultimaConsulta:'—',status:'Ativo',whatsapp:true,cidade:'São Paulo',iniciais:nome.split(' ').map(n=>n[0]).slice(0,2).join(''),corBg:bg,corText:tx};
+      DB.pacientes.push(np);pacienteId=np.id;
+    }else{pacienteId=+document.getElementById('ag-pac').value;}
+    DB.agendamentos.push({id:DB.nextId.agendamento++,pacienteId,dentistaId:+document.getElementById('ag-den').value,data:document.getElementById('ag-data').value,hora:document.getElementById('ag-hora').value,procedimento:document.getElementById('ag-proc').value,duracao:+document.getElementById('ag-dur').value,status:document.getElementById('ag-status').value,obs:document.getElementById('ag-obs').value});
+    window._agNovoPac=false;App.closeModal();App.toast('Agendamento criado!','success');
+    if(document.getElementById('ag-wa')?.checked)setTimeout(()=>App.toast('📱 WhatsApp enviado!'),700);
+    this.refresh();
+  },
+
+  updateStatus(id,status){const a=DB.agendamentos.find(x=>x.id===id);if(a)a.status=status;App.closeModal();App.toast(`Status: ${status}`,'success');this.refresh();}
+};
+window._agNovoPac=false;
+
+
+const IAPage = {
+  abaConsultorio: 0,
+  abaConfig: 'personalidade',
+  leadAtual: 1,
+  abaLead: 'conversas',
+
+  consultoriosIA: [
+    { id:0, nome:'Consultório Principal', dentista:'Dr. Carlos Mendes', personalidade:'Sou Joana, assistente virtual da Clínica Sorrir. Sou atenciosa, empática e eficiente. Priorizo sempre o conforto e a segurança do paciente.', expertise:'Odontologia geral, endodontia, profilaxia, urgências odontológicas', tomVoz:'Amigável e acolhedor. Uso linguagem simples, evito termos técnicos sem explicação.', followUp:'D+0: reenvio após 4h sem resposta. D+1: nova abordagem com oferta de horário. D+3: última tentativa com incentivo especial.', regras:'1. Nunca forneça diagnósticos. 2. Sempre encaminhe urgências graves ao pronto-socorro. 3. Não discuta preços sem antes qualificar o lead. 4. Máx 3 tentativas de follow-up por lead.', faq:[{p:'Qual o horário de funcionamento?',r:'Atendemos de segunda a sexta, das 7h às 19h, e sábado das 8h às 13h.'},{p:'Vocês aceitam convênio?',r:'Sim! Aceitamos Unimed, Amil, Bradesco Saúde, SulAmérica e Porto Seguro.'},{p:'Como funciona o clareamento?',r:'O clareamento dental leva em média 2 sessões de 1h. O resultado dura cerca de 1 ano.'}], config:{ confirmacaoHoras:2, lembreteAntes:24, maxTentativas:3, horarioAtendimento:'07:00-19:00', debounce:300 } },
+    { id:1, nome:'Consultório Ortodontia', dentista:'Dra. Paula Santos', personalidade:'Sou Ana, especialista em orientar pacientes sobre tratamentos ortodônticos. Sou paciente e detalhista para explicar o processo de aparelho e alinhadores.', expertise:'Ortodontia fixa e removível, alinhadores invisíveis, contenção, bruxismo', tomVoz:'Profissional e didático. Explico passo a passo os tratamentos, com exemplos práticos.', followUp:'D+0: confirmação. D+2: envio de antes/depois de casos. D+5: oferta de avaliação gratuita.', regras:'1. Sempre ofereça avaliação gratuita. 2. Explique as diferenças entre aparelho e alinhador. 3. Mencione o período estimado de tratamento.', faq:[{p:'Aparelho ou alinhador invisível?',r:'Depende do caso! O alinhador é mais estético e removível, ideal para casos leves a moderados. O aparelho fixo é mais indicado para casos complexos.'},{p:'Quanto tempo leva o tratamento?',r:'Em média de 18 a 36 meses, dependendo da complexidade do caso. A avaliação gratuita define o plano exato.'}], config:{ confirmacaoHoras:1, lembreteAntes:48, maxTentativas:4, horarioAtendimento:'08:00-18:00', debounce:500 } },
+    { id:2, nome:'Consultório Implantes', dentista:'Dra. Ana Oliveira', personalidade:'Sou Laura, especialista em implantes. Transmito confiança e segurança ao explicar o procedimento, desmistificando medos comuns.', expertise:'Implantes unitários e múltiplos, protocolo All-on-4, enxerto ósseo, próteses sobre implante', tomVoz:'Seguro e tranquilizador. Abordo medos com empatia e dados científicos.', followUp:'D+0: confirmação + vídeo explicativo. D+3: cases de sucesso. D+7: oferta de consulta com radiografia inclusa.', regras:'1. Sempre mencione a garantia de 5 anos. 2. Esclareça que o procedimento é feito com anestesia. 3. Não cite valores sem avaliação.', faq:[{p:'A cirurgia de implante dói?',r:'O procedimento é feito com anestesia local, então não há dor durante. No pós-operatório pode haver desconforto leve por 2-3 dias, controlado com medicação.'},{p:'Quanto tempo dura um implante?',r:'Com cuidados adequados, o implante pode durar a vida toda. Oferecemos garantia de 5 anos.'}], config:{ confirmacaoHoras:1, lembreteAntes:24, maxTentativas:3, horarioAtendimento:'08:00-18:00', debounce:400 } },
+  ],
+
+  render() {
+    const c=this.consultoriosIA[this.abaConsultorio];
+    return `
+    <div class="topbar">
+      <div class="topbar-left"><div class="topbar-title">IA de Atendimento — WhatsApp</div></div>
+      <div class="topbar-right">
+        <span class="badge badge-wa" style="font-size:12px;padding:5px 10px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="#1a7c4e" stroke="none"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+          WhatsApp API — Conectado
+        </span>
+        <button class="btn btn-primary" onclick="IAPage.simularLead()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Simular lead
+        </button>
+      </div>
+    </div>
+
+    <!-- CONSULTÓRIO TABS -->
+    <div style="background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;flex-shrink:0;display:flex;align-items:center;gap:0">
+      ${this.consultoriosIA.map((c,i)=>`
+        <div onclick="IAPage.abaConsultorio=${i};IAPage.refresh()" style="padding:12px 18px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid ${this.abaConsultorio===i?'var(--green)':'transparent'};color:${this.abaConsultorio===i?'var(--green)':'var(--text-3)'};white-space:nowrap;transition:all .15s">
+          <div>${c.nome}</div>
+          <div style="font-size:11px;opacity:.7">${c.dentista}</div>
+        </div>
+      `).join('')}
+      <button class="btn btn-sm" style="margin-left:auto" onclick="App.toast('Novo consultório IA criado!','success')">+ Consultório</button>
+    </div>
+
+    <div style="display:flex;flex:1;overflow:hidden">
+      <!-- LEFT: LEADS -->
+      <div style="width:290px;min-width:290px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:10px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px">
+          <div class="search-bar" style="flex:1"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Buscar lead..."></div>
+        </div>
+        <div style="padding:6px 12px;border-bottom:1px solid var(--border);display:flex;gap:4px;flex-wrap:wrap">
+          ${['Todos','Urgente','Qualificado','Follow-up','Agendado'].map(s=>`<button onclick="IAPage.filtroStatus='${s}';IAPage.refresh()" class="btn btn-sm" style="font-size:11px;padding:3px 8px;background:${(IAPage.filtroStatus||'Todos')===s?'var(--green)':'transparent'};color:${(IAPage.filtroStatus||'Todos')===s?'white':'var(--text-3)'};border-color:${(IAPage.filtroStatus||'Todos')===s?'var(--green)':'var(--border-2)'}">${s}</button>`).join('')}
+        </div>
+        <div style="overflow-y:auto;flex:1">
+          ${DB.leads.map(l=>`
+            <div onclick="IAPage.leadAtual=${l.id};IAPage.abaLead='conversas';IAPage.refresh()" style="padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;background:${l.id===this.leadAtual?'var(--green-light)':'var(--white)'};transition:background .1s">
+              <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+                <div style="font-size:13.5px;font-weight:600">${l.nome}</div>
+                <div style="font-size:10px;color:var(--text-3)">${l.hora}</div>
+              </div>
+              <div style="font-size:11.5px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px">${l.motivo}</div>
+              <div style="display:flex;gap:5px;align-items:center">
+                ${DB.getStatusBadge(l.status)}
+                <span style="font-size:10px;color:var(--text-3)">${l.procedimento}</span>
+                <span style="margin-left:auto;font-size:11px;font-weight:700;color:${l.urgencia>=4?'var(--red)':l.urgencia>=3?'var(--amber)':'var(--green-dark)'}">U${l.urgencia}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- MIDDLE: CHAT or CONFIG -->
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+        <div style="background:var(--white);border-bottom:1px solid var(--border);padding:0 16px;flex-shrink:0;display:flex;gap:0">
+          ${['conversas','config'].map(a=>`<div onclick="IAPage.abaLead='${a}';IAPage.refresh()" style="padding:10px 16px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid ${this.abaLead===a?'var(--green)':'transparent'};color:${this.abaLead===a?'var(--green)':'var(--text-3)'}">${a==='conversas'?'Conversas':'⚙ Configurar IA — '+c.nome}</div>`).join('')}
+        </div>
+        ${this.abaLead==='conversas'?this.renderChat():this.renderConfig(c)}
+      </div>
+
+      <!-- RIGHT: INFO -->
+      <div style="width:250px;min-width:250px;background:var(--white);border-left:1px solid var(--border);overflow-y:auto;padding:16px">
+        ${this.abaLead==='conversas'?this.renderLeadInfo():this.renderIAStats(c)}
+      </div>
+    </div>`;
+  },
+
+  renderChat(){
+    const lead=DB.leads.find(l=>l.id===this.leadAtual);
+    if(!lead) return '<div class="empty-state">Selecione um lead</div>';
+    return `
+    <div style="padding:10px 16px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0">
+      <div class="patient-av" style="background:var(--green-light);color:var(--green-dark);width:34px;height:34px">${lead.nome.split(' ').map(n=>n[0]).slice(0,2).join('')}</div>
+      <div style="flex:1"><div style="font-weight:600;font-size:14px">${lead.nome}</div><div class="text-muted">${lead.telefone} · ${lead.procedimento}</div></div>
+      ${DB.getStatusBadge(lead.status)}
+      <button class="btn btn-sm btn-primary" onclick="AgendaPage.openNovoAgendamento()">Agendar</button>
+    </div>
+    <!-- MODE TABS: IA vs HUMAN -->
+    <div style="display:flex;background:var(--white);border-bottom:1px solid var(--border);padding:0 16px;flex-shrink:0;gap:0" id="chat-mode-tabs">
+      <div onclick="IAPage.setChatMode('ia')" id="tab-ia" style="padding:9px 18px;font-size:13.5px;font-weight:500;cursor:pointer;border-bottom:2px solid var(--green);color:var(--green);display:flex;align-items:center;gap:6px;transition:all .15s">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        IA Automática
+        <span style="background:var(--green);color:white;font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px;font-family:var(--mono)">AUTO</span>
+      </div>
+      <div onclick="IAPage.setChatMode('human')" id="tab-human" style="padding:9px 18px;font-size:13.5px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--text-3);display:flex;align-items:center;gap:6px;transition:all .15s">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Atendente Humano
+      </div>
+      <div id="chat-mode-banner" style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green-dark);background:var(--green-light);padding:4px 12px;border-radius:20px;margin-top:6px;margin-bottom:6px">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--green)" stroke="none"><circle cx="12" cy="12" r="10"/></svg>
+        IA respondendo automaticamente
+      </div>
+    </div>
+    <div class="chat-messages" id="chat-msgs" style="background:var(--gray-50)">
+      ${lead.conversa.map(m=>`
+        <div class="msg${m.lado==='user'?'':' msg-right'}">
+          <div class="msg-av ${m.lado==='user'?'msg-av-user':'msg-av-ia'}">${m.lado==='user'?lead.nome[0]:'IA'}</div>
+          <div><div class="bubble ${m.lado==='user'?'bubble-user':'bubble-ia'}">${m.texto}</div><div class="msg-time">${m.hora}</div></div>
+        </div>
+      `).join('')}
+    </div>
+    <!-- IA mode input -->
+    <div class="chat-input-bar" id="ia-input-bar">
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 8px;background:var(--green-light);border-radius:var(--radius-sm);flex-shrink:0">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--green-dark)" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+        <span style="font-size:12px;color:var(--green-dark);font-weight:500">IA</span>
+      </div>
+      <input class="chat-input" id="chat-input" placeholder="Testar IA ou forçar resposta..." onkeydown="if(event.key==='Enter')IAPage.sendMsg()">
+      <button class="btn-send" onclick="IAPage.sendMsg()"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+    </div>
+    <!-- Human mode panel -->
+    <div id="human-panel" style="display:none;flex-direction:column;border-top:1px solid var(--border);background:var(--white)">
+      <div style="padding:10px 16px;background:linear-gradient(135deg,#185FA5,#378ADD);display:flex;align-items:center;gap:10px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span style="font-size:13px;font-weight:600;color:white">Atendimento Humano — você está respondendo diretamente</span>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button onclick="IAPage.setChatMode('ia')" style="padding:4px 12px;border-radius:20px;background:rgba(255,255,255,.2);color:white;border:1px solid rgba(255,255,255,.3);font-size:12px;cursor:pointer;font-family:var(--font)">Devolver à IA</button>
+        </div>
+      </div>
+      <div style="padding:10px 16px;display:flex;gap:8px;border-bottom:1px solid var(--border);overflow-x:auto">
+        <span style="font-size:12px;color:var(--text-3);white-space:nowrap;align-self:center">Respostas rápidas:</span>
+        ${IAPage._quickReplies().map(r=>`<button onclick="IAPage.sendHuman('${r.replace(/'/g,'\\')}')" style="padding:5px 12px;border-radius:20px;border:1px solid var(--border-2);background:var(--white);font-size:12.5px;cursor:pointer;white-space:nowrap;font-family:var(--font);transition:all .15s" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='var(--white)'">${r}</button>`).join('')}
+      </div>
+      <div class="chat-input-bar" style="border-top:none">
+        <div style="display:flex;align-items:center;gap:8px;padding:4px 8px;background:var(--blue-light);border-radius:var(--radius-sm);flex-shrink:0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span style="font-size:12px;color:var(--blue);font-weight:500">Você</span>
+        </div>
+        <input class="chat-input" id="human-input" placeholder="Digite sua mensagem para o paciente..." onkeydown="if(event.key==='Enter')IAPage.sendHumanInput()">
+        <button class="btn-send" style="background:var(--blue)" onclick="IAPage.sendHumanInput()"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+      </div>
+      <div style="padding:8px 16px;display:flex;gap:8px;background:var(--gray-50)">
+        <button class="btn btn-sm" onclick="AgendaPage.openNovoAgendamento()">📅 Agendar</button>
+        <button class="btn btn-sm" onclick="App.navigate('prontuario')">📋 Prontuário</button>
+        <button class="btn btn-sm" onclick="AssinaturaPage.openGerarDocumento(null)">✍️ Documento</button>
+        <button class="btn btn-sm" onclick="App.toast('Transferindo de volta para IA...','success');IAPage.setChatMode('ia')">🤖 Devolver IA</button>
+        <button class="btn btn-sm" style="margin-left:auto" onclick="App.toast('Conversa encerrada','success')">✓ Encerrar</button>
+      </div>
+    </div>`;
+  },
+
+  renderConfig(c){
+    const abas=[['personalidade','Personalidade'],['expertise','Expertise'],['tom','Tom de Voz'],['followup','Follow-Up'],['regras','Regras'],['faq','Perguntas Freq.'],['agendamento','Agendamento']];
+    return `<div style="display:flex;height:100%;overflow:hidden">
+      <div style="width:160px;min-width:160px;border-right:1px solid var(--border);padding:8px 0;overflow-y:auto">
+        ${abas.map(([id,label])=>`<div onclick="IAPage.abaConfig='${id}';IAPage.refresh()" style="padding:9px 14px;font-size:13px;cursor:pointer;color:${this.abaConfig===id?'var(--green-dark)':'var(--text-2)'};background:${this.abaConfig===id?'var(--green-light)':'transparent'};font-weight:${this.abaConfig===id?'500':'400'};border-left:3px solid ${this.abaConfig===id?'var(--green)':'transparent'}">${label}</div>`).join('')}
+      </div>
+      <div style="flex:1;padding:20px;overflow-y:auto">
+        ${this['renderConfigAba_'+this.abaConfig](c)}
+      </div>
+    </div>`;
+  },
+
+  renderConfigAba_personalidade(c){return`<div class="section-label" style="margin-bottom:8px">Descrição da personalidade da IA</div>
+    <textarea class="input" style="min-height:140px;margin-bottom:14px" oninput="IAPage.consultoriosIA[IAPage.abaConsultorio].personalidade=this.value">${c.personalidade}</textarea>
+    <div class="form-row"><div class="form-group"><label>Nome da assistente</label><input class="input" value="${c.nome.replace('Consultório ','IA ')}"></div><div class="form-group"><label>Idioma</label><select class="input"><option>Português (Brasil)</option><option>Inglês</option><option>Espanhol</option></select></div></div>
+    <button class="btn btn-primary" onclick="App.toast('Personalidade salva!','success')">Salvar</button>`;},
+
+  renderConfigAba_expertise(c){return`<div class="section-label" style="margin-bottom:8px">Área de expertise e especialidades</div>
+    <textarea class="input" style="min-height:120px;margin-bottom:14px" oninput="IAPage.consultoriosIA[IAPage.abaConsultorio].expertise=this.value">${c.expertise}</textarea>
+    <div class="section-label" style="margin-bottom:8px">Procedimentos que a IA pode agendar diretamente</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      ${DB.procedimentos.map(p=>`<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--green)"> ${p}</label>`).join('')}
+    </div>
+    <button class="btn btn-primary" onclick="App.toast('Expertise salva!','success')">Salvar</button>`;},
+
+  renderConfigAba_tom(c){return`<div class="section-label" style="margin-bottom:8px">Tom de voz e estilo de comunicação</div>
+    <textarea class="input" style="min-height:120px;margin-bottom:14px">${c.tomVoz}</textarea>
+    <div class="form-row"><div class="form-group"><label>Estilo geral</label><select class="input"><option>Amigável</option><option>Formal</option><option>Descontraído</option><option>Profissional</option></select></div><div class="form-group"><label>Uso de emojis</label><select class="input"><option>Moderado</option><option>Frequente</option><option>Raramente</option><option>Nunca</option></select></div></div>
+    <div class="form-group" style="margin-bottom:14px"><label>Mensagem de boas-vindas</label><textarea class="input">Olá! 😊 Sou a ${c.nome.replace('Consultório ','')}, assistente da Clínica Sorrir. Como posso te ajudar?</textarea></div>
+    <button class="btn btn-primary" onclick="App.toast('Tom de voz salvo!','success')">Salvar</button>`;},
+
+  renderConfigAba_followup(c){return`<div class="section-label" style="margin-bottom:8px">Fluxo de follow-up automático</div>
+    <textarea class="input" style="min-height:120px;margin-bottom:14px">${c.followUp}</textarea>
+    <div class="section-label" style="margin-bottom:8px">Configuração de débounce (ms)</div>
+    <div class="form-row">
+      <div class="form-group"><label>Tempo de debounce (ms)</label><input class="input" type="number" value="${c.config.debounce}" oninput="IAPage.consultoriosIA[IAPage.abaConsultorio].config.debounce=+this.value" min="100" max="2000" step="50"></div>
+      <div class="form-group"><label>Máx. tentativas follow-up</label><input class="input" type="number" value="${c.config.maxTentativas}" min="1" max="10"></div>
+    </div>
+    <div style="padding:10px;background:var(--blue-light);border-radius:var(--radius-sm);font-size:12px;color:var(--blue);margin-bottom:14px">
+      O debounce evita que a IA responda mensagens consecutivas do mesmo usuário antes de processar todas. Recomendado: 300–500ms.
+    </div>
+    <button class="btn btn-primary" onclick="App.toast('Follow-up salvo!','success')">Salvar</button>`;},
+
+  renderConfigAba_regras(c){return`<div class="section-label" style="margin-bottom:8px">Regras e restrições do agente</div>
+    <textarea class="input" style="min-height:160px;margin-bottom:14px">${c.regras}</textarea>
+    <div class="section-label" style="margin-bottom:8px">Palavras-chave para transferência humana imediata</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
+      ${['falar com atendente','humano','reclamação','emergência','processo','advogado'].map(p=>`<span style="background:var(--red-light);color:var(--red);padding:3px 10px;border-radius:20px;font-size:12px">${p} <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:4px">✕</span></span>`).join('')}
+      <input class="input" style="width:180px;font-size:12px;padding:4px 8px" placeholder="+ adicionar palavra-chave">
+    </div>
+    <button class="btn btn-primary" onclick="App.toast('Regras salvas!','success')">Salvar</button>`;},
+
+  renderConfigAba_faq(c){return`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div class="section-label">Perguntas frequentes</div>
+      <button class="btn btn-sm btn-primary" onclick="IAPage.addFAQ()">+ Adicionar</button>
+    </div>
+    <div id="faq-list" style="display:flex;flex-direction:column;gap:10px">
+      ${c.faq.map((f,i)=>`<div style="border:1px solid var(--border);border-radius:var(--radius);padding:12px">
+        <div class="form-group" style="margin-bottom:8px"><label>Pergunta</label><input class="input" value="${f.p}" oninput="IAPage.consultoriosIA[IAPage.abaConsultorio].faq[${i}].p=this.value"></div>
+        <div class="form-group"><label>Resposta da IA</label><textarea class="input" style="min-height:60px" oninput="IAPage.consultoriosIA[IAPage.abaConsultorio].faq[${i}].r=this.value">${f.r}</textarea></div>
+        <button class="btn btn-sm btn-danger" style="margin-top:8px" onclick="IAPage.removeFAQ(${i})">Remover</button>
+      </div>`).join('')}
+    </div>`;},
+
+  renderConfigAba_agendamento(c){return`<div class="section-label" style="margin-bottom:12px">Configurações de agendamento automático</div>
+    <div class="form-row">
+      <div class="form-group"><label>Horário de atendimento IA</label><input class="input" value="${c.config.horarioAtendimento}"></div>
+      <div class="form-group"><label>Confirmação enviada após (h)</label><input class="input" type="number" value="${c.config.confirmacaoHoras}" min="0" max="24"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Lembrete antes da consulta (h)</label><input class="input" type="number" value="${c.config.lembreteAntes}" min="1" max="72"></div>
+      <div class="form-group"><label>Dentista padrão (urgências)</label><select class="input">${DB.dentistas.map(d=>`<option>${d.nome}</option>`).join('')}</select></div>
+    </div>
+    <div class="form-group" style="margin-bottom:14px"><label>Mensagem de fora do horário</label><textarea class="input">Olá! Nosso atendimento automático está disponível das 7h às 19h. Vou registrar sua mensagem e retornaremos assim que possível!</textarea></div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+      ${[['Agendar direto sem confirmação humana','true'],['Bloquear horários já ocupados','true'],['Sugerir próximo horário livre em caso de conflito','true'],['Enviar pesquisa NPS pós-atendimento','false']].map(([label,val])=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" ${val==='true'?'checked':''} style="accent-color:var(--green)"> ${label}</label>`).join('')}
+    </div>
+    <button class="btn btn-primary" onclick="App.toast('Configurações de agendamento salvas!','success')">Salvar</button>`;},
+
+  renderLeadInfo(){
+    const lead=DB.leads.find(l=>l.id===this.leadAtual);
+    if(!lead) return '';
+    const urgColors=['','#1D9E75','#9FE1CB','#EF9F27','#D85A30','#E24B4A'];
+    return `<div class="section-label">Lead</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+        <div><div class="text-muted" style="font-size:11px">Nome</div><div style="font-weight:500;font-size:13px">${lead.nome}</div></div>
+        <div><div class="text-muted" style="font-size:11px">Telefone</div><div style="font-size:13px">${lead.telefone}</div></div>
+        <div><div class="text-muted" style="font-size:11px">Interesse</div><div style="font-size:13px">${lead.procedimento}</div></div>
+        <div><div class="text-muted" style="font-size:11px;margin-bottom:4px">Urgência</div>
+          <div style="display:flex;gap:3px">${[1,2,3,4,5].map(n=>`<div style="width:28px;height:8px;border-radius:4px;background:${n<=lead.urgencia?urgColors[lead.urgencia]:'var(--gray-100)'}"></div>`).join('')}</div>
+          <div class="text-muted" style="font-size:11px;margin-top:3px">${['','Baixa','Baixa','Média','Alta','Urgente'][lead.urgencia]}</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label" style="margin-bottom:8px">Ações rápidas</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button class="btn btn-sm btn-primary" style="width:100%" onclick="AgendaPage.openNovoAgendamento()">Agendar consulta</button>
+        <button class="btn btn-sm" style="width:100%" onclick="App.toast('Lead adicionado ao CRM!','success')">Adicionar ao CRM</button>
+        <button class="btn btn-sm btn-danger" style="width:100%" onclick="App.toast('Lead marcado como perdido')">Lead perdido</button>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label" style="margin-bottom:6px">Sugestão IA</div>
+      <div style="padding:8px;background:var(--blue-light);border-radius:var(--radius-sm);font-size:12px;color:var(--blue)">${lead.urgencia>=4?'🚨 Agendar com prioridade ainda hoje!':'📅 Oferecer horário nesta semana'}</div>`;
+  },
+
+  renderIAStats(c){return`<div class="section-label" style="margin-bottom:12px">Status da IA</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="stat-row"><span class="stat-label">Conversas hoje</span><span class="stat-value">34</span></div>
+      <div class="stat-row"><span class="stat-label">Leads gerados</span><span class="stat-value text-green">7</span></div>
+      <div class="stat-row"><span class="stat-label">Agendamentos auto</span><span class="stat-value">5</span></div>
+      <div class="stat-row"><span class="stat-label">Taxa de conversão</span><span class="stat-value">71%</span></div>
+      <div class="stat-row" style="border:none"><span class="stat-label">Debounce atual</span><span class="stat-value">${c.config.debounce}ms</span></div>
+    </div>
+    <div class="divider"></div>
+    <div class="section-label" style="margin-bottom:8px">Teste rápido</div>
+    <input class="input" style="margin-bottom:8px" placeholder="Simule uma mensagem de teste...">
+    <button class="btn btn-sm" style="width:100%" onclick="App.toast('Resposta IA simulada!')">Testar IA</button>`;},
+
+  addFAQ(){
+    const c=this.consultoriosIA[this.abaConsultorio];
+    c.faq.push({p:'Nova pergunta',r:'Resposta da IA...'});
+    this.refresh();
+  },
+  removeFAQ(i){this.consultoriosIA[this.abaConsultorio].faq.splice(i,1);this.refresh();},
+
+  sendMsg(){
+    const input=document.getElementById('chat-input');
+    const texto=input?.value?.trim();
+    if(!texto)return;
+    const lead=DB.leads.find(l=>l.id===this.leadAtual);
+    const hora=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    lead.conversa.push({lado:'ia',texto,hora});
+    input.value='';
+    const msgs=document.getElementById('chat-msgs');
+    if(msgs){msgs.innerHTML+=`<div class="msg msg-right"><div class="msg-av msg-av-ia">IA</div><div><div class="bubble bubble-ia">${texto}</div><div class="msg-time">${hora}</div></div></div>`;msgs.scrollTop=msgs.scrollHeight;}
+  },
+
+  setChatMode(mode) {
+    const iaBar = document.getElementById('ia-input-bar');
+    const humanPanel = document.getElementById('human-panel');
+    const tabIA = document.getElementById('tab-ia');
+    const tabHuman = document.getElementById('tab-human');
+    const banner = document.getElementById('chat-mode-banner');
+    if (!iaBar) return;
+    if (mode === 'human') {
+      iaBar.style.display = 'none';
+      if(humanPanel) humanPanel.style.display = 'flex';
+      if(tabIA) { tabIA.style.borderBottomColor='transparent'; tabIA.style.color='var(--text-3)'; }
+      if(tabHuman) { tabHuman.style.borderBottomColor='var(--blue)'; tabHuman.style.color='var(--blue)'; }
+      if(banner) { banner.style.background='var(--blue-light)'; banner.style.color='var(--blue)'; banner.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="var(--blue)" stroke="none"><circle cx="12" cy="12" r="10"/></svg> Atendente humano online'; }
+      App.toast('Você assumiu o atendimento. A IA está pausada.','success');
+    } else {
+      iaBar.style.display = 'flex';
+      if(humanPanel) humanPanel.style.display = 'none';
+      if(tabIA) { tabIA.style.borderBottomColor='var(--green)'; tabIA.style.color='var(--green)'; }
+      if(tabHuman) { tabHuman.style.borderBottomColor='transparent'; tabHuman.style.color='var(--text-3)'; }
+      if(banner) { banner.style.background='var(--green-light)'; banner.style.color='var(--green-dark)'; banner.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="var(--green)" stroke="none"><circle cx="12" cy="12" r="10"/></svg> IA respondendo automaticamente'; }
+      App.toast('IA reativada para este contato.');
+    }
+  },
+
+  _quickReplies() {
+    return [
+      'Olá! Como posso ajudar?',
+      'Verificando disponibilidade...',
+      'Pode confirmar seu CPF?',
+      'Nosso dentista poderá te atender hoje.',
+      'Vou verificar com a equipe e retorno.',
+      'Qual horário é melhor para você?',
+      'Agendamento confirmado! ✓',
+    ];
+  },
+
+  sendHumanInput() {
+    const input = document.getElementById('human-input');
+    const texto = input?.value?.trim();
+    if (!texto) return;
+    this.sendHuman(texto);
+    if(input) input.value = '';
+  },
+
+  sendHuman(texto) {
+    const lead = DB.leads.find(l => l.id === this.leadAtual);
+    if(!lead) return;
+    const hora = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    lead.conversa.push({lado:'ia', texto: '👤 ' + texto, hora, humano: true});
+    const msgs = document.getElementById('chat-msgs');
+    if(msgs) {
+      msgs.innerHTML += `<div class="msg msg-right">
+        <div class="msg-av" style="background:var(--blue-light);color:var(--blue);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600">Você</div>
+        <div><div class="bubble" style="background:#dbeafe;color:#1e3a5f;border-radius:14px 4px 14px 14px">${texto}</div><div class="msg-time" style="text-align:right">${hora} · atendente</div></div>
+      </div>`;
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+  },
+
+  simularLead(){
+    const nomes=['Carla Mendes','Pedro Augusto','Silvia Torres','Bruno Castilho','Rafaela Lima'];
+    const procs=['Clareamento','Implante','Limpeza','Avaliação','Ortodontia'];
+    const nome=nomes[Math.floor(Math.random()*nomes.length)];
+    const proc=procs[Math.floor(Math.random()*procs.length)];
+    const novo={id:DB.leads.length+Math.floor(Math.random()*100)+1,nome,telefone:`(11) 9${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}`,motivo:`Interesse em ${proc.toLowerCase()}`,urgencia:Math.floor(Math.random()*3)+1,procedimento:proc,status:'Novo',hora:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),conversa:[{lado:'user',texto:`Olá! Tenho interesse em ${proc.toLowerCase()}`,hora:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}]};
+    DB.leads.unshift(novo);this.leadAtual=novo.id;this.abaLead='conversas';this.refresh();
+    App.toast(`Novo lead: ${nome}`,'success');
+  },
+
+  refresh(){document.getElementById('page-ia').innerHTML=this.render();}
+};
+
+
+const PacientesPage = {
+  filtro: '',
+  view: 'lista',
+
+  render() {
+    return `
+    <div class="topbar">
+      <div class="topbar-left"><div class="topbar-title">Pacientes / CRM</div></div>
+      <div class="topbar-right">
+        <div style="display:flex;background:var(--gray-100);border-radius:var(--radius-sm);padding:2px;gap:2px">
+          ${['lista','kanban'].map(v=>`<button onclick="PacientesPage.view='${v}';PacientesPage.refresh()" style="padding:5px 14px;border-radius:5px;font-size:13px;font-weight:500;border:none;cursor:pointer;background:${this.view===v?'var(--white)':'transparent'};color:${this.view===v?'var(--text)':'var(--text-3)'};box-shadow:${this.view===v?'var(--shadow)':'none'}">${v==='lista'?'Lista':'Kanban'}</button>`).join('')}
+        </div>
+        <div class="search-bar" style="width:260px">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" placeholder="Nome, CPF ou telefone..." oninput="PacientesPage.filtro=this.value;PacientesPage.refresh()" value="${this.filtro}">
+        </div>
+        <button class="btn btn-primary" onclick="PacientesPage.openNovoPaciente()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Novo paciente
+        </button>
+      </div>
+    </div>
+    <div class="page-body" style="${this.view==='kanban'?'padding:16px 16px;':''}">
+      ${this.view==='lista'?this.renderLista():this.renderKanban()}
+    </div>`;
+  },
+
+  renderLista() {
+    const lista = DB.pacientes.filter(p=>!this.filtro||p.nome.toLowerCase().includes(this.filtro.toLowerCase())||p.cpf.includes(this.filtro)||p.telefone.includes(this.filtro));
+    return `
+    <div class="grid grid-4 mb-16">
+      <div class="metric-card"><div class="metric-label">Total de pacientes</div><div class="metric-value">${DB.pacientes.length}</div><div class="metric-sub">+3 este mês</div></div>
+      <div class="metric-card"><div class="metric-label">Ativos</div><div class="metric-value">${DB.pacientes.filter(p=>p.status==='Ativo').length}</div><div class="metric-delta delta-up">▲ 8%</div></div>
+      <div class="metric-card"><div class="metric-label">Com WhatsApp</div><div class="metric-value">${DB.pacientes.filter(p=>p.whatsapp).length}</div><div class="metric-sub">${Math.round(DB.pacientes.filter(p=>p.whatsapp).length/DB.pacientes.length*100)}% da base</div></div>
+      <div class="metric-card"><div class="metric-label">Retornos pendentes</div><div class="metric-value" style="color:var(--amber)">${DB.pacientes.filter(p=>p.status==='Retorno').length}</div><div class="metric-sub">Automático ativo</div></div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div class="card-title">${lista.length} pacientes</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm" onclick="PacientesPage.openCampanha()">📱 Campanha WhatsApp</button>
+          <button class="btn btn-sm" onclick="App.toast('CSV exportado!')">Exportar CSV</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Paciente</th><th>Telefone</th><th>Último atend.</th><th>Próxima consulta</th><th>Dentista</th><th>Convênio</th><th>Status</th><th>WA</th><th></th></tr></thead>
+          <tbody>
+            ${lista.map(p=>{
+              const d=DB.getDentista(p.dentista);
+              const prox=DB.agendamentos.find(a=>a.pacienteId===p.id&&a.data>='2026-04-08');
+              return `<tr onclick="ProntuarioPage.pacienteAtual=${p.id};App.navigate('prontuario')">
+                <td><div style="display:flex;align-items:center;gap:8px"><div class="patient-av" style="background:${p.corBg};color:${p.corText}">${p.iniciais}</div><div><div style="font-weight:500;color:var(--text)">${p.nome}</div><div class="text-muted">${p.email}</div></div></div></td>
+                <td>${p.telefone}</td>
+                <td>${p.ultimaConsulta}</td>
+                <td>${prox?`${prox.data.split('-').reverse().join('/')} ${prox.hora}`:'—'}</td>
+                <td><div style="display:flex;align-items:center;gap:5px"><span class="color-dot" style="background:${d.cor}"></span>${d.nome.split(' ').slice(1).join(' ')}</div></td>
+                <td>${p.convenio}</td>
+                <td>${DB.getStatusBadge(p.status)}</td>
+                <td>${p.whatsapp?'<span class="badge badge-wa">✓</span>':'<span class="badge badge-gray">—</span>'}</td>
+                <td onclick="event.stopPropagation()">
+                  <div style="display:flex;gap:3px">
+                    <button class="btn btn-icon btn-sm btn-ghost" title="WhatsApp" onclick="App.toast('📱 Abrindo WhatsApp...')"><svg viewBox="0 0 24 24" width="13" height="13"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+                    <button class="btn btn-icon btn-sm btn-ghost" title="Agendar" onclick="AgendaPage.openNovoAgendamento()"><svg viewBox="0 0 24 24" width="13" height="13"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg></button>
+                  </div>
+                </td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  },
+
+  renderKanban() {
+    const cols = [
+      { id:'Novo', label:'Novo Lead', cor:'#378ADD', bg:'#E6F1FB', items: DB.leads.filter(l=>l.status==='Novo') },
+      { id:'Qualificado', label:'Qualificado', cor:'#854F0B', bg:'#FAEEDA', items: DB.leads.filter(l=>l.status==='Qualificado') },
+      { id:'Follow-up', label:'Follow-up', cor:'#72243E', bg:'#FBEAF0', items: DB.leads.filter(l=>l.status==='Follow-up') },
+      { id:'Agendado', label:'Agendado', cor:'#0F6E56', bg:'#E1F5EE', items: DB.leads.filter(l=>l.status==='Agendado') },
+      { id:'Urgente', label:'Urgente', cor:'#A32D2D', bg:'#FCEBEB', items: DB.leads.filter(l=>l.status==='Urgente') },
+      { id:'Convertido', label:'Convertido', cor:'#1D9E75', bg:'#E1F5EE', items: DB.pacientes.filter(p=>p.status==='Ativo').slice(0,3).map(p=>({id:p.id,nome:p.nome,procedimento:'Paciente ativo',urgencia:0,hora:p.ultimaConsulta,telefone:p.telefone,status:'Convertido',motivo:'Paciente cadastrado'})) },
+    ];
+    return `<div style="display:flex;gap:14px;overflow-x:auto;min-height:calc(100vh - 200px);padding-bottom:16px;align-items:flex-start">
+      ${cols.map(col=>`
+        <div style="width:240px;min-width:240px;display:flex;flex-direction:column;gap:0">
+          <div style="padding:10px 12px;border-radius:var(--radius-lg) var(--radius-lg) 0 0;background:${col.bg};border:1px solid ${col.cor}30;border-bottom:none;display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:13px;font-weight:600;color:${col.cor}">${col.label}</div>
+            <span style="background:${col.cor};color:white;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px">${col.items.length}</span>
+          </div>
+          <div style="background:var(--gray-50);border:1px solid ${col.cor}30;border-radius:0 0 var(--radius-lg) var(--radius-lg);min-height:200px;padding:8px;display:flex;flex-direction:column;gap:6px;flex:1">
+            ${col.items.map(item=>`
+              <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:11px;cursor:pointer;transition:box-shadow .15s" onmouseover="this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.boxShadow='none'" onclick="IAPage.leadAtual=${item.id||1};App.navigate('ia')">
+                <div style="font-weight:600;font-size:13px;margin-bottom:3px">${item.nome}</div>
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:6px">${item.motivo}</div>
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <span style="font-size:11px;color:var(--text-3)">${item.telefone||''}</span>
+                  <span style="font-size:10px;font-weight:700;color:${item.urgencia>=4?'var(--red)':item.urgencia>=3?'var(--amber)':'var(--green-dark)'}">${item.urgencia?'U'+item.urgencia:''}</span>
+                </div>
+                <div style="margin-top:6px;display:flex;gap:4px">
+                  <button class="btn btn-sm" style="flex:1;font-size:11px;padding:3px 6px" onclick="event.stopPropagation();App.toast('Movendo lead...')">Mover →</button>
+                  <button class="btn btn-sm btn-primary" style="font-size:11px;padding:3px 6px" onclick="event.stopPropagation();AgendaPage.openNovoAgendamento()">Agendar</button>
+                </div>
+              </div>
+            `).join('')}
+            <button class="btn btn-sm" style="width:100%;border-style:dashed;color:var(--text-3)" onclick="IAPage.simularLead();App.navigate('ia')">+ Lead</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>`;
+  },
+
+  refresh(){document.getElementById('page-pacientes').innerHTML=this.render();},
+
+  openNovoPaciente(){
+    App.openModal('Novo Paciente',`
+      <div class="form-row"><div class="form-group form-full"><label>Nome completo *</label><input class="input" id="np-nome" placeholder="Nome completo"></div></div>
+      <div class="form-row"><div class="form-group"><label>CPF</label><input class="input" id="np-cpf" placeholder="000.000.000-00"></div><div class="form-group"><label>Data de nascimento</label><input class="input" type="date" id="np-nasc"></div></div>
+      <div class="form-row"><div class="form-group"><label>Telefone / WhatsApp *</label><input class="input" id="np-tel" placeholder="(11) 99999-9999"></div><div class="form-group"><label>E-mail</label><input class="input" type="email" id="np-email"></div></div>
+      <div class="form-row"><div class="form-group"><label>Dentista responsável</label><select class="input" id="np-den">${DB.dentistas.map(d=>`<option value="${d.id}">${d.nome}</option>`).join('')}</select></div><div class="form-group"><label>Convênio</label><select class="input" id="np-conv"><option>Particular</option><option>Unimed</option><option>Amil</option><option>Bradesco Saúde</option><option>SulAmérica</option></select></div></div>
+      <div class="form-group" style="margin-bottom:14px"><label>Como nos conheceu?</label><select class="input"><option>Indicação</option><option>Google</option><option>Instagram</option><option>Passou na rua</option><option>Outro</option></select></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px">
+        <button class="btn" onclick="App.closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="PacientesPage.salvarPaciente()">Cadastrar</button>
+      </div>
+    `);
+  },
+
+  salvarPaciente(){
+    const nome=document.getElementById('np-nome').value.trim();
+    if(!nome){App.toast('Informe o nome','error');return;}
+    const cores=[['#E1F5EE','#0F6E56'],['#E6F1FB','#185FA5'],['#FBEAF0','#72243E'],['#FAEEDA','#854F0B']];
+    const[bg,tx]=cores[DB.pacientes.length%cores.length];
+    DB.pacientes.push({id:DB.nextId.paciente++,nome,cpf:document.getElementById('np-cpf').value||'—',nascimento:document.getElementById('np-nasc').value||'—',telefone:document.getElementById('np-tel').value||'—',email:document.getElementById('np-email').value||'—',convenio:document.getElementById('np-conv').value,dentista:+document.getElementById('np-den').value,ultimaConsulta:'—',status:'Ativo',whatsapp:true,cidade:'São Paulo',iniciais:nome.split(' ').map(n=>n[0]).slice(0,2).join(''),corBg:bg,corText:tx});
+    App.closeModal();App.toast(`${nome} cadastrado!`,'success');this.refresh();
+  },
+
+  openCampanha(){
+    App.openModal('Campanha WhatsApp',`
+      <div class="form-group" style="margin-bottom:14px"><label>Nome da campanha</label><input class="input" placeholder="Ex: Retorno de limpeza — Junho 2026"></div>
+      <div class="form-group" style="margin-bottom:14px"><label>Segmentação</label>
+        <div style="display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--gray-50);border-radius:var(--radius-sm)">
+          ${['Pacientes sem consulta há 6+ meses','Limpeza atrasada (>6 meses)','Aniversariantes do mês','Plano de tratamento em aberto','Leads não convertidos'].map(s=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" style="accent-color:var(--green)"> ${s}</label>`).join('')}
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:14px"><label>Mensagem (use {{nome}}, {{dentista}}, {{data}})</label><textarea class="input">Olá, {{nome}}! 😊 Notamos que faz um tempo desde sua última visita à Clínica Sorrir. Que tal agendar uma consulta de retorno? Estamos aqui para cuidar do seu sorriso!</textarea></div>
+      <div class="form-row"><div class="form-group"><label>Data de envio</label><input class="input" type="date" value="2026-04-10"></div><div class="form-group"><label>Horário</label><input class="input" type="time" value="10:00"></div></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">
+        <button class="btn" onclick="App.closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="App.closeModal();App.toast('Campanha agendada para 10/04 às 10h!','success')">Agendar campanha</button>
+      </div>
+    `);
+  }
+};
+
+
+const ProntuarioPage = {
+  pacienteAtual: 1,
+  abaAtual: 'dados',
+
+  render() {
+    const p = DB.getPaciente(this.pacienteAtual) || DB.pacientes[0];
+    const d = DB.getDentista(p.dentista);
+    const ags = DB.agendamentos.filter(a=>a.pacienteId===p.id);
+
+    return `
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="btn btn-ghost btn-sm" onclick="App.navigate('pacientes')">← Pacientes</button>
+        <div class="topbar-title">Prontuário Eletrônico</div>
+      </div>
+      <div class="topbar-right">
+        <select class="input" style="width:200px;font-size:13px" onchange="ProntuarioPage.pacienteAtual=+this.value;ProntuarioPage.refresh()">
+          ${DB.pacientes.map(pac=>`<option value="${pac.id}"${pac.id===p.id?' selected':''}>${pac.nome}</option>`).join('')}
+        </select>
+        <button class="btn btn-primary" onclick="AgendaPage.openNovoAgendamento()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Novo atendimento
+        </button>
+      </div>
+    </div>
+
+    <div style="background:var(--white);border-bottom:1px solid var(--border);padding:16px 24px;flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="patient-av" style="background:${p.corBg};color:${p.corText};width:52px;height:52px;font-size:18px;font-weight:600">${p.iniciais}</div>
+        <div style="flex:1">
+          <div style="font-size:18px;font-weight:600;color:var(--text)">${p.nome}</div>
+          <div style="font-size:13px;color:var(--text-3);margin-top:2px">${calcIdade(p.nascimento)} anos · ${p.telefone} · ${p.email} · ${p.convenio}</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          ${DB.getStatusBadge(p.status)}
+          ${p.whatsapp?'<span class="badge badge-wa">WhatsApp</span>':''}
+          <button class="btn btn-sm" onclick="App.toast('📱 Mensagem WhatsApp enviada!','success')">Enviar WA</button>
+          <button class="btn btn-sm" onclick="AssinaturaPage.openGerarDocumento(${p.id})">Gerar documento</button>
+        </div>
+      </div>
+      <div class="tabs" style="margin-top:14px;margin-bottom:0">
+        ${['dados','anamnese','odontograma','historico','exames','plano'].map(aba=>{
+          const labels={dados:'Dados',anamnese:'Anamnese',odontograma:'Odontograma',historico:'Histórico',exames:'Exames',plano:'Plano de Tratamento'};
+          return `<div class="tab${this.abaAtual===aba?' active':''}" onclick="ProntuarioPage.abaAtual='${aba}';ProntuarioPage.refresh()">${labels[aba]}</div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="page-body">
+      ${this['renderAba_'+this.abaAtual](p,d,ags)}
+    </div>`;
+  },
+
+  renderAba_dados(p,d) {
+    return `<div class="grid grid-2 gap-16">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Dados pessoais</div><button class="btn btn-sm btn-primary" onclick="App.toast('Dados salvos!','success')">Salvar</button></div>
+        <div class="form-row"><div class="form-group"><label>Nome completo</label><input class="input" value="${p.nome}"></div><div class="form-group"><label>Data de nascimento</label><input class="input" value="${p.nascimento}"></div></div>
+        <div class="form-row"><div class="form-group"><label>CPF</label><input class="input" value="${p.cpf}"></div><div class="form-group"><label>Telefone / WhatsApp</label><input class="input" value="${p.telefone}"></div></div>
+        <div class="form-row"><div class="form-group"><label>E-mail</label><input class="input" value="${p.email}"></div><div class="form-group"><label>Convênio</label><select class="input"><option${p.convenio==='Particular'?' selected':''}>Particular</option><option${p.convenio==='Unimed'?' selected':''}>Unimed</option><option${p.convenio==='Amil'?' selected':''}>Amil</option></select></div></div>
+        <div class="form-group"><label>Observações</label><textarea class="input">Paciente com histórico de sensibilidade dentária.</textarea></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Dentista responsável</div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--gray-50);border-radius:var(--radius);margin-bottom:16px">
+          <div style="width:44px;height:44px;border-radius:50%;background:${d.bgCor};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:${d.cor}">${d.nome.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>
+          <div>
+            <div style="font-weight:600;font-size:14px">${d.nome}</div>
+            <div class="text-muted">${d.especialidade}</div>
+          </div>
+        </div>
+        <div class="section-label">Próximos agendamentos</div>
+        ${DB.agendamentos.filter(a=>a.pacienteId===p.id&&a.data>='2026-04-08').slice(0,3).map(a=>`
+          <div class="appt-item" style="margin-bottom:6px">
+            <div class="appt-time">${a.hora}</div>
+            <div class="appt-info"><div class="appt-name">${a.procedimento}</div><div class="appt-proc">${a.data.split('-').reverse().join('/')}</div></div>
+            ${DB.getStatusBadge(a.status)}
+          </div>
+        `).join('') || '<div class="text-muted" style="padding:8px">Nenhum agendamento futuro</div>'}
+      </div>
+    </div>`;
+  },
+
+  renderAba_anamnese() {
+    const items = ['Diabetes','Hipertensão','Cardiopatia','Alergias a medicamentos','Uso de anticoagulantes','Anemia','Problemas renais','Epilepsia','Gravidez ou amamentação','Fumante'];
+    return `<div class="grid grid-2 gap-16">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Histórico médico</div><button class="btn btn-sm btn-primary" onclick="App.toast('Anamnese salva!','success')">Salvar</button></div>
+        <div class="form-group" style="margin-bottom:14px"><label>Queixa principal</label><textarea class="input">Sensibilidade em dente 23 e desconforto ao mastigar no lado esquerdo.</textarea></div>
+        <div class="section-label">Condições sistêmicas</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+          ${items.map((item,i)=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+            <input type="checkbox" style="accent-color:var(--green)" ${i===0||i===7?'':'checked'}> ${item}
+          </label>`).join('')}
+        </div>
+        <div class="form-group"><label>Medicamentos em uso</label><textarea class="input" placeholder="Liste os medicamentos...">Losartana 50mg — 1x ao dia</textarea></div>
+        <div class="form-group"><label>Alergias</label><input class="input" placeholder="Alergias conhecidas..." value="Penicilina"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Histórico odontológico</div></div>
+        <div class="form-group" style="margin-bottom:12px"><label>Última consulta odontológica (antes desta clínica)</label><input class="input" value="Há cerca de 1 ano"></div>
+        <div class="form-group" style="margin-bottom:12px"><label>Medo ou ansiedade ao dentista?</label><select class="input"><option>Leve</option><option>Moderado</option><option selected>Nenhum</option><option>Intenso</option></select></div>
+        <div class="form-group" style="margin-bottom:12px"><label>Hábitos</label>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+            ${['Bruxismo (range dentes)','Respiração bucal','Sucção de dedo ou chupeta','Tabagismo','Morde objetos ou unhas'].map((h,i)=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" style="accent-color:var(--green)"${i===0?' checked':''}> ${h}</label>`).join('')}
+          </div>
+        </div>
+        <div class="form-group"><label>Observações adicionais</label><textarea class="input">Paciente relatou sensibilidade ao frio em todos os dentes. Indicada aplicação de verniz fluoretado.</textarea></div>
+        <div style="margin-top:12px;padding:10px;background:var(--blue-light);border-radius:var(--radius-sm);font-size:12px;color:var(--blue)">
+          <strong>Última edição:</strong> Dr. Mendes em 01/04/2026 às 10:23
+        </div>
+      </div>
+    </div>`;
+  },
+
+  renderAba_odontograma(p) {
+    const estado = DB.odontograma[p.id] || {};
+    const legenda = [['ok','Saudável','var(--green-light)','var(--green)'],['trat','Tratado','var(--blue-light)','var(--blue-mid)'],['carie','Cárie','var(--amber-light)','var(--amber-mid)'],['ext','Extração ind.','var(--red-light)','var(--red-mid)'],['implante','Implante','var(--pink-light)','var(--pink-mid)'],['ausente','Ausente','var(--gray-100)','var(--gray-200)']];
+    const renderRow = (dentes) => dentes.map(n=>{
+      const st = estado[n]||'';
+      return `<div class="tooth ${st}" onclick="ProntuarioPage.editarDente(${n},'${st}')" title="Dente ${n}">${n}</div>`;
+    }).join('');
+
+    return `<div style="display:flex;gap:16px">
+      <div class="card" style="flex:1">
+        <div class="card-header"><div class="card-title">Odontograma</div><span class="text-muted">Clique em um dente para editar</span></div>
+        <div class="odontogram" style="margin:16px 0">
+          <div class="text-muted" style="font-size:11px;margin-bottom:4px">SUPERIOR</div>
+          <div class="odo-row">${renderRow([18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28])}</div>
+          <div style="height:12px"></div>
+          <div class="odo-row">${renderRow([48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38])}</div>
+          <div class="text-muted" style="font-size:11px;margin-top:4px">INFERIOR</div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+          ${legenda.map(([cls,label,bg,border])=>`<div style="display:flex;align-items:center;gap:5px;font-size:12px">
+            <div style="width:14px;height:14px;border-radius:3px;background:${bg};border:1.5px solid ${border}"></div>${label}
+          </div>`).join('')}
+        </div>
+      </div>
+      <div class="card" style="width:260px;flex-shrink:0">
+        <div class="card-header"><div class="card-title">Resumo clínico</div></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${Object.entries(estado).map(([d,s])=>{
+            const labels={ok:'Saudável',trat:'Tratado',carie:'Cárie',ext:'Extração indicada',implante:'Implante',ausente:'Ausente'};
+            const colors={ok:'green',trat:'blue',carie:'amber',ext:'red',implante:'pink',ausente:'gray'};
+            return s!=='ok'?`<div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:13px;font-weight:500">Dente ${d}</span>
+              <span class="badge badge-${colors[s]||'gray'}">${labels[s]||s}</span>
+            </div>`:'';
+          }).join('')}
+        </div>
+        <div class="divider"></div>
+        <button class="btn btn-sm" style="width:100%" onclick="App.toast('Odontograma salvo!','success')">Salvar odontograma</button>
+      </div>
+    </div>`;
+  },
+
+  renderAba_historico(p,d,ags) {
+    return `<div class="card">
+      <div class="card-header"><div class="card-title">Histórico de atendimentos</div><button class="btn btn-sm btn-primary" onclick="ProntuarioPage.openNovoAtendimento()">+ Registrar atendimento</button></div>
+      <div style="display:flex;flex-direction:column;gap:0">
+        ${ags.map(a=>{
+          const den = DB.getDentista(a.dentistaId);
+          return `<div style="display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--border)">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;width:60px;flex-shrink:0">
+              <div style="width:12px;height:12px;border-radius:50%;background:${den.cor};flex-shrink:0"></div>
+              <div style="width:1px;flex:1;background:var(--border)"></div>
+            </div>
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                <span style="font-weight:600;font-size:14px">${a.procedimento}</span>
+                ${DB.getStatusBadge(a.status)}
+              </div>
+              <div class="text-muted">${a.data.split('-').reverse().join('/')} às ${a.hora} · ${den.nome}</div>
+              ${a.obs?`<div style="margin-top:8px;padding:8px;background:var(--gray-50);border-radius:var(--radius-sm);font-size:13px;color:var(--text-2)">${a.obs}</div>`:''}
+            </div>
+          </div>`;
+        }).join('') || '<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><p>Nenhum atendimento registrado</p></div>'}
+      </div>
+    </div>`;
+  },
+
+  renderAba_exames() {
+    return `<div class="card">
+      <div class="card-header">
+        <div class="card-title">Exames e imagens</div>
+        <button class="btn btn-sm btn-primary" onclick="App.toast('Selecione um arquivo para upload')">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Adicionar exame
+        </button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        ${[['Radiografia Periapical','12/03/2026','Dente 23','Dr. Mendes'],['Panorâmica','01/01/2026','Geral','Dr. Mendes'],['Foto Clínica','05/04/2026','Região anterior','Dra. Oliveira']].map(([tipo,data,local,den])=>`
+          <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:box-shadow .15s" onmouseover="this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.boxShadow='none'">
+            <div style="height:120px;background:linear-gradient(135deg,var(--gray-100),var(--gray-200));display:flex;align-items:center;justify-content:center">
+              <svg viewBox="0 0 24 24" width="40" height="40" style="opacity:.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <div style="padding:10px">
+              <div style="font-weight:500;font-size:13px">${tipo}</div>
+              <div class="text-muted">${data} · ${local}</div>
+              <div class="text-muted">${den}</div>
+            </div>
+          </div>
+        `).join('')}
+        <div style="border:2px dashed var(--border-2);border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;height:160px;cursor:pointer;color:var(--text-3);gap:8px" onclick="App.toast('Selecione um arquivo (JPG, PNG, PDF, DICOM)')">
+          <svg viewBox="0 0 24 24" width="28" height="28" style="opacity:.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span style="font-size:13px">Adicionar exame</span>
+        </div>
+      </div>
+    </div>`;
+  },
+
+  renderAba_plano(p) {
+    const plano = [
+      { proc:'Restauração em Resina', dentes:'23', seq:1, valor:380, status:'Planejado' },
+      { proc:'Limpeza Profunda', dentes:'Todos', seq:2, valor:280, status:'Concluído' },
+      { proc:'Tratamento Canal', dentes:'36', seq:3, valor:1200, status:'Em andamento' },
+      { proc:'Coroa Cerâmica', dentes:'36', seq:4, valor:1800, status:'Planejado' },
+    ];
+    const total = plano.reduce((s,i)=>s+i.valor,0);
+    const concluido = plano.filter(i=>i.status==='Concluído').reduce((s,i)=>s+i.valor,0);
+    return `<div style="display:flex;flex-direction:column;gap:16px">
+      <div class="grid grid-3 gap-16">
+        <div class="metric-card"><div class="metric-label">Valor total do plano</div><div class="metric-value">${DB.formatCurrency(total)}</div></div>
+        <div class="metric-card"><div class="metric-label">Já realizado</div><div class="metric-value text-green">${DB.formatCurrency(concluido)}</div></div>
+        <div class="metric-card"><div class="metric-label">A realizar</div><div class="metric-value" style="color:var(--amber)">${DB.formatCurrency(total-concluido)}</div></div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <div class="card-title">Procedimentos planejados</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" onclick="App.toast('PDF gerado!','success')">Exportar PDF</button>
+            <button class="btn btn-sm btn-primary" onclick="ProntuarioPage.openNovoAtendimento()">+ Adicionar</button>
+          </div>
+        </div>
+        <table><thead><tr><th>Seq.</th><th>Procedimento</th><th>Dente(s)</th><th>Valor</th><th>Status</th><th></th></tr></thead><tbody>
+          ${plano.map(item=>`<tr>
+            <td style="font-variant-numeric:tabular-nums;font-weight:500">${item.seq}</td>
+            <td>${item.proc}</td>
+            <td>${item.dentes}</td>
+            <td style="font-weight:500">${DB.formatCurrency(item.valor)}</td>
+            <td>${DB.getStatusBadge(item.status)}</td>
+            <td><button class="btn btn-sm btn-ghost" onclick="App.toast('Status atualizado!')">Editar</button></td>
+          </tr>`).join('')}
+        </tbody></table>
+      </div>
+    </div>`;
+  },
+
+  openNovoAtendimento() {
+    App.openModal('Registrar Atendimento', `
+      <div class="form-row">
+        <div class="form-group"><label>Procedimento(s)</label><select class="input">${DB.procedimentos.map(p=>`<option>${p}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Dentista</label><select class="input">${DB.dentistas.map(d=>`<option value="${d.id}">${d.nome}</option>`).join('')}</select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Data</label><input class="input" type="date" value="2026-04-08"></div>
+        <div class="form-group"><label>Dente(s) tratado(s)</label><input class="input" placeholder="Ex: 23, 36"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:14px"><label>Observações clínicas</label><textarea class="input" placeholder="Notas, intercorrências, próximos passos..."></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Anestesia utilizada</label><select class="input"><option>Não utilizada</option><option>Lidocaína 2%</option><option>Mepivacaína 3%</option><option>Articaína 4%</option></select></div>
+        <div class="form-group"><label>Próximo retorno</label><input class="input" type="date"></div>
+      </div>
+      <div class="modal-footer" style="padding:14px 0 0;border:none">
+        <button class="btn" onclick="App.closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="App.closeModal();App.toast('Atendimento registrado!','success')">Salvar atendimento</button>
+      </div>
+    `);
+  },
+
+  editarDente(num, estadoAtual) {
+    const estados = ['','ok','trat','carie','ext','implante','ausente'];
+    const labels = {ok:'Saudável',trat:'Tratado',carie:'Cárie',ext:'Extração indicada',implante:'Implante',ausente:'Ausente'};
+    App.openModal(`Dente ${num}`, `
+      <div style="margin-bottom:14px">
+        <div class="section-label">Estado atual: ${labels[estadoAtual]||'Sem registro'}</div>
+      </div>
+      <div class="section-label">Alterar estado</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+        ${estados.filter(e=>e).map(e=>`
+          <button class="btn${e===estadoAtual?' btn-primary':''}" onclick="ProntuarioPage.atualizarDente(${num},'${e}')">${labels[e]}</button>
+        `).join('')}
+      </div>
+      <div class="form-group"><label>Anotação neste dente</label><textarea class="input" placeholder="Observações clínicas sobre este dente..."></textarea></div>
+      <div class="modal-footer" style="padding:14px 0 0;border:none">
+        <button class="btn" onclick="App.closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="App.closeModal();App.toast('Dente atualizado!','success')">Salvar</button>
+      </div>
+    `);
+  },
+
+  atualizarDente(num, estado) {
+    if(!DB.odontograma[this.pacienteAtual]) DB.odontograma[this.pacienteAtual]={};
+    DB.odontograma[this.pacienteAtual][num] = estado;
+    App.closeModal();
+    App.toast(`Dente ${num} atualizado: ${estado}`, 'success');
+    this.refresh();
+  },
+
+  refresh() { document.getElementById('page-prontuario').innerHTML = this.render(); }
+};
+
+function calcIdade(nasc) {
+  if(!nasc||nasc==='—') return '—';
+  const [d,m,a] = nasc.split('/');
+  const hoje = new Date(2026,3,8);
+  const dn = new Date(+a,+m-1,+d);
+  let idade = hoje.getFullYear()-dn.getFullYear();
+  if(hoje<new Date(hoje.getFullYear(),dn.getMonth(),dn.getDate())) idade--;
+  return idade;
+}
+
+
+const AssinaturaPage = {
+  pacienteSelecionado: 1,
+
+  render() {
+    const assinados=DB.documentos.filter(d=>d.status==='Assinado').length;
+    const pendentes=DB.documentos.filter(d=>d.status==='Pendente').length;
+    return `
+    <div class="topbar">
+      <div class="topbar-left"><div class="topbar-title">Assinatura Digital</div></div>
+      <div class="topbar-right">
+        <button class="btn btn-primary" onclick="AssinaturaPage.openGerarDocumento(null)">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Gerar documento
+        </button>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="grid grid-4 mb-16">
+        <div class="metric-card"><div class="metric-label">Documentos gerados</div><div class="metric-value">${DB.documentos.length}</div><div class="metric-sub">Este mês</div></div>
+        <div class="metric-card"><div class="metric-label">Assinados</div><div class="metric-value text-green">${assinados}</div><div class="metric-delta delta-up">${Math.round(assinados/DB.documentos.length*100)}% do total</div></div>
+        <div class="metric-card"><div class="metric-label">Aguardando</div><div class="metric-value" style="color:var(--amber)">${pendentes}</div><div class="metric-sub">Lembrete auto ativo</div></div>
+        <div class="metric-card"><div class="metric-label">Segurança</div><div class="metric-value text-green" style="font-size:16px">SHA-256</div><div class="metric-sub">Hash + Timestamp + IP</div></div>
+      </div>
+
+      <!-- PER PATIENT BLOCKS -->
+      <div class="section-label" style="margin-bottom:12px">Termos de consentimento por paciente</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        ${DB.pacientes.filter(p=>DB.documentos.some(d=>d.pacienteId===p.id)).map(p=>{
+          const docs=DB.documentos.filter(d=>d.pacienteId===p.id);
+          const den=DB.getDentista(p.dentista);
+          return `<div class="card" style="padding:0;overflow:hidden">
+            <div style="padding:12px 16px;background:var(--gray-50);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+              <div class="patient-av" style="background:${p.corBg};color:${p.corText};width:36px;height:36px">${p.iniciais}</div>
+              <div style="flex:1">
+                <div style="font-weight:600;font-size:14px">${p.nome}</div>
+                <div class="text-muted">${p.telefone} · ${den.nome} · ${p.convenio}</div>
+              </div>
+              <div style="display:flex;gap:6px;align-items:center">
+                <span class="badge badge-green">${docs.filter(d=>d.status==='Assinado').length} assinados</span>
+                ${docs.filter(d=>d.status==='Pendente').length?`<span class="badge badge-amber">${docs.filter(d=>d.status==='Pendente').length} pendentes</span>`:''}
+                <button class="btn btn-sm btn-primary" onclick="AssinaturaPage.openGerarDocumento(${p.id})">+ Gerar</button>
+              </div>
+            </div>
+            <div style="padding:8px">
+              ${docs.map(doc=>{
+                const signed=doc.status==='Assinado';
+                return `<div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .1s" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background=''" onclick="AssinaturaPage.openDocumento(${doc.id})">
+                  <div style="width:32px;height:32px;border-radius:7px;background:${signed?'var(--green-light)':'var(--amber-light)'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                    <svg viewBox="0 0 24 24" width="15" height="15" style="color:${signed?'var(--green-dark)':'var(--amber)'}"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  </div>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-weight:500;font-size:13px">${doc.tipo}</div>
+                    <div class="text-muted">${doc.procedimento} · ${doc.data}</div>
+                  </div>
+                  <div style="display:flex;gap:6px;align-items:center">
+                    ${DB.getStatusBadge(doc.status)}
+                    ${!signed?`<button class="btn btn-sm" style="font-size:11px" onclick="event.stopPropagation();AssinaturaPage.reenviar(${doc.id})">Reenviar WA</button>`:''}
+                    <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();App.toast('PDF baixado!')">PDF</button>
+                  </div>
+                </div>`;
+              }).join('')}
+            </div>
+          </div>`;
+        }).join('')}
+
+        <!-- Pacientes sem documentos -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Gerar documentos para outros pacientes</div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            ${DB.pacientes.filter(p=>!DB.documentos.some(d=>d.pacienteId===p.id)).map(p=>`
+              <div style="display:flex;align-items:center;gap:7px;padding:7px 12px;border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:13px;transition:all .15s" onclick="AssinaturaPage.openGerarDocumento(${p.id})" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background=''">
+                <div class="patient-av" style="background:${p.corBg};color:${p.corText};width:22px;height:22px;font-size:9px">${p.iniciais}</div>
+                ${p.nome.split(' ')[0]}
+                <svg viewBox="0 0 24 24" width="12" height="12"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  },
+
+  openDocumento(id){
+    const doc=DB.documentos.find(d=>d.id===id);
+    const p=DB.getPaciente(doc.pacienteId);
+    const den=DB.getDentista(doc.dentistaId);
+    const signed=doc.status==='Assinado';
+    App.openModal(doc.tipo,`
+      <div style="background:var(--gray-50);border-radius:var(--radius);padding:20px;margin-bottom:16px;font-size:13px;line-height:1.8">
+        <div style="text-align:center;margin-bottom:16px"><div style="font-weight:700;font-size:15px">CLÍNICA SORRIR</div><div style="font-weight:600">${doc.tipo.toUpperCase()}</div></div>
+        <p>Eu, <strong>${p.nome}</strong>, CPF ${p.cpf}, declaro que fui devidamente informado(a) pelo(a) Dr(a). <strong>${den.nome}</strong> sobre o procedimento: <strong>${doc.procedimento}</strong>.</p>
+        <p style="margin-top:8px">Declaro que compreendi todas as informações fornecidas, incluindo riscos, benefícios e alternativas do tratamento proposto, e autorizo expressamente a realização do referido procedimento.</p>
+        <p style="margin-top:8px">Local e data: São Paulo, ${doc.data}.</p>
+        ${signed?`<div style="margin-top:16px;padding:10px;border:2px solid var(--green);border-radius:var(--radius-sm);text-align:center">
+          <div style="font-weight:600;color:var(--green-dark)">✓ Documento assinado digitalmente</div>
+          <div class="text-muted" style="font-size:11px">SHA-256: 3f8a9c2d1e4b7f6a... · IP: 177.x.x.x · ${doc.data}</div>
+        </div>`:`<div style="margin-top:16px;height:60px;border:2px dashed var(--border-2);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:12px">Aguardando assinatura do paciente</div>`}
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="flex:1" onclick="App.toast('PDF baixado!')">Download PDF</button>
+        ${!signed?`<button class="btn btn-primary" style="flex:1" onclick="AssinaturaPage.reenviar(${doc.id})">Reenviar via WhatsApp</button>`:''}
+        <button class="btn" onclick="App.closeModal()">Fechar</button>
+      </div>
+    `,'modal-lg');
+  },
+
+  reenviar(id){App.closeModal();App.toast('📱 Link de assinatura reenviado via WhatsApp!','success');},
+
+  openGerarDocumento(pacienteId,tipoInicial='Termo de Consentimento Informado'){
+    App.openModal('Gerar Documento',`
+      <div class="form-group" style="margin-bottom:14px">
+        <label>Tipo de documento</label>
+        <select class="input" id="doc-tipo">
+          ${['Termo de Consentimento Informado','Contrato de Tratamento','Autorização de Procedimento','Contrato de Parcelamento','Declaração de Conclusão de Tratamento','Atestado de Comparecimento','Receita Odontológica'].map(t=>`<option${t===tipoInicial?' selected':''}>${t}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Paciente</label><select class="input" id="doc-pac">${DB.pacientes.map(p=>`<option value="${p.id}"${p.id===pacienteId?' selected':''}>${p.nome}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Dentista</label><select class="input" id="doc-den">${DB.dentistas.map(d=>`<option value="${d.id}">${d.nome}</option>`).join('')}</select></div>
+      </div>
+      <div class="form-group" style="margin-bottom:14px"><label>Procedimento / Detalhes</label><input class="input" id="doc-proc" placeholder="Ex: Implante dentário — dente 23"></div>
+      <div style="padding:10px;background:var(--green-light);border-radius:var(--radius-sm);font-size:13px;color:var(--green-dark);margin-bottom:14px">
+        📱 Documento enviado ao paciente via WhatsApp para assinatura digital pelo celular
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px">
+        <button class="btn" onclick="App.closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="AssinaturaPage.gerarDocumento()">Gerar e enviar</button>
+      </div>
+    `);
+  },
+
+  gerarDocumento(){
+    const tipo=document.getElementById('doc-tipo').value;
+    const pacId=+document.getElementById('doc-pac').value;
+    const denId=+document.getElementById('doc-den').value;
+    const proc=document.getElementById('doc-proc').value||'Procedimento odontológico';
+    DB.documentos.push({id:DB.nextId.documento++,tipo,pacienteId:pacId,dentistaId:denId,data:'08/04/2026',status:'Pendente',procedimento:proc});
+    App.closeModal();App.toast('Documento gerado e enviado via WhatsApp!','success');
+    document.getElementById('page-assinatura').innerHTML=this.render();
+  }
+};
+
+
+const FinanceiroPage = {
+  aba: 'receber',
+  render() {
+    const totalReceber = DB.financeiro.receber.filter(r=>r.status!=='Pago').reduce((s,r)=>s+(r.valor-r.desconto),0);
+    const totalPagar = DB.financeiro.pagar.filter(r=>r.status!=='Pago').reduce((s,r)=>s+r.valor,0);
+    const faturamento = DB.financeiro.faturamentoDentista.reduce((s,d)=>s+d.producao,0);
+    const totalComissoes = DB.financeiro.faturamentoDentista.reduce((s,d)=>s+d.comissao,0);
+
+    return `
+    <div class="topbar">
+      <div class="topbar-left"><div class="topbar-title">Financeiro</div></div>
+      <div class="topbar-right">
+        <button class="btn" onclick="FinanceiroPage.openLancamento('receber')">+ A Receber</button>
+        <button class="btn" onclick="FinanceiroPage.openLancamento('pagar')">+ A Pagar</button>
+        <button class="btn btn-primary" onclick="App.toast('Relatório exportado!','success')">Exportar</button>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="grid grid-4 mb-16">
+        <div class="metric-card"><div class="metric-label">Faturamento (abr)</div><div class="metric-value">${DB.formatCurrency(faturamento)}</div><div class="metric-delta delta-up">▲ 12% vs março</div></div>
+        <div class="metric-card"><div class="metric-label">A receber</div><div class="metric-value text-green">${DB.formatCurrency(totalReceber)}</div><div class="metric-sub">${DB.financeiro.receber.filter(r=>r.status!=='Pago').length} lançamentos</div></div>
+        <div class="metric-card"><div class="metric-label">A pagar</div><div class="metric-value text-red">${DB.formatCurrency(totalPagar)}</div><div class="metric-sub">${DB.financeiro.pagar.filter(r=>r.status!=='Pago').length} contas</div></div>
+        <div class="metric-card"><div class="metric-label">Comissões do mês</div><div class="metric-value">${DB.formatCurrency(totalComissoes)}</div><div class="metric-sub">5 dentistas</div></div>
+      </div>
+
+      <div class="grid grid-2 mb-16">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Fluxo de caixa 2026</div></div>
+          <div style="font-size:11px;color:var(--text-3);margin-bottom:8px;display:flex;gap:14px">
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:var(--green);border-radius:2px;display:inline-block"></span>Entradas</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:var(--red-mid);border-radius:2px;display:inline-block"></span>Saídas</span>
+          </div>
+          <div class="cf-chart">
+            ${DB.financeiro.fluxoCaixa.map(f=>{
+              const maxE = Math.max(...DB.financeiro.fluxoCaixa.map(x=>x.entrada));
+              const eH = Math.round((f.entrada/maxE)*100);
+              const sH = Math.round((f.saida/maxE)*100);
+              return `<div class="cf-col">
+                <div class="cf-bars">
+                  <div class="cf-bar" style="height:${eH}%;background:var(--green);opacity:0.85"></div>
+                  <div class="cf-bar" style="height:${sH}%;background:var(--red-mid);opacity:0.7"></div>
+                </div>
+                <div class="cf-month">${f.mes}</div>
+              </div>`;
+            }).join('')}
+          </div>
+          <div class="divider"></div>
+          <div class="stat-row"><span class="stat-label">Saldo do mês (abr)</span><span class="stat-value text-green">${DB.formatCurrency(DB.financeiro.fluxoCaixa[3].entrada - DB.financeiro.fluxoCaixa[3].saida)}</span></div>
+          <div class="stat-row" style="border:none"><span class="stat-label">Projeção próximo mês</span><span class="stat-value">R$ 36.000</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Comissões por dentista</div><span class="text-muted">Abril 2026</span></div>
+          <table style="font-size:13px">
+            <thead><tr><th>Dentista</th><th>Produção</th><th style="text-align:center">%</th><th>Comissão</th></tr></thead>
+            <tbody>
+              ${DB.financeiro.faturamentoDentista.map(f=>{
+                const d = DB.getDentista(f.dentistaId);
+                return `<tr>
+                  <td><div style="display:flex;align-items:center;gap:6px"><span class="color-dot" style="background:${d.cor}"></span>${d.nome.replace('Dr. ','').replace('Dra. ','')}</div></td>
+                  <td style="font-variant-numeric:tabular-nums">${DB.formatCurrency(f.producao)}</td>
+                  <td style="text-align:center">${d.comissao}%</td>
+                  <td style="font-weight:600;color:var(--green-dark)">${DB.formatCurrency(f.comissao)}</td>
+                </tr>`;
+              }).join('')}
+              <tr style="border-top:2px solid var(--border-2)">
+                <td style="font-weight:600">Total</td>
+                <td style="font-weight:600">${DB.formatCurrency(faturamento)}</td>
+                <td></td>
+                <td style="font-weight:700;color:var(--green-dark)">${DB.formatCurrency(totalComissoes)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="padding:0;border-bottom:1px solid var(--border)">
+          <div class="tabs" style="margin:0;padding:0 20px">
+            <div class="tab${this.aba==='receber'?' active':''}" onclick="FinanceiroPage.aba='receber';FinanceiroPage.refresh()">Contas a Receber (${DB.financeiro.receber.length})</div>
+            <div class="tab${this.aba==='pagar'?' active':''}" onclick="FinanceiroPage.aba='pagar';FinanceiroPage.refresh()">Contas a Pagar (${DB.financeiro.pagar.length})</div>
+          </div>
+        </div>
+        ${this.aba==='receber' ? this.renderReceber() : this.renderPagar()}
+      </div>
+    </div>`;
+  },
+
+  renderReceber() {
+    return `<table><thead><tr><th>Paciente</th><th>Procedimento</th><th>Dentista</th><th>Valor</th><th>Parcelas</th><th>Vencimento</th><th>Forma</th><th>Status</th><th></th></tr></thead><tbody>
+      ${DB.financeiro.receber.map(r=>{
+        const p = DB.getPaciente(r.pacienteId);
+        const d = DB.getDentista(r.dentistaId);
+        return `<tr>
+          <td><div style="display:flex;align-items:center;gap:8px"><div class="patient-av" style="background:${p.corBg};color:${p.corText}">${p.iniciais}</div>${p.nome}</div></td>
+          <td>${r.procedimento}</td>
+          <td><div style="display:flex;align-items:center;gap:5px"><span class="color-dot" style="background:${d.cor}"></span>${d.nome.split(' ')[1]}</div></td>
+          <td style="font-weight:600">${DB.formatCurrency(r.valor-r.desconto)}${r.desconto?`<div class="text-muted">- ${DB.formatCurrency(r.desconto)} desc.</div>`:''}</td>
+          <td>${r.parcelas}x</td>
+          <td>${r.vencimento}</td>
+          <td><span class="badge badge-gray" style="font-size:11px">${r.forma}</span></td>
+          <td>${DB.getStatusBadge(r.status)}</td>
+          <td>
+            <div style="display:flex;gap:4px">
+              ${r.status!=='Pago'?`<button class="btn btn-sm" onclick="FinanceiroPage.marcarPago('receber',${r.id})">Pago</button>`:''}
+              <button class="btn btn-sm btn-ghost" onclick="App.toast('WhatsApp enviado!','success')">WA</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('')}
+    </tbody></table>`;
+  },
+
+  renderPagar() {
+    return `<table><thead><tr><th>Destinatário</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Recorrência</th><th>Status</th><th></th></tr></thead><tbody>
+      ${DB.financeiro.pagar.map(r=>`<tr>
+        <td style="font-weight:500">${r.destinatario}</td>
+        <td><span class="badge badge-gray">${r.categoria}</span></td>
+        <td class="text-muted">${r.categoria}</td>
+        <td style="font-weight:600">${DB.formatCurrency(r.valor)}</td>
+        <td>${r.vencimento}</td>
+        <td class="text-muted">${r.recorrencia}</td>
+        <td>${DB.getStatusBadge(r.status)}</td>
+        <td>
+          ${r.status!=='Pago'?`<button class="btn btn-sm" onclick="FinanceiroPage.marcarPago('pagar',${r.id})">Pago</button>`:''}
+        </td>
+      </tr>`).join('')}
+    </tbody></table>`;
+  },
+
+  marcarPago(tipo, id) {
+    const lista = DB.financeiro[tipo==='receber'?'receber':'pagar'];
+    const item = lista.find(r=>r.id===id);
+    if(item) item.status = 'Pago';
+    App.toast('Lançamento marcado como pago!', 'success');
+    this.refresh();
+  },
+
+  openLancamento(tipo) {
+    App.openModal(tipo==='receber'?'Novo Lançamento a Receber':'Novo Lançamento a Pagar', `
+      ${tipo==='receber'?`
+        <div class="form-row">
+          <div class="form-group"><label>Paciente</label><select class="input">${DB.pacientes.map(p=>`<option>${p.nome}</option>`).join('')}</select></div>
+          <div class="form-group"><label>Dentista</label><select class="input">${DB.dentistas.map(d=>`<option>${d.nome}</option>`).join('')}</select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Procedimento</label><select class="input">${DB.procedimentos.map(p=>`<option>${p}</option>`).join('')}</select></div>
+          <div class="form-group"><label>Forma de pagamento</label><select class="input"><option>Pix</option><option>Dinheiro</option><option>Cartão Débito</option><option>Cartão Crédito</option><option>Parcelado</option><option>Convênio</option></select></div>
+        </div>
+      `:`
+        <div class="form-row">
+          <div class="form-group"><label>Destinatário</label><input class="input" placeholder="Fornecedor ou serviço"></div>
+          <div class="form-group"><label>Categoria</label><select class="input"><option>Aluguel</option><option>Material</option><option>Salário</option><option>Marketing</option><option>Equipamentos</option><option>Outros</option></select></div>
+        </div>
+      `}
+      <div class="form-row">
+        <div class="form-group"><label>Valor (R$)</label><input class="input" type="number" placeholder="0,00"></div>
+        <div class="form-group"><label>Vencimento</label><input class="input" type="date" value="2026-04-08"></div>
+      </div>
+      <div class="modal-footer" style="padding:14px 0 0;border:none">
+        <button class="btn" onclick="App.closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="App.closeModal();App.toast('Lançamento registrado!','success')">Salvar</button>
+      </div>
+    `);
+  },
+
+  refresh() { document.getElementById('page-financeiro').innerHTML = this.render(); }
+};
+
+
+const ConfiguracoesPage = {
+  aba: 'clinica',
+  usuarios: [
+    { id:1, nome:'Dr. Carlos Mendes', email:'carlos@clinicasorrir.com.br', perfil:'Dentista', ativo:true, bloqueios:[] },
+    { id:2, nome:'Dra. Ana Oliveira', email:'ana@clinicasorrir.com.br', perfil:'Dentista', ativo:true, bloqueios:[] },
+    { id:3, nome:'Dra. Paula Santos', email:'paula@clinicasorrir.com.br', perfil:'Dentista', ativo:true, bloqueios:[] },
+    { id:4, nome:'Juliana Recepção', email:'recepcao@clinicasorrir.com.br', perfil:'Recepcionista', ativo:true, bloqueios:['financeiro'] },
+    { id:5, nome:'Admin Gestor', email:'gestor@clinicasorrir.com.br', perfil:'Gestor', ativo:true, bloqueios:[] },
+    { id:6, nome:'Marcos Financeiro', email:'financeiro@clinicasorrir.com.br', perfil:'Financeiro', ativo:true, bloqueios:['ia','assinatura'] },
+  ],
+  modulos: [
+    { id:'dashboard', label:'Dashboard', icon:'⬜' },
+    { id:'agenda', label:'Agenda', icon:'📅' },
+    { id:'ia', label:'IA Atendimento', icon:'💬' },
+    { id:'pacientes', label:'Pacientes / CRM', icon:'👥' },
+    { id:'prontuario', label:'Prontuário', icon:'📋' },
+    { id:'assinatura', label:'Assinatura Digital', icon:'✍️' },
+    { id:'financeiro', label:'Financeiro', icon:'💰' },
+    { id:'configuracoes', label:'Configurações', icon:'⚙️' },
+  ],
+
+  render() {
+    const tabs=[['clinica','Clínica'],['dentistas','Dentistas'],['usuarios','Usuários & Acessos'],['gestor','Gestor — Permissões'],['whatsapp','WhatsApp / IA'],['procedimentos','Procedimentos'],['planos','Planos']];
+    return `
+    <div class="topbar">
+      <div class="topbar-left"><div class="topbar-title">Configurações</div></div>
+      <div class="topbar-right"><button class="btn btn-primary" onclick="App.toast('Configurações salvas!','success')">Salvar alterações</button></div>
+    </div>
+    <div style="display:flex;flex:1;overflow:hidden">
+      <div style="width:220px;min-width:220px;background:var(--white);border-right:1px solid var(--border);padding:12px 8px;display:flex;flex-direction:column;gap:2px;overflow-y:auto">
+        ${tabs.map(([id,label])=>`<div onclick="ConfiguracoesPage.aba='${id}';ConfiguracoesPage.refresh()" style="padding:9px 12px;border-radius:var(--radius-sm);cursor:pointer;font-size:13.5px;font-weight:${this.aba===id?'500':'400'};color:${this.aba===id?'var(--green-dark)':'var(--text-2)'};background:${this.aba===id?'var(--green-light)':'transparent'};border-left:3px solid ${this.aba===id?'var(--green)':'transparent'};transition:all .15s">${label}</div>`).join('')}
+      </div>
+      <div class="page-body" style="flex:1;overflow-y:auto">
+        ${this['renderAba_'+this.aba]()}
+      </div>
+    </div>`;
+  },
+
+  renderAba_clinica(){return`<div style="max-width:620px">
+    <div class="card mb-16">
+      <div class="card-header"><div class="card-title">Dados da clínica</div></div>
+      <div class="form-row"><div class="form-group"><label>Nome da clínica</label><input class="input" value="Clínica Sorrir"></div><div class="form-group"><label>CNPJ</label><input class="input" value="12.345.678/0001-90"></div></div>
+      <div class="form-row"><div class="form-group"><label>Telefone</label><input class="input" value="(11) 3456-7890"></div><div class="form-group"><label>E-mail</label><input class="input" value="contato@clinicasorrir.com.br"></div></div>
+      <div class="form-group" style="margin-bottom:14px"><label>Endereço completo</label><input class="input" value="Av. Paulista, 1234 — Sala 56 — Bela Vista — São Paulo/SP"></div>
+      <div class="form-row"><div class="form-group"><label>Horário de abertura</label><input class="input" type="time" value="07:00"></div><div class="form-group"><label>Horário de fechamento</label><input class="input" type="time" value="19:00"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Personalização</div></div>
+      <div class="form-group" style="margin-bottom:14px"><label>Nome da assistente virtual IA</label><input class="input" value="Joana da Clínica Sorrir"></div>
+      <div class="form-row"><div class="form-group"><label>Tom de comunicação</label><select class="input"><option>Amigável</option><option>Formal</option><option>Descontraído</option></select></div><div class="form-group"><label>Idioma padrão</label><select class="input"><option>Português (Brasil)</option></select></div></div>
+    </div>
+  </div>`;},
+
+  renderAba_dentistas(){return`<div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+      <button class="btn btn-primary" onclick="ConfiguracoesPage.openNovoDentista()">+ Novo dentista</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${DB.dentistas.map(d=>`<div class="card card-sm">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="width:44px;height:44px;border-radius:50%;background:${d.bgCor};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:${d.cor}">${d.nome.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:14px">${d.nome}</div>
+            <div class="text-muted">${d.especialidade}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px">
+            <div><div class="text-muted" style="font-size:11px">Comissão</div><div style="font-weight:600;color:var(--green-dark)">${d.comissao}%</div></div>
+            <div style="width:22px;height:22px;border-radius:50%;background:${d.cor}"></div>
+            <button class="btn btn-sm" onclick="App.toast('Editando...')">Editar</button>
+          </div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;},
+
+  renderAba_usuarios(){return`<div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div>
+        <div style="font-weight:600;margin-bottom:3px">Logins e perfis de acesso</div>
+        <div class="text-muted">Cada dentista e colaborador tem login individual</div>
+      </div>
+      <button class="btn btn-primary" onclick="ConfiguracoesPage.openNovoUsuario()">+ Novo usuário</button>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table>
+        <thead><tr><th>Nome</th><th>E-mail / Login</th><th>Perfil</th><th>Módulos bloqueados</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          ${this.usuarios.map(u=>`<tr>
+            <td><div style="display:flex;align-items:center;gap:8px">
+              <div class="patient-av" style="background:var(--green-light);color:var(--green-dark)">${u.nome.split(' ').map(n=>n[0]).slice(0,2).join('')}</div>
+              <div style="font-weight:500">${u.nome}</div>
+            </div></td>
+            <td style="font-family:var(--mono);font-size:12px">${u.email}</td>
+            <td>${this.renderPerfilBadge(u.perfil)}</td>
+            <td>${u.bloqueios.length?u.bloqueios.map(b=>`<span class="badge badge-red" style="margin-right:3px">${b}</span>`).join(''):'<span class="text-muted">Nenhum</span>'}</td>
+            <td>${u.ativo?'<span class="badge badge-green">Ativo</span>':'<span class="badge badge-gray">Inativo</span>'}</td>
+            <td>
+              <div style="display:flex;gap:4px">
+                <button class="btn btn-sm" onclick="ConfiguracoesPage.editarUsuario(${u.id})">Editar</button>
+                <button class="btn btn-sm btn-danger" onclick="App.toast('Senha resetada e enviada por email!','success')">Reset senha</button>
+              </div>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;},
+
+  renderAba_gestor(){return`<div>
+    <div style="padding:12px 16px;background:var(--amber-light);border-radius:var(--radius);margin-bottom:20px;display:flex;gap:10px;align-items:flex-start">
+      <svg viewBox="0 0 24 24" width="18" height="18" style="color:var(--amber);flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div style="font-size:13px;color:var(--amber)"><strong>Área restrita ao Gestor / Admin.</strong> Aqui você define quais módulos cada perfil pode acessar. Recepcionistas e dentistas só verão os módulos habilitados abaixo.</div>
+    </div>
+
+    ${['Recepcionista','Dentista','Financeiro'].map(perfil=>{
+      const cor={Recepcionista:'blue',Dentista:'green',Financeiro:'amber'}[perfil];
+      return `<div class="card mb-16">
+        <div class="card-header">
+          <div style="display:flex;align-items:center;gap:8px"><div class="card-title">Permissões — ${perfil}</div>${this.renderPerfilBadge(perfil)}</div>
+          <button class="btn btn-sm" onclick="App.toast('Permissões de ${perfil} salvas!','success')">Salvar</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          ${this.modulos.map(m=>{
+            const bloqueadoPor={Recepcionista:['financeiro','configuracoes'],Dentista:['configuracoes'],Financeiro:['ia','assinatura','prontuario']}[perfil]||[];
+            const bloqueado=bloqueadoPor.includes(m.id);
+            return `<label style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;background:${bloqueado?'var(--gray-50)':'var(--white)'}">
+              <input type="checkbox" ${bloqueado?'':'checked'} style="accent-color:var(--green)" onclick="App.toast('Permissão atualizada!')">
+              <span style="font-size:13px;${bloqueado?'color:var(--text-3)':''}">${m.label}</span>
+            </label>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }).join('')}
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Configurações adicionais de acesso</div></div>
+      ${[['Recepcionista pode editar dados financeiros de agendamentos','false'],['Dentista pode ver agenda de outros dentistas','true'],['Financeiro pode exportar relatórios completos','true'],['Recepcionista pode cancelar agendamentos','true'],['Dentista pode excluir prontuários','false']].map(([label,val])=>`<div class="stat-row"><span class="stat-label" style="font-size:13px">${label}</span><input type="checkbox" ${val==='true'?'checked':''} style="accent-color:var(--green)" onclick="App.toast('Configuração atualizada!')"></div>`).join('')}
+    </div>
+  </div>`;},
+
+  renderAba_whatsapp(){return`<div style="max-width:620px">
+    <div class="card mb-16">
+      <div class="card-header"><div class="card-title">WhatsApp Business API</div><span class="badge badge-green">Conectado</span></div>
+      <div class="form-group" style="margin-bottom:14px"><label>Número do WhatsApp Business</label><input class="input" value="+55 11 93456-7890"></div>
+      <div class="form-group" style="margin-bottom:14px"><label>Token de acesso (Meta)</label><input class="input" type="password" value="••••••••••••••••"></div>
+      <div style="padding:10px;background:var(--green-light);border-radius:var(--radius-sm);font-size:13px;color:var(--green-dark)">✓ API conectada · Última mensagem há 5 minutos</div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Automações ativas</div></div>
+      ${[['Confirmação de agendamento','2h após agendamento','Ativo'],['Lembrete D-1','18h do dia anterior','Ativo'],['Follow-up pós-falta','Mesmo dia','Ativo'],['Pesquisa NPS','1h após atendimento','Pausado'],['Retorno semestral','A cada 6 meses','Ativo']].map(([n,d,s])=>`<div class="stat-row"><div><div style="font-weight:500;font-size:13px">${n}</div><div class="text-muted">${d}</div></div><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" ${s==='Ativo'?'checked':''} style="accent-color:var(--green)"><span class="badge badge-${s==='Ativo'?'green':'gray'}">${s}</span></label></div>`).join('')}
+    </div>
+  </div>`;},
+
+  renderAba_procedimentos(){return`<div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:16px"><button class="btn btn-primary" onclick="App.toast('Formulário de novo procedimento')">+ Novo procedimento</button></div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table><thead><tr><th>Procedimento</th><th>Duração padrão</th><th>Retorno automático</th><th>Valor base</th><th>Ativo</th></tr></thead><tbody>
+        ${[['Limpeza / Profilaxia','60 min','6 meses','R$ 280'],['Tratamento de Canal','90 min','30 dias','R$ 1.200'],['Implante','120 min','3 meses','R$ 4.800'],['Clareamento','60 min','12 meses','R$ 900'],['Aparelho Ortodôntico','45 min','30 dias','R$ 350/mês'],['Restauração','45 min','6 meses','R$ 380'],['Cirurgia Oral','120 min','7 dias','R$ 2.200'],['Avaliação','30 min','—','Gratuita'],['Consulta de Retorno','30 min','—','R$ 150']].map(([p,dur,ret,val])=>`<tr><td style="font-weight:500">${p}</td><td>${dur}</td><td>${ret==='—'?ret:`<span class="badge badge-blue">${ret}</span>`}</td><td style="font-variant-numeric:tabular-nums">${val}</td><td><input type="checkbox" checked style="accent-color:var(--green)"></td></tr>`).join('')}
+      </tbody></table>
+    </div>
+  </div>`;},
+
+  renderAba_planos(){return`<div>
+    <div class="grid grid-3 mb-16 gap-16">
+      ${[{n:'Starter',p:'R$ 197',a:false,r:['1 dentista','500 pacientes','1.000 WA/mês','100 docs/mês','5 GB','Suporte e-mail']},{n:'Pro',p:'R$ 497',a:true,r:['10 dentistas','5.000 pacientes','10.000 WA/mês','Docs ilimitados','50 GB','Chat + e-mail']},{n:'Enterprise',p:'R$ 1.497+',a:false,r:['Ilimitado','Ilimitado','Ilimitado','Blockchain docs','500 GB','Gerente dedicado']}].map(pl=>`
+        <div class="card" style="${pl.a?'border:2px solid var(--green)':''}">
+          <div style="display:flex;justify-content:space-between;margin-bottom:12px"><div style="font-size:18px;font-weight:700">${pl.n}</div>${pl.a?'<span class="badge badge-green">Plano atual</span>':''}</div>
+          <div style="font-size:28px;font-weight:700;color:var(--green-dark);margin-bottom:16px">${pl.p}<span style="font-size:13px;color:var(--text-3)">/mês</span></div>
+          ${pl.r.map(r=>`<div style="font-size:13px;display:flex;gap:6px;margin-bottom:5px"><span style="color:var(--green);font-weight:700">✓</span>${r}</div>`).join('')}
+          <button class="btn${pl.a?' btn-primary':''}" style="width:100%;margin-top:16px" onclick="App.toast('${pl.a?'Você já está neste plano!':'Upgrade para '+pl.n+'...'}')">${pl.a?'Plano ativo':'Fazer upgrade'}</button>
+        </div>
+      `).join('')}
+    </div>
+    <div class="card"><div class="card-header"><div class="card-title">Faturamento atual</div></div>
+      <div class="stat-row"><span class="stat-label">Próximo vencimento</span><span class="stat-value">05/05/2026</span></div>
+      <div class="stat-row"><span class="stat-label">Valor</span><span class="stat-value">R$ 497,00</span></div>
+      <div class="stat-row" style="border:none"><span class="stat-label">Forma de pagamento</span><span class="stat-value">Cartão •••• 4521</span></div>
+    </div>
+  </div>`;},
+
+  renderPerfilBadge(perfil){
+    const map={Admin:'green',Gestor:'blue',Dentista:'green',Recepcionista:'amber',Financeiro:'coral'};
+    return `<span class="badge badge-${map[perfil]||'gray'}">${perfil}</span>`;
+  },
+
+  openNovoDentista(){
+    App.openModal('Novo Dentista',`
+      <div class="form-row"><div class="form-group"><label>Nome completo</label><input class="input" placeholder="Dr(a). Nome Sobrenome"></div><div class="form-group"><label>CRO</label><input class="input" placeholder="SP-123456"></div></div>
+      <div class="form-row"><div class="form-group"><label>Especialidade</label><select class="input"><option>Clínico Geral</option><option>Ortodontia</option><option>Implantodontia</option><option>Endodontia</option><option>Periodontia</option><option>Cirurgia Oral</option><option>Prótese Dentária</option></select></div><div class="form-group"><label>Comissão (%)</label><input class="input" type="number" value="40" min="0" max="100"></div></div>
+      <div class="form-row"><div class="form-group"><label>E-mail (login)</label><input class="input" type="email" placeholder="dentista@clinicasorrir.com.br"></div><div class="form-group"><label>Cor na agenda</label><input class="input" type="color" value="#1D9E75" style="height:40px;padding:4px"></div></div>
+      <div style="padding:10px;background:var(--blue-light);border-radius:var(--radius-sm);font-size:13px;color:var(--blue);margin-bottom:14px">Um e-mail com as credenciais de acesso será enviado ao dentista automaticamente.</div>
+      <div style="display:flex;justify-content:flex-end;gap:8px">
+        <button class="btn" onclick="App.closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="App.closeModal();App.toast('Dentista cadastrado e credenciais enviadas!','success')">Cadastrar</button>
+      </div>
+    `);
+  },
+
+  openNovoUsuario(){
+    App.openModal('Novo Usuário',`
+      <div class="form-row"><div class="form-group"><label>Nome completo</label><input class="input" placeholder="Nome do colaborador"></div><div class="form-group"><label>E-mail (login)</label><input class="input" type="email" placeholder="email@clinicasorrir.com.br"></div></div>
+      <div class="form-row"><div class="form-group"><label>Perfil de acesso</label><select class="input"><option>Recepcionista</option><option>Dentista</option><option>Financeiro</option><option>Gestor</option><option>Admin</option></select></div><div class="form-group"><label>Dentista vinculado</label><select class="input"><option>— Nenhum —</option>${DB.dentistas.map(d=>`<option>${d.nome}</option>`).join('')}</select></div></div>
+      <div class="section-label" style="margin-bottom:8px;margin-top:8px">Módulos disponíveis</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        ${this.modulos.map(m=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--green)"> ${m.label}</label>`).join('')}
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px">
+        <button class="btn" onclick="App.closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="App.closeModal();App.toast('Usuário criado! Senha enviada por e-mail.','success')">Criar usuário</button>
+      </div>
+    `);
+  },
+
+  editarUsuario(id){
+    const u=this.usuarios.find(x=>x.id===id);
+    App.openModal(`Editar — ${u.nome}`,`
+      <div class="form-row"><div class="form-group"><label>Nome</label><input class="input" value="${u.nome}"></div><div class="form-group"><label>E-mail</label><input class="input" value="${u.email}"></div></div>
+      <div class="form-group" style="margin-bottom:14px"><label>Perfil</label><select class="input"><option${u.perfil==='Admin'?' selected':''}>Admin</option><option${u.perfil==='Gestor'?' selected':''}>Gestor</option><option${u.perfil==='Dentista'?' selected':''}>Dentista</option><option${u.perfil==='Recepcionista'?' selected':''}>Recepcionista</option><option${u.perfil==='Financeiro'?' selected':''}>Financeiro</option></select></div>
+      <div class="section-label" style="margin-bottom:8px">Módulos que este usuário pode acessar</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        ${this.modulos.map(m=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" ${!u.bloqueios.includes(m.id)?'checked':''} style="accent-color:var(--green)"> ${m.label}</label>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;justify-content:space-between">
+        <button class="btn btn-danger" onclick="App.closeModal();App.toast('Usuário desativado')">Desativar usuário</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="App.closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="App.closeModal();App.toast('Usuário atualizado!','success')">Salvar</button>
+        </div>
+      </div>
+    `);
+  },
+
+  refresh(){document.getElementById('page-configuracoes').innerHTML=this.render();}
+};
+
+
+
+// ============================================================
+// OdontoCloud — App Controller
+// ============================================================
+const PageRenderers = {
+  dashboard: DashboardPage,
+  agenda: AgendaPage,
+  ia: IAPage,
+  pacientes: PacientesPage,
+  prontuario: ProntuarioPage,
+  assinatura: AssinaturaPage,
+  financeiro: FinanceiroPage,
+  configuracoes: ConfiguracoesPage,
+};
+
+const App = {
+  currentPage: 'dashboard',
+
+  init() {
+    // Pre-render all pages
+    Object.keys(PageRenderers).forEach(key => {
+      const el = document.getElementById(`page-${key}`);
+      if (el) el.innerHTML = PageRenderers[key].render();
+    });
+    this.navigate('dashboard');
+  },
+
+  login() {
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('main-app').classList.remove('hidden');
+    this.init();
+  },
+
+  logout() {
+    document.getElementById('main-app').classList.add('hidden');
+    document.getElementById('login-screen').classList.remove('hidden');
+  },
+
+  navigate(page) {
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+    // Show target
+    const el = document.getElementById(`page-${page}`);
+    if (el) {
+      // Re-render page for freshness
+      if (PageRenderers[page]) {
+        el.innerHTML = PageRenderers[page].render();
+      }
+      el.classList.add('active');
+    }
+
+    // Highlight nav
+    const navItem = document.querySelector(`.nav-item[data-page="${page}"]`);
+    if (navItem) navItem.classList.add('active');
+
+    this.currentPage = page;
+  },
+
+  openModal(title, body, extraClass = '') {
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-body').innerHTML = body;
+    const modal = document.querySelector('.modal');
+    modal.className = `modal ${extraClass}`;
+    document.getElementById('modal-overlay').classList.remove('hidden');
+  },
+
+  closeModal() {
+    document.getElementById('modal-overlay').classList.add('hidden');
+  },
+
+  toast(msg, type = '') {
+    const container = document.getElementById('toast-container');
+    const icons = {
+      success: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`,
+      error: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+      '': `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+    };
+    const toast = document.createElement('div');
+    toast.className = `toast${type ? ' toast-'+type : ''}`;
+    toast.innerHTML = `${icons[type] || icons['']}${msg}`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+  }
+};
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') App.closeModal();
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/OdontoCloud.Api/OdontoCloud.Api.csproj" />
+    <Project Path="src/OdontoCloud.Application/OdontoCloud.Application.csproj" />
+    <Project Path="src/OdontoCloud.Domain/OdontoCloud.Domain.csproj" />
+    <Project Path="src/OdontoCloud.Infrastructure/OdontoCloud.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/OdontoCloud.Domain.Tests/OdontoCloud.Domain.Tests.csproj" />
+    <Project Path="tests/OdontoCloud.Infrastructure.Tests/OdontoCloud.Infrastructure.Tests.csproj" />
+    <Project Path="tests/OdontoCloud.Api.IntegrationTests/OdontoCloud.Api.IntegrationTests.csproj" />
+  </Folder>
+</Solution>

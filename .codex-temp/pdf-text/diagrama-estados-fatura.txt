@@ -1,0 +1,34 @@
+                                     Fatura Gerada
+
+
+                                       Pendente
+
+
+                  Pagamento Parcial
+
+
+                       Parcial                               Venceu o prazo
+
+
+                                                                       Erro ou Desistência (Antes
+Pagamento Total                  Venceu o prazo
+                                                                                de pagar)
+
+
+          Quitação do Restante                    Atrasado
+
+
+                                                       Inadimplência assumida
+                            Pagamento em Atraso
+                                                               (Perda)
+
+
+                   Pago                                                Cancelado
+
+
+Devolução do Dinheiro ao
+        Paciente
+
+
+       Estornado
+

@@ -1,0 +1,126 @@
+# OdontoCloud - Contexto Operacional
+
+## Produto
+
+OdontoCloud e um ERP/SaaS multi-tenant para clinicas odontologicas. O objetivo do produto e centralizar operacao clinica, agenda, CRM, financeiro, prontuario eletronico, odontograma, IA via WhatsApp e assinatura digital.
+
+O `ClinicaId` e o limite de tenant devem vir do backend, extraidos do JWT. O frontend nao deve enviar `ClinicaId` em payloads operacionais.
+
+## Stack Atual
+
+- Backend: .NET 8, ASP.NET Core REST API, EF Core Code-First, PostgreSQL, MediatR, FluentValidation, JWT.
+- Frontend: React, Vite, Tailwind CSS, Axios, React Router, React Hook Form.
+- Banco local: PostgreSQL via `docker-compose.yml`.
+- Solucao: `OdontoCloud.slnx`.
+
+## Estado Atual do Codigo
+
+- Auth esta funcional com JWT e persistencia no `localStorage`.
+- Multi-tenancy usa `TenantEntityBase`, `TenantService` e query filters no `OdontoCloudDbContext`.
+- Backend tem modulos de Pacientes, Agenda, Prontuario, PlanoTratamento, Financeiro, ContasPagar e Dentistas.
+- Frontend tem telas reais de Login, Pacientes/CRM e Agenda.
+- Rotas de Dashboard, IA Atendimento, Prontuario, Assinatura Digital, Financeiro e Configuracoes ainda estao em placeholder ou parcialmente sem UI real.
+- Testes atuais de dominio passam com `dotnet test OdontoCloud.slnx`.
+
+## Documentacao Externa Lida
+
+Arquivo principal:
+
+- `D:\OdontoCloud\OdontoCloud_Documentacao_Completa.docx`
+- `C:\Users\pmgam\Desktop\coisas-projeto-marcos\OdontoCloud_Documentacao_Completa.docx`
+
+Usar a copia local em `D:\OdontoCloud` como referencia primaria quando estiver trabalhando no Cursor.
+
+Arquivos de apoio:
+
+- `Diagrama de caso de uso.pdf`
+- `Diagramas ERP e UML.pdf`
+- `diagrama-maquina-estados1.pdf`
+- `diagrama-estados-fatura.pdf`
+- `diagrama-estados-itemplanotratamento.pdf`
+- `diagrama-contasapagar.pdf`
+- `diagrama-finalizacao-financas.pdf`
+- `diagrama-sequencia-anamnese.pdf`
+- `diagrama-sequencia-fatura.pdf`
+- `diagrama-sequencia-ia.pdf`
+- `diagrama-sequencia-recepcionista.pdf`
+- `Dente_permanente.svg`
+- `denticao_decidua.svg`
+
+## Requisitos de Produto Consolidados
+
+### Dashboard
+
+- Tela inicial com KPIs operacionais e financeiros.
+- Consultas do dia, faturamento por dentista, leads da IA, procedimentos do mes e metricas de WhatsApp.
+- Filtros por periodo, dentista e clinica nos planos aplicaveis.
+
+### Agenda
+
+- Visualizacoes de dia, semana e mes.
+- Dentista tem cor propria persistente para agenda, legenda, relatorios e WhatsApp.
+- Status previstos: Agendado, Confirmado, Pendente, Remarcado, Falta, Cancelado, Atendido.
+- Cancelamento e mudanca de status e preserva historico.
+- Exclusao real e apenas para corrigir erro operacional.
+- Configuracao futura por dentista: dias de atendimento, horario inicial/final, slot padrao, almoco, bloqueios pontuais e limite diario.
+
+### IA Atendimento
+
+- Atendimento via WhatsApp Business API.
+- Qualifica urgencia, identifica paciente novo/retorno, sugere slots, agenda e registra historico.
+- Leads tem status, urgencia, procedimento de interesse, follow-up e conversa.
+
+### Financeiro
+
+- Contas a Receber, Contas a Pagar, fluxo de caixa, DRE, inadimplencia e relatorios por dentista/procedimento/convenio.
+- Comissao automatica por dentista pode ser percentual fixo, por categoria, valor fixo por procedimento ou mista.
+- Baixa de ContaReceber deve gerar ContaPagar de comissao na mesma transacao quando aplicavel.
+- Faturamento misto entre dentistas deve continuar bloqueado.
+
+### CRM de Pacientes
+
+- Cadastro amplo: dados pessoais, contato, endereco, convenio e origem.
+- Historico unificado: agendamentos, atendimentos, cobrancas, documentos, conversas IA, anotacoes, exames.
+- Retornos automaticos por procedimento.
+- Campanhas WhatsApp segmentadas.
+
+### Prontuario
+
+- Abas: dados do paciente, anamnese, odontograma, historico, exames, plano de tratamento.
+- Anamnese estruturada e versionada.
+- Odontograma interativo com dentes permanentes e deciduos.
+- Estados documentados: Saudavel, Tratado, Carie, Extracao indicada, Ausente, Implante, Protese.
+- Plano de tratamento deve calcular total, pago e a receber.
+
+### Assinatura Digital
+
+- Documentos gerados automaticamente e enviados por WhatsApp.
+- Assinatura mobile sem login do paciente.
+- Registro com timestamp, IP, hash SHA-256, CPF e arquivo no prontuario.
+
+### Perfis
+
+- Admin: todos os modulos.
+- Gestor: Dashboard, Agenda, Financeiro, CRM, Relatorios; nao edita prontuario.
+- Dentista: agenda propria, prontuario e assinatura; ve apenas pacientes proprios.
+- Recepcionista: Agenda, Pacientes, IA, Assinatura; sem financeiro detalhado.
+- Financeiro: Financeiro e Relatorios; sem acesso clinico.
+
+## Diretrizes de Implementacao
+
+- Seguir padroes existentes do repo.
+- Evitar refactors amplos durante tarefas de modulo.
+- Backend deve manter isolamento multi-tenant por query filters e `TenantService`.
+- Frontend deve delegar filtros pesados para API.
+- Estado de UI deve refletir sucesso real da API.
+- Erros 400 devem aparecer no formulario sem fechar modal.
+- Usar Tailwind e componentes locais antes de criar CSS novo.
+- Mudar contratos existentes somente quando necessario e documentar.
+
+## Riscos Tecnicos Atuais
+
+- Login atual compara senha com texto puro.
+- JWT secret esta em `appsettings.json`.
+- Autorizacao por perfil/permissao ainda e limitada.
+- Se `ClinicaId` faltar no token, `TenantService` retorna `Guid.Empty`; isso precisa de tratamento mais robusto.
+- Documentacao de produto e maior que a implementacao atual, entao cada agente deve limitar escopo.

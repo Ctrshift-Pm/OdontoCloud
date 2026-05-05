@@ -1,0 +1,63 @@
+                                                 Front-end (React)                              OdontoCloud API                                 PostgreSQL
+Dentista   Recepcionista
+
+                                                   1. GERAÇÃO DA FATURA (Consultório)
+
+           Aprova Plano de Tratamento
+   1
+
+                                                                POST /api/financeiro/faturar-plano
+                                                           2
+
+                                                                                           Soma itens do plano.
+                                                                                       Gera as parcelas (1x, 3x, etc).
+
+                                                                                                           INSERT ContaReceber (Status = Pendente)
+                                                                                                       3
+
+                                                                                                                           Sucesso
+                                                                                                                                                     4
+
+                                                                   201 Created (Contas Geradas)
+                                                                                                       5
+
+                                                                     2. BAIXA DA CONTA (Recepção)
+
+                         Paciente vai pagar na saída
+                  6
+
+                                                           GET /api/financeiro/receber?pacienteId=...
+                                                           7
+
+                                                                                                                 SELECT (Filtro Multi-tenant)
+                                                                                                       8
+
+                                                                                                                  Retorna faturas pendentes
+                                                                                                                                                     9
+
+                                                                           Exibe na tela
+                                                                                                      10
+
+                      Informa "R$ 500 no Pix" e confirma
+                 11
+
+                                                           PATCH /api/financeiro/receber/{id}/pagar
+                                                           12
+
+                                                                                       Registra Forma de Pagamento,
+                                                                                   DataPagamento e UsuarioId (Auditoria)
+
+                                                                                                             UPDATE ContaReceber (Status = Pago)
+                                                                                                      13
+
+                                                                                                                           Sucesso
+                                                                                                                                                     14
+
+                                                                     200 OK (Recibo Liberado)
+                                                                                                      15
+
+
+
+                                                 Front-end (React)                              OdontoCloud API                                 PostgreSQL
+Dentista   Recepcionista
+

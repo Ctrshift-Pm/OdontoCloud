@@ -1,0 +1,32 @@
+                                                                                                                         Criação da Consulta
+
+
+                                                                                                                                Agendado
+
+
+                                                                                              Envio de WhatsApp (T+1h)
+
+
+                                                                                                      Pendente
+
+
+                          Paciente responde "Sim"
+
+
+                                Confirmado                                                                                                                     Cancelamento Manual
+
+
+                                                                                                                                               Reinicia ciclo de
+                          Paciente não compareceu                              Paciente pede outro horário   Paciente responde "Não"
+                                                                                                                                                 confirmação
+
+                                                                 Cancelamento de última
+Consulta Realizada                    Falta
+                                                                          hora
+
+                   Follow-up de               Follow-up sem sucesso /
+               reagendamento aceito                 Desistência
+
+
+    Atendido                                                                              Remarcado                 Cancelado
+

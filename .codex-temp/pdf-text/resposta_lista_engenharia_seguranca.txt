@@ -1,0 +1,336 @@
+                                                                 Lista de Exercícios — Engenharia de Segurança
+                                                                                            Me. Sergio Souza Novak
+                                                                           Engenharia da Qualidade e Confiabilidade
+
+
+
+
+                                        Engenharia de Segurança
+ Instruções: Justifique suas respostas de forma clara e objetiva. Para questões discursivas,
+                   escreva na caixa de resposta abaixo de cada enunciado.
+
+
+
+  Conceitos de Referência
+       • Safety (Segurança): Ausência de falhas catastróficas que causem morte, lesão ou dano
+         ambiental.
+
+       • Hazard (Perigo): Estado ou condição do sistema com potencial para causar um acidente.
+
+       • Risco: Medida da probabilidade e da gravidade de um perigo causar um acidente.
+
+       • ALARP: As Low As Reasonably Practical (O mais baixo que for razoavelmente praticá-
+         vel).
+
+       • FTA (Fault Tree Analysis): Técnica top-down para identificar causas raízes de falhas
+         críticas.
+
+
+  1. Relembre o caso real do acidente aéreo no aeroporto de Varsóvia em 1993, envolvendo
+um Airbus e seu sistema de frenagem.
+
+   a) O inquérito do acidente revelou a existência de bugs (erros de codificação) no software?
+      Explique a causa real da falha.
+
+  b) Por que esse caso é utilizado para ilustrar que a "boa engenharia"de software, por si
+     só, não garante a segurança do sistema?
+
+ a) Não foi um “bug de codificação” no sentido clássico. O relatório do acidente atribui a causa principal às decisões da tripulação em condição
+ de windshear, chuva forte e tailwind, somadas a características de projeto da lógica de frenagem do A320. O sistema só liberava spoilers e
+ reversores quando certas condições de “aircraft on ground” fossem reconhecidas; em Varsóvia, o toque ocorreu primeiro em um trem de pouso, o
+ outro tocou 9 segundos depois, e a água na pista ainda reduziu a eficácia da frenagem. A falha real foi uma combinação de condições operacionais,
+ lógica de controle e limitações de projeto/interface.
+
+ b) Esse caso mostra que software “bem feito” não basta: o software pode estar funcionando exatamente como especificado e, ainda assim, o
+ sistema permanecer inseguro porque as suposições de projeto e as restrições de segurança do sistema são inadequadas. Em outras palavras,
+ segurança depende do sistema completo, não só da qualidade do código.
+
+
+
+
+   2. Frequentemente, os conceitos de Confiabilidade e Segurança (Safety) são confun-
+didos.
+
+   a) Explique por que um sistema pode ser 100% confiável (funcionar conforme a especifi-
+      cação) e ainda assim ser inseguro.
+
+                                                                        1
+                                                               Lista de Exercícios — Engenharia de Segurança
+                                                                                          Me. Sergio Souza Novak
+                                                                         Engenharia da Qualidade e Confiabilidade
+
+
+
+  b) Segundo a literatura estudada (Lutz, 1993), qual é a causa principal dos erros de
+     software relacionados à segurança que persistem até os testes finais?
+
+a) Um sistema pode ser 100% confiável e ainda inseguro porque confiabilidade significa “fazer corretamente o que foi especificado”, enquanto
+segurança significa “não levar a perdas inaceitáveis”. Logo, um sistema pode executar de forma perfeita uma lógica, um comando ou uma
+especificação que, no nível do sistema, é perigosa.
+
+
+b) Segundo Lutz, a principal causa dos erros de software ligados à segurança que chegam até os testes finais são erros de
+requisitos/especificação, em especial requisitos de interface inadequados e discrepâncias nos requisitos. Eles persistem porque muitos só
+aparecem claramente na integração e nos testes de sistema, quando interações e lacunas de comunicação ficam visíveis.
+
+
+
+
+   3. Na engenharia de requisitos de segurança, utilizamos frequentemente os chamados
+requisitos do tipo "Não Deve"(Shall Not).
+
+  a) O que diferencia um requisito "Não Deve"de um requisito funcional comum?
+
+  b) Dê um exemplo de requisito "Não Deve"para um sistema de controle de automóveis
+     autônomos.
+
+  c) Por que esses requisitos não podem ser implementados diretamente e precisam ser
+     decompostos?
+
+a) Um requisito do tipo “Não Deve” é uma restrição de segurança: ele define
+comportamentos, estados ou condições proibidas. Já um requisito funcional comum
+descreve o que o sistema deve fazer para prestar um serviço.
+
+b) Exemplo: “O veículo não deve iniciar ultrapassagem quando os sensores indicarem
+risco de colisão frontal dentro da distância mínima de segurança.”
+
+c) Esses requisitos não podem ser implementados diretamente porque são muito abstratos.
+Primeiro, é preciso decompô-los em regras operacionais concretas, como limites,
+intertravamentos, checagens de sensores, monitoramento, fallback e condições de bloqueio.
+
+
+   4. Sobre a Identificação de Perigos, analise o caso da Bomba de Insulina estudado em
+aula.
+
+  a) Cite dois perigos classificados como Falha de Serviço.
+
+  b) Cite um perigo classificado como Biológico e um como Elétrico.
+
+  c) Qual a importância legal de se manter um Registro de Perigos (Hazard Registry)
+     durante o desenvolvimento?
+
+
+
+
+                                                                      2
+                                                Lista de Exercícios — Engenharia de Segurança
+                                                                           Me. Sergio Souza Novak
+                                                          Engenharia da Qualidade e Confiabilidade
+
+
+
+
+a) Dois perigos de Falha de Serviço: sobredosagem de insulina e subdosagem de insulina.
+
+b) Um perigo Biológico: infecção causada pela introdução do dispositivo. Um perigo Elétrico:
+falha de energia por bateria esgotada.
+
+c) O Registro de Perigos (Hazard Registry / Hazard Log) é importante legalmente porque
+mantém um histórico rastreável, auditável e atualizado dos perigos, decisões, mitigação,
+risco residual e justificativas ALARP. Ele pode ser inspecionado por auditores e reguladores e
+até servir de evidência em processos legais.
+
+
+   5. A Análise da Árvore de Defeitos (FTA) é uma técnica dedutiva fundamental
+para a segurança.
+  a) Defina se a FTA é uma abordagem top-down ou bottom-up e justifique sua resposta.
+  b) Explique o princípio de que perigos que surgem de uma combinação de causas raízes
+     são preferíveis a perigos com uma única causa principal.
+
+ a) A FTA é uma abordagem top-down e dedutiva. Parte-se do evento de topo indesejado e,
+ usando portas lógicas, vai-se decompondo esse evento em causas de nível mais baixo até
+ chegar às falhas básicas.
+
+ b) É preferível que um perigo surja de combinação de causas raízes porque isso reduz a
+ vulnerabilidade a falha única. Se uma única causa principal já basta para provocar o acidente,
+ existe um single point of failure; quando são necessárias várias falhas simultâneas, o sistema
+ tende a ser mais tolerante e seguro.
+
+
+   6. O Triângulo do Risco define regiões de aceitabilidade. Sobre a Região ALARP:
+  a) O que significa a sigla ALARP e qual a regra de decisão para riscos situados nessa
+     região?
+  b) No caso da bomba de insulina, uma "sobrecarga de dosagem"seria classificada como
+     risco ALARP ou Intolerável? Por quê?
+
+ a) ALARP significa As Low As Reasonably Practicable. Na região ALARP, o risco só é tolerado se tiver sido
+ reduzido o máximo possível de forma razoável; isto é, devem ser adotadas medidas adicionais sempre que o
+ custo/esforço não seja grosseiramente desproporcional ao ganho de segurança.
+
+ b) No caso da bomba de insulina, sobrecarga de dosagem tende a ser classificada como Intolerável, não
+ apenas ALARP, porque pode levar rapidamente a dano grave, coma ou morte.
+ Em dispositivo médico crítico, esse perigo exige mitigação forte e não mera aceitação residual comum.
+
+
+
+
+   7. Existem três estratégias clássicas para a Redução do Risco: (1) Proteção, (2)
+Detecção/Remoção e (3) Limitação de Danos.
+
+                                                     3
+                                                Lista de Exercícios — Engenharia de Segurança
+                                                                           Me. Sergio Souza Novak
+                                                          Engenharia da Qualidade e Confiabilidade
+
+
+
+   • Explique como um sistema de extintores automáticos em um motor de avião se encaixa
+     em uma dessas estratégias.
+
+   • Como a estratégia de "Proteção contra Perigos"poderia ser aplicada a uma cortadora
+     de papel industrial?
+
+ a) O extintor automático no motor de avião se encaixa em Limitação de Danos: ele não necessariamente
+ impede o início do incêndio, mas limita suas consequências.
+
+ b) Na cortadora de papel industrial, a estratégia de Proteção contra Perigos pode ser aplicada com barreiras
+ físicas, enclausuramento da lâmina, sensores de presença, cortina de luz e intertravamento que impeça
+ operação com a área de risco acessível.
+
+
+
+
+   8. O sociólogo Charles Perrow (1984) cunhou o termo "Acidentes Normais".
+
+  a) O que Perrow quer dizer com o termo "Acidentes Normais"em sistemas complexos?
+
+  b) Apesar da complexidade introduzida, por que o controle por software ainda é preferível
+     a controladores de hardware simples em sistemas críticos atuais?
+
+a) Para Perrow, “Acidentes Normais” são acidentes que se tornam praticamente inevitáveis em sistemas
+complexos e fortemente acoplados, porque falhas múltiplas podem interagir de forma inesperada e difícil
+de controlar.
+
+b) Mesmo introduzindo complexidade, o controle por software continua preferível porque os sistemas
+críticos modernos exigem lógica sofisticada, coordenação entre muitos sensores/atuadores, diagnóstico,
+reconfiguração e tratamento de múltiplos estados operacionais, que é algo que controladores de hardware
+simples não conseguem oferecer adequadamente. O problema, portanto, não é “usar software”, mas
+projetar a segurança no nível do sistema.
+
+
+
+   9. Analise a Árvore de Falhas (FTA) abaixo, que representa a falha em um sistema
+de contenção de pressão industrial.
+
+
+
+
+                                                     4
+                                                Lista de Exercícios — Engenharia de Segurança
+                                                                           Me. Sergio Souza Novak
+                                                          Engenharia da Qualidade e Confiabilidade
+
+
+
+                                     FALHA NA
+                                    CONTENÇÃO
+                                    DE PRESSÃO
+
+
+
+
+                                                    Falha no Sistema
+                                                    de Resfriamento
+                           Válvula de Alívio
+                           Presa (Fechada)
+
+
+
+                                                                   Falha da Bomba
+                                                                  Reserva (Standby)
+                                               Falha da Bomba
+                                                  Principal
+
+
+
+  a) Com base nas portas lógicas utilizadas, descreva as condições necessárias (em termos de
+     falhas básicas) para que o evento "FALHA NA CONTENÇÃO DE PRESSÃO"
+     ocorra.
+
+  b) Qual a vantagem, do ponto de vista de segurança, de se utilizar bombas em redundância
+     (Principal + Reserva) conectadas por uma porta AND?
+
+a) Pela árvore de falhas, a FALHA NA CONTENÇÃO DE PRESSÃO ocorre se acontecer:
+(i) a Válvula de Alívio presa (fechada), ou (ii) a Falha no Sistema de Resfriamento. E essa falha do
+resfriamento ocorre somente se houver falha simultânea da Bomba Principal e da Bomba Reserva.
+
+b) A vantagem da redundância com porta AND é que a falha de uma única bomba não basta para causar
+a perda do resfriamento. Isso elimina falha única crítica e reduz o risco do evento de topo.
+
+
+
+
+   10. Texto de Apoio: Segurança em Barragens de Rejeitos
+   E o que pode causar o rompimento de uma barragem de rejeitos? Em geral, estas falhas
+são o resultado tanto de problemas geotécnicos da estrutura de contenção e como da gestão
+dos rejeitos armazenados. Dentre as várias causas, devemos destacar a falha no controle do
+balanço hídrico e a ausência de monitoramento. Analisando as imagens do rompimento em
+Brumadinho, é possível ver que todo o dique escorrega para frente. Isto é típico de ruptura
+por piping, onde ocorre uma erosão regressiva devida à movimentação descontrolada de água
+no interior do dique.
+   Um conjunto mínimo de corte (minimal cut set) é: “Obstrução do Vertedouro Princ.” E
+“Falha na Abertura do Vertedouro Aux.”, levando à “Falha Total do Sistema de Drenagem”,
+“Transbordamento” e ao rompimento. Isso significa que a segurança depende da redundância:
+
+                                                     5
+                                                           Lista de Exercícios — Engenharia de Segurança
+                                                                                      Me. Sergio Souza Novak
+                                                                     Engenharia da Qualidade e Confiabilidade
+
+
+
+falha isolada em um vertedouro não basta, mas ambas simultâneas criam vulnerabilidade
+crítica.
+                    Fonte: Adaptado de UFABC. O que é e para que serve uma barragem de rejeitos?
+
+                                                       ROMPIMENTO
+                                                       DA BARRAGEM
+
+
+
+
+                            Transbordamento                                              Instabilidade
+                              (Galvamento)                                                Estrutural
+
+
+
+
+           Evento Pluvio-            Falha Total do Sis-
+          métrico Extremo            tema de Drenagem
+
+
+                                                                                                     Erosão In-
+                                                                   Liquefação Estática
+                                                                                                   terna (Piping)
+
+
+
+
+         Obstrução do                         Falha na Abertura         Falha ou Ausência                  Gradiente Hi-
+       Vertedouro Princ.                      do Vertedouro Aux.        do Filtro Granular                dráulico Crítico
+
+
+Com base na análise lógica da Aŕvore de Falhas e no texto de apoio, conclui-se que a segurança
+do sistema de barragem depende fundamentalmente da redundância e da integridade de múltiplos
+             componentes. Nesse contexto, o rompimento da barragem ocorrerá unicamente se:
+ A) Ocorrer um "Evento Pluviométrico Extremo", independentemente do estado do sistema de
+    drenagem.
+  B) Houver um "Gradiente Hidráulico Crítico", mesmo que o "Filtro Granular"esteja operando
+     corretamente.
+  C) Ocorrer a falha simultânea da "Obstrução do Vertedouro Princ."e da "Falha na Abertura do
+     Auxiliar", ou houver liquefação ou piping.
+ D) O sistema de drenagem falhar completamente por obstrução de um único vertedouro (prin-
+    cipal ou auxiliar).
+  E) A "Instabilidade Estrutural"for ativada pelo evento "Liquefação Estática"em conjunto com o
+     "Transbordamento".
+
+  Resposta: C)
+
+
+
+
+                            “Boa atividade! Att. Me. Prof. Sergio Souza Novak.”
+
+
+                                                               6
+

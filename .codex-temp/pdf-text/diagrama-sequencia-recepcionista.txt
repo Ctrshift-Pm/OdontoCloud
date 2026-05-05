@@ -1,0 +1,89 @@
+                                                                                     Front-end (React)                               OdontoCloud API (.NET 8)                            PostgreSQL                 Twilio
+Paciente                                 Recepcionista
+
+           Liga ou manda WhatsApp (Manual)
+   1
+
+                                                     Digita Nome/CPF na barra de busca
+                                               2
+
+                                                                                                         GET /api/pacientes?search=...
+                                                                                             3
+
+                                                                                                                                                     SELECT (Filtro Multi-tenant automático)
+                                                                                                                                                4
+
+                                                                                                                                                                Retorna resultados
+                                                                                                                                                                                               5
+
+                                                                                                               Exibe lista na tela
+                                                                                                                                                6
+
+                                                   alt                                                       [Paciente NÃO existe no CRM]
+
+                                                    Preenche formulário "Novo Paciente"
+                                               7
+
+                                                                                                   POST /api/pacientes (Nome, Telefone)
+                                                                                             8
+
+                                                                                                                                                                INSERT Paciente
+                                                                                                                                                9
+
+                                                                                                                                                                Retorna PacienteId
+                                                                                                                                                                                               10
+
+                                                                                                                  201 Created
+                                                                                                                                                11
+
+
+                                                     Abre modal de "Novo Agendamento"
+                                              12
+
+                                               Seleciona Dentista, Data e Procedimento
+                                              13
+
+                                                                                              GET /api/agendamentos (Busca ocupação do dia)
+                                                                                             14
+
+                                                                                                                                                       Consulta agenda do Dentista no dia
+                                                                                                                                                15
+
+                                                                                                                                                              Retorna slots ocupados
+                                                                                                                                                                                               16
+
+                                                                                                   Renderiza horários livres na interface
+                                                                                                                                                17
+
+    "Temos horário às 14h ou 16h. Qual prefere?"
+                                              18
+
+                      "Às 14h"
+   19
+
+                                                         Seleciona 14h e clica em "Salvar"
+                                              20
+
+                                                                                             POST /api/agendamentos (Valida HasOverlapping)
+                                                                                             21
+
+                                                                                                                                                     INSERT Agendamento (Status = Agendado)
+                                                                                                                                                22
+
+                                                                                                                                                                     Sucesso
+                                                                                                                                                                                               23
+
+                                                                                                                  201 Created
+                                                                                                                                                24
+
+                                                                                                                                                 opt        [Se checkbox "Enviar confirmação WA" estiver marcado]
+
+                                                                                                                                                                    Dispara template de confirmação
+                                                                                                                                                25
+
+
+
+
+                                                                                     Front-end (React)                               OdontoCloud API (.NET 8)                            PostgreSQL                 Twilio
+Paciente                                 Recepcionista
+

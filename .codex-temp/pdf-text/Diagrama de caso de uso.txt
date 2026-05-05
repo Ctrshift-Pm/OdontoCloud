@@ -1,0 +1,58 @@
+                                               Diagrama UML - OdontoCloud
+
+
+                      Criar                                                                                Acessar
+                   Agendamento                                                                            Comissões
+                                                                                    Gerenciar
+                                                 Cadastrar                          Contas a
+                                                 Paciente                            Pagar
+
+                                    Criar
+                                  Campanhas
+                                    WPP
+                                                                                                                      Financeiro
+  Recepcionista
+                     Criar                                                                          Visualizar
+                   Plano de                                  Visualizar                             Dashboard
+                  Tratamento                                  Agenda
+
+                                               Atualizar
+                                             Odontograma
+
+
+                                                                                    Gerenciar
+                                   Realizar
+                                                                                      DRE
+                                 Atendimento
+
+
+Dentista                                                                                            Gerenciar         Gestor
+                                               Preencher
+                                                                                                    Fluxo de
+                                               Anamnese
+                                                                                                     Caixa
+                                   Gerar                                       Qualificar
+                                 Documento                                     Urgência
+                    Fazer
+                  Upload de
+                   Exames
+
+                                         Assinar                           Agendar
+                                        Documento                          Consulta
+                                                                          Automática
+
+
+
+                                  Responder                                              Fazer
+    Paciente                                                                                                            IA
+                                 Confirmação                                           Follow- up
+
+
+
+
+                                               Nota:
+                                               O ator Admin possui privilégios globais
+                                               e pode executar todos os casos de uso
+                                               do sistema.
+                               Admin
+

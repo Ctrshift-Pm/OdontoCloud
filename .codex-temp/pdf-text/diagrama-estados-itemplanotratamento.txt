@@ -1,0 +1,23 @@
+                       Gerado pelo Odontograma
+
+
+                                 Orcado
+
+
+               Paciente aceitou fazer
+
+
+                     Aprovado                    Paciente recusou
+
+
+Dentista iniciou a sessão   Desistência após aprovar
+
+
+      EmExecucao                            Cancelado
+
+
+Procedimento finalizado
+
+
+       Concluido
+
