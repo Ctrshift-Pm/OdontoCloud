@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OdontoCloud.Application.UseCases.PlanoTratamento.Commands;
 using OdontoCloud.Application.UseCases.Prontuario;
+using OdontoCloud.Domain.Enums;
+using OdontoCloud.Infrastructure.Identity;
 
 namespace OdontoCloud.Api.Controllers;
 
@@ -19,6 +21,7 @@ public sealed class PlanoTratamentoController : ControllerBase
     }
 
     [HttpPatch("itens/{id:guid}/aprovar")]
+    [Permission(ModuloSistema.Prontuario, AcaoPermissao.Editar)]
     public async Task<ActionResult<ItemPlanoTratamentoDto>> Aprovar(Guid id, CancellationToken cancellationToken)
     {
         var response = await _sender.Send(new AprovarItemPlanoCommand(id), cancellationToken);
@@ -31,6 +34,7 @@ public sealed class PlanoTratamentoController : ControllerBase
     }
 
     [HttpPatch("itens/{id:guid}/concluir")]
+    [Permission(ModuloSistema.Prontuario, AcaoPermissao.Editar)]
     public async Task<ActionResult<ItemPlanoTratamentoDto>> Concluir(Guid id, CancellationToken cancellationToken)
     {
         var response = await _sender.Send(new ConcluirItemPlanoCommand(id), cancellationToken);

@@ -21,7 +21,7 @@ using OdontoCloud.Infrastructure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var jwtKey = ResolveJwtSigningKey(builder.Configuration);
+var jwtKey = JwtSigningKeyResolver.Resolve(builder.Configuration, builder.Environment);
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "OdontoCloud";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "OdontoCloud.Client";
 var corsOrigins = ResolveCorsOrigins(builder.Configuration);
@@ -171,30 +171,6 @@ app.MapGet("/healthz", () => Results.Ok(new { status = "ok", service = "OdontoCl
 app.MapControllers();
 
 app.Run();
-
-static string ResolveJwtSigningKey(IConfiguration configuration)
-{
-    var keyFromFile = configuration["Jwt:KeyFilePath"];
-    if (!string.IsNullOrWhiteSpace(keyFromFile) && File.Exists(keyFromFile))
-    {
-        var fileKey = File.ReadAllText(keyFromFile).Trim();
-
-        if (!string.IsNullOrWhiteSpace(fileKey))
-        {
-            return fileKey;
-        }
-    }
-
-    var keyFromConfig = configuration["Jwt:Key"]
-                       ?? throw new InvalidOperationException("A chave JWT não foi configurada.");
-
-    if (keyFromConfig.Length < 32)
-    {
-        throw new InvalidOperationException("A chave JWT deve ter pelo menos 32 caracteres.");
-    }
-
-    return keyFromConfig;
-}
 
 static string[] ResolveCorsOrigins(IConfiguration configuration)
 {

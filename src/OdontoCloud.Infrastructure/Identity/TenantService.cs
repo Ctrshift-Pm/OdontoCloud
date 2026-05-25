@@ -48,6 +48,11 @@ public class TenantService : ITenantService
             throw new UnauthorizedAccessException("Token com claim UserId inválido.");
         }
 
+        if (userId == Guid.Empty)
+        {
+            throw new UnauthorizedAccessException("Token com UserId inválido.");
+        }
+
         return userId;
     }
 }

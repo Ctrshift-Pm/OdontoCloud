@@ -14,11 +14,35 @@ function getFocusableElements(container) {
   })
 }
 
+function getInitialFocusElement(container) {
+  if (!container) {
+    return null
+  }
+
+  const autofocusElement = container.querySelector('[data-autofocus]')
+  if (autofocusElement instanceof HTMLElement) {
+    return autofocusElement
+  }
+
+  const formField = container.querySelector('input:not([disabled]), select:not([disabled]), textarea:not([disabled])')
+  if (formField instanceof HTMLElement) {
+    return formField
+  }
+
+  const focusableElement = getFocusableElements(container)[0]
+  return focusableElement ?? null
+}
+
 export default function Modal({ isOpen, title, description, onClose, children, footer }) {
   const modalContainerRef = useRef(null)
   const previouslyFocusedElement = useRef(null)
+  const onCloseRef = useRef(onClose)
   const titleId = useId()
   const descriptionId = useId()
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
 
   useEffect(() => {
     if (!isOpen) {
@@ -31,7 +55,7 @@ export default function Modal({ isOpen, title, description, onClose, children, f
     function handleKeyDown(event) {
       if (event.key === 'Escape') {
         event.preventDefault()
-        onClose()
+        onCloseRef.current?.()
         return
       }
 
@@ -56,8 +80,7 @@ export default function Modal({ isOpen, title, description, onClose, children, f
 
     window.addEventListener('keydown', handleKeyDown)
 
-    const focusableElements = getFocusableElements(modalContainerRef.current)
-    const firstElement = focusableElements[0] || modalContainerRef.current
+    const firstElement = getInitialFocusElement(modalContainerRef.current) || modalContainerRef.current
     if (firstElement) {
       firstElement.focus()
     }
@@ -70,7 +93,7 @@ export default function Modal({ isOpen, title, description, onClose, children, f
         previouslyFocusedElement.current.focus()
       }
     }
-  }, [isOpen, onClose])
+  }, [isOpen])
 
   if (!isOpen) {
     return null

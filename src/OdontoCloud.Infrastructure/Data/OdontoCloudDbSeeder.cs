@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using OdontoCloud.Domain.Entities;
@@ -15,6 +16,7 @@ public static class OdontoCloudDbSeeder
 
         var dbContext = scope.ServiceProvider.GetRequiredService<OdontoCloudDbContext>();
         var httpContextAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
+        var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<Usuario>>();
 
         await dbContext.Database.MigrateAsync(cancellationToken);
 
@@ -28,20 +30,24 @@ public static class OdontoCloudDbSeeder
         }
 
         httpContextAccessor.HttpContext = CreateSeederHttpContext(clinica.Id);
-        var adminExists = await dbContext.Usuarios.AnyAsync(
+        var admin = await dbContext.Usuarios.FirstOrDefaultAsync(
             usuario => usuario.Email == "admin@clinicasorrir.com.br",
             cancellationToken);
 
-        if (!adminExists)
+        if (admin is null)
         {
-            var admin = new Usuario(
+            admin = new Usuario(
                 clinica.Id,
                 "Administrador",
                 "admin@clinicasorrir.com.br",
-                "123",
+                passwordHasher.HashPassword(new Usuario(clinica.Id, "Administrador", "admin@clinicasorrir.com.br", "seed", PerfilUsuario.Admin), "123"),
                 PerfilUsuario.Admin);
 
             dbContext.Usuarios.Add(admin);
+        }
+        else if (!admin.PasswordHash.StartsWith("AQAAAA", StringComparison.Ordinal))
+        {
+            admin.AtualizarSenhaHash(passwordHasher.HashPassword(admin, "123"));
         }
 
         var dentistaExists = await dbContext.Dentistas.AnyAsync(

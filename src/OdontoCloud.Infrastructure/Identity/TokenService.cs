@@ -1,8 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.IO;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using OdontoCloud.Application.Interfaces;
 using OdontoCloud.Domain.Entities;
@@ -12,17 +12,19 @@ namespace OdontoCloud.Infrastructure.Identity;
 public sealed class TokenService : ITokenService
 {
     private readonly IConfiguration _configuration;
+    private readonly IHostEnvironment _environment;
 
-    public TokenService(IConfiguration configuration)
+    public TokenService(IConfiguration configuration, IHostEnvironment environment)
     {
         _configuration = configuration;
+        _environment = environment;
     }
 
     public string GenerateToken(Usuario usuario)
     {
         var issuer = _configuration["Jwt:Issuer"] ?? "OdontoCloud";
         var audience = _configuration["Jwt:Audience"] ?? "OdontoCloud.Client";
-        var key = ResolveJwtSigningKey(_configuration["Jwt:Key"], _configuration["Jwt:KeyFilePath"]);
+        var key = JwtSigningKeyResolver.Resolve(_configuration, _environment);
         var expirationInMinutes = int.TryParse(_configuration["Jwt:ExpirationInMinutes"], out var value)
             ? value
             : 120;
@@ -58,31 +60,5 @@ public sealed class TokenService : ITokenService
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
-    private static string ResolveJwtSigningKey(string? configuredKey, string? keyFilePath)
-    {
-        if (!string.IsNullOrWhiteSpace(keyFilePath) && File.Exists(keyFilePath))
-        {
-            var fileKey = File.ReadAllText(keyFilePath).Trim();
-            if (!string.IsNullOrWhiteSpace(fileKey))
-            {
-                if (fileKey.Length < 32)
-                {
-                    throw new InvalidOperationException("A chave JWT deve ter pelo menos 32 caracteres.");
-                }
-
-                return fileKey;
-            }
-        }
-
-        var key = configuredKey ?? throw new InvalidOperationException("A chave JWT não foi configurada.");
-
-        if (key.Length < 32)
-        {
-            throw new InvalidOperationException("A chave JWT deve ter pelo menos 32 caracteres.");
-        }
-
-        return key;
     }
 }

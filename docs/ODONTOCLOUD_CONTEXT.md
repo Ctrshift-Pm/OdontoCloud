@@ -117,8 +117,8 @@ Arquivos de apoio:
 
 ## Riscos Tecnicos Atuais
 
-- Login atual compara senha com texto puro.
-- JWT secret esta em `appsettings.json`.
-- Autorizacao por perfil/permissao ainda e limitada.
-- Se `ClinicaId` faltar no token, `TenantService` retorna `Guid.Empty`; isso precisa de tratamento mais robusto.
+- Usuarios legados podem existir com senha em texto puro ate passarem pelo fluxo de upgrade; o seed novo ja grava hash.
+- `PlanoTratamento` exigia endurecimento de permissao por acao e deve continuar coberto por testes de autorizacao.
+- JWT deve continuar vindo de variavel de ambiente ou secret fora de `Development`; placeholder no repo nao pode ser usado em producao.
+- Claims obrigatorias do tenant/usuario agora precisam continuar validadas estritamente em qualquer fluxo autenticado.
 - Documentacao de produto e maior que a implementacao atual, entao cada agente deve limitar escopo.
