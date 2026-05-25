@@ -33,7 +33,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(FrontendCorsPolicy, policy =>
     {
-        policy.WithOrigins(corsOrigins)
+        policy.SetIsOriginAllowed(origin => IsAllowedCorsOrigin(origin, corsOrigins))
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -224,6 +224,28 @@ static string[] ResolveCorsOrigins(IConfiguration configuration)
         "https://localhost:5173",
         "https://127.0.0.1:5173"
     ];
+}
+
+static bool IsAllowedCorsOrigin(string? origin, IReadOnlyCollection<string> configuredOrigins)
+{
+    if (string.IsNullOrWhiteSpace(origin))
+    {
+        return false;
+    }
+
+    if (configuredOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase))
+    {
+        return true;
+    }
+
+    if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+    {
+        return false;
+    }
+
+    return uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)
+        && (uri.Host.Equals("vercel.app", StringComparison.OrdinalIgnoreCase)
+            || uri.Host.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase));
 }
 
 static void AddPermissionPolicies(AuthorizationOptions options)
