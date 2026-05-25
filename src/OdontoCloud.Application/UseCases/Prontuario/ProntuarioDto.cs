@@ -10,4 +10,5 @@ public sealed record ProntuarioDto(
     bool AnamneseDesatualizada,
     DateTimeOffset? AnamneseAtualizadaEmUtc,
     DateTimeOffset? OdontogramaAtualizadoEmUtc,
+    string DenticaoAtiva,
     IReadOnlyList<ItemPlanoTratamentoDto> ItensPlanoTratamento);

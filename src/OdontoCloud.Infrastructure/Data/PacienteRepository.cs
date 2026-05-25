@@ -26,6 +26,19 @@ public sealed class PacienteRepository : IPacienteRepository
             .ToListAsync(cancellationToken);
     }
 
+    public Task<Paciente?> GetByIdAsync(Guid pacienteId, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Pacientes
+            .AsNoTracking()
+            .FirstOrDefaultAsync(paciente => paciente.Id == pacienteId, cancellationToken);
+    }
+
+    public Task<Paciente?> GetByIdTrackingAsync(Guid pacienteId, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Pacientes
+            .FirstOrDefaultAsync(paciente => paciente.Id == pacienteId, cancellationToken);
+    }
+
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return _dbContext.SaveChangesAsync(cancellationToken);

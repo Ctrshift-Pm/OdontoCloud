@@ -58,6 +58,38 @@ public sealed class FinanceiroController : ControllerBase
         return Ok(response);
     }
 
+    [HttpPut("receber/{id:guid}")]
+    [Permission(ModuloSistema.Financeiro, AcaoPermissao.Editar)]
+    public async Task<ActionResult<ContaReceberDto>> Update(
+        Guid id,
+        [FromBody] UpdateContaReceberRequest request,
+        CancellationToken cancellationToken)
+    {
+        var response = await _sender.Send(
+            new UpdateContaReceberCommand(id, request.ValorBase, request.Desconto, request.DataVencimento),
+            cancellationToken);
+
+        if (response is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(response);
+    }
+
+    [HttpDelete("receber/{id:guid}")]
+    [Permission(ModuloSistema.Financeiro, AcaoPermissao.Excluir)]
+    public async Task<ActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    {
+        var response = await _sender.Send(new DeleteContaReceberCommand(id), cancellationToken);
+        if (!response)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
+    }
+
     [HttpGet("pendentes")]
     [Permission(ModuloSistema.Financeiro, AcaoPermissao.Visualizar)]
     public async Task<ActionResult<IReadOnlyList<ContaReceberDto>>> GetPendentes(
@@ -84,4 +116,6 @@ public sealed class FinanceiroController : ControllerBase
     }
 
     public sealed record ReceberPagamentoRequest(decimal ValorPago, string FormaPagamento);
+
+    public sealed record UpdateContaReceberRequest(decimal ValorBase, decimal Desconto, DateTime DataVencimento);
 }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using OdontoCloud.Application.Exceptions;
 using OdontoCloud.Application.Interfaces;
 using OdontoCloud.Application.UseCases.Auth.Login;
 using OdontoCloud.Domain.Entities;
@@ -84,22 +85,58 @@ public sealed class LoginCommandHandlerTests
         Assert.Equal(0, fakeRepo.Atualizacoes);
     }
 
+    [Fact]
+    public async Task Login_ComEmailDuplicadoSemClinicaId_DeveLancarExcecaoDeLoginAmbiguo()
+    {
+        const string senha = "123";
+        var usuario = new Usuario(
+            Guid.NewGuid(),
+            "Usuario Duplicado",
+            "duplicado@odontocloud.local",
+            senha,
+            PerfilUsuario.Admin);
+        var fakeRepo = new FakeUsuarioAuthenticationRepository(usuario, simularAmbiguidade: true);
+
+        var handler = new LoginCommandHandler(
+            fakeRepo,
+            new FakeTokenService(),
+            new LegacyPasswordVerifier(new PasswordHasher<Usuario>()));
+
+        await Assert.ThrowsAsync<LoginEmailAmbiguoException>(() =>
+            handler.Handle(new LoginCommand(usuario.Email, senha), default));
+    }
+
     private sealed class FakeUsuarioAuthenticationRepository : IUsuarioAuthenticationRepository
     {
         private readonly Usuario _usuario;
+        private readonly bool _simularAmbiguidade;
 
-        public FakeUsuarioAuthenticationRepository(Usuario usuario)
+        public FakeUsuarioAuthenticationRepository(Usuario usuario, bool simularAmbiguidade = false)
         {
             _usuario = usuario;
+            _simularAmbiguidade = simularAmbiguidade;
         }
 
         public string? HashAtualizado { get; private set; }
 
         public int Atualizacoes { get; private set; }
 
-        public Task<Usuario?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+        public Task<Usuario?> GetByEmailAsync(
+            string email,
+            Guid? clinicaId = null,
+            CancellationToken cancellationToken = default)
         {
+            if (_simularAmbiguidade && clinicaId is null)
+            {
+                throw new LoginEmailAmbiguoException();
+            }
+
             return Task.FromResult(_usuario.Email == email ? _usuario : null);
+        }
+
+        public Task<Usuario?> GetByIdAsync(Guid usuarioId, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(_usuario.Id == usuarioId ? _usuario : null);
         }
 
         public Task<int> AtualizarSenhaHashAsync(

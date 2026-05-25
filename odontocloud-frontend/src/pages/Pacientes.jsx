@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
-import { criarPaciente, getPacientes } from '../api/pacientes'
+import { atualizarPacienteKanbanStatus, criarPaciente, getPacientes } from '../api/pacientes'
 import { getApiErrorMessage } from '../api/client'
 import AppShell from '../components/AppShell'
 import FeedbackMessage from '../components/FeedbackMessage'
@@ -176,6 +176,13 @@ function isRetornoPendente(paciente) {
   return String(paciente.status || '').toLowerCase() === 'retorno'
 }
 
+const KANBAN_STATUSES = ['Novo', 'Contato', 'Avaliacao', 'Tratamento', 'Inativo']
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100]
+
+function getPacienteKanbanStatus(paciente) {
+  return KANBAN_STATUSES.includes(paciente.crmKanbanStatus) ? paciente.crmKanbanStatus : KANBAN_STATUSES[0]
+}
+
 function MetricCard({ label, value, tone = 'default' }) {
   const toneMap = {
     default: 'bg-white text-[var(--ink-900)]',
@@ -192,11 +199,14 @@ function MetricCard({ label, value, tone = 'default' }) {
   )
 }
 
-function ActionIconButton({ children, title, ...props }) {
+function ActionIconButton({ children, title, ariaLabel, ...props }) {
+  const accessibleLabel = ariaLabel || title || 'Acao'
+
   return (
     <button
       type="button"
       title={title}
+      aria-label={accessibleLabel}
       className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-black/8 bg-white text-[var(--ink-600)] transition hover:bg-[var(--surface-muted)] hover:text-[var(--ink-900)]"
       {...props}
     >
@@ -216,6 +226,8 @@ export default function Pacientes() {
   const [modalError, setModalError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const [viewMode, setViewMode] = useState('lista')
+  const [pageSize, setPageSize] = useState(10)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const {
     register,
@@ -333,12 +345,52 @@ export default function Pacientes() {
     return haystack.includes(normalizedSearch)
   })
 
+  const totalPages = Math.max(1, Math.ceil(filteredPacientes.length / pageSize))
+  const safeCurrentPage = Math.min(currentPage, totalPages)
+  const pageStartIndex = filteredPacientes.length === 0 ? 0 : (safeCurrentPage - 1) * pageSize
+  const pageEndIndex = Math.min(pageStartIndex + pageSize, filteredPacientes.length)
+  const paginatedPacientes = filteredPacientes.slice(pageStartIndex, pageEndIndex)
+
   const metrics = useMemo(() => ({
     total: pacientes.length,
     ativos: pacientes.filter(isPacienteAtivo).length,
     whatsappValidado: pacientes.filter(hasValidatedWhatsapp).length,
     retornosPendentes: pacientes.filter(isRetornoPendente).length,
   }), [pacientes])
+
+  const kanbanColumns = useMemo(() => {
+    const agrupado = KANBAN_STATUSES.reduce((acc, status) => {
+      acc[status] = []
+      return acc
+    }, {})
+
+    paginatedPacientes.forEach((paciente) => {
+      const status = getPacienteKanbanStatus(paciente)
+      agrupado[status].push(paciente)
+    })
+
+    return KANBAN_STATUSES.map((status) => ({
+      status,
+      pacientes: agrupado[status],
+    }))
+  }, [paginatedPacientes])
+
+  async function handleKanbanStatusChange(paciente, novoStatus) {
+    if (novoStatus === getPacienteKanbanStatus(paciente)) {
+      return
+    }
+
+    setSuccessMessage('')
+    setPageError('')
+
+    try {
+      await atualizarPacienteKanbanStatus(paciente.id, novoStatus)
+      await loadPacientes()
+      setSuccessMessage('Status do paciente atualizado com sucesso.')
+    } catch (error) {
+      setPageError(getApiErrorMessage(error, 'Nao foi possivel atualizar o status do paciente.'))
+    }
+  }
 
   return (
     <>
@@ -377,7 +429,10 @@ export default function Pacientes() {
                 <div className="inline-flex items-center gap-2 rounded-2xl border border-black/8 bg-[var(--surface-muted)] p-1.5">
                   <button
                     type="button"
-                    onClick={() => setViewMode('lista')}
+                    onClick={() => {
+                      setViewMode('lista')
+                      setCurrentPage(1)
+                    }}
                     className={`rounded-xl px-3 py-2 text-sm font-medium transition ${
                       viewMode === 'lista' ? 'bg-white text-[var(--ink-900)] shadow-sm' : 'text-[var(--ink-500)]'
                     }`}
@@ -386,7 +441,10 @@ export default function Pacientes() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setViewMode('kanban')}
+                    onClick={() => {
+                      setViewMode('kanban')
+                      setCurrentPage(1)
+                    }}
                     className={`rounded-xl px-3 py-2 text-sm font-medium transition ${
                       viewMode === 'kanban' ? 'bg-white text-[var(--ink-900)] shadow-sm' : 'text-[var(--ink-500)]'
                     }`}
@@ -408,8 +466,12 @@ export default function Pacientes() {
                   </svg>
                   <input
                     type="search"
+                    aria-label="Buscar paciente por nome, CPF ou telefone"
                     value={search}
-                    onChange={(event) => setSearch(event.target.value)}
+                    onChange={(event) => {
+                      setSearch(event.target.value)
+                      setCurrentPage(1)
+                    }}
                     placeholder="Buscar por nome, CPF ou telefone"
                     className="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-[var(--ink-900)] outline-none placeholder:text-[var(--ink-500)]"
                   />
@@ -417,12 +479,110 @@ export default function Pacientes() {
               </div>
             </div>
 
+            <div className="mt-5 flex flex-col gap-3 rounded-2xl border border-black/6 bg-stone-50 px-4 py-3 text-sm text-[var(--ink-600)] md:flex-row md:items-center md:justify-between">
+              <div>
+                {filteredPacientes.length === 0
+                  ? 'Nenhum paciente encontrado.'
+                  : `Exibindo ${pageStartIndex + 1}-${pageEndIndex} de ${filteredPacientes.length} pacientes.`}
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="flex items-center gap-2">
+                  <span>Por pagina</span>
+                  <select
+                    value={pageSize}
+                    aria-label="Itens por pagina"
+                    className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm"
+                    onChange={(event) => {
+                      setPageSize(Number(event.target.value))
+                      setCurrentPage(1)
+                    }}
+                  >
+                    {PAGE_SIZE_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  type="button"
+                  className="btn-secondary px-3 py-2 text-sm"
+                  disabled={safeCurrentPage <= 1}
+                  onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                >
+                  Anterior
+                </button>
+                <span className="min-w-20 text-center">
+                  {safeCurrentPage}/{totalPages}
+                </span>
+                <button
+                  type="button"
+                  className="btn-secondary px-3 py-2 text-sm"
+                  disabled={safeCurrentPage >= totalPages}
+                  onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                >
+                  Proxima
+                </button>
+              </div>
+            </div>
+
             {viewMode === 'kanban' ? (
-              <div className="mt-6 rounded-[28px] border border-dashed border-black/10 bg-[var(--surface-muted)] px-6 py-10 text-center">
-                <div className="text-sm font-semibold text-[var(--ink-900)]">Visão Kanban em preparação</div>
-                <p className="mt-2 text-sm text-[var(--ink-500)]">
-                  O controle já está pronto. A distribuição por colunas entra na próxima sprint.
-                </p>
+              <div className="mt-6">
+                {isLoading ? (
+                  <div className="rounded-[28px] border border-black/10 bg-[var(--surface-muted)] px-6 py-10 text-center text-sm text-[var(--ink-500)]">
+                    Carregando pacientes...
+                  </div>
+                ) : (
+                  <div className="grid gap-4 xl:grid-cols-5">
+                    {kanbanColumns.map((coluna) => (
+                      <section key={coluna.status} className="min-h-[300px] rounded-2xl border border-black/8 bg-white">
+                        <div className="border-b border-black/8 bg-stone-50 px-4 py-3">
+                          <h3 className="text-sm font-semibold text-[var(--ink-900)]">
+                            {coluna.status} ({coluna.pacientes.length})
+                          </h3>
+                        </div>
+                        <div className="space-y-3 p-3">
+                          {coluna.pacientes.length === 0 ? (
+                            <div className="rounded-xl border border-dashed border-black/10 p-3 text-center text-xs text-[var(--ink-500)]">
+                              Nenhum paciente nesta etapa.
+                            </div>
+                          ) : (
+                            coluna.pacientes.map((paciente) => (
+                              <article
+                                key={paciente.id}
+                                className="rounded-xl border border-black/10 bg-[var(--surface-muted)] p-3"
+                              >
+                                <div className="text-sm font-semibold text-[var(--ink-900)]">{paciente.nome}</div>
+                                <div className="mt-1 text-xs text-[var(--ink-500)]">
+                                  {formatPhone(paciente.telefoneWhatsapp)}
+                                </div>
+                                <div className="mt-3">
+                                  <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.18em] text-[var(--ink-500)]">
+                                    Status do funil
+                                  </label>
+                                  <select
+                                    className="w-full rounded-lg border border-black/20 bg-white px-2 py-2 text-sm"
+                                    value={getPacienteKanbanStatus(paciente)}
+                                    aria-label={`Mudar status de ${paciente.nome}`}
+                                    onChange={(event) => {
+                                      void handleKanbanStatusChange(paciente, event.target.value)
+                                    }}
+                                  >
+                                    {KANBAN_STATUSES.map((status) => (
+                                      <option key={status} value={status}>
+                                        {status}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              </article>
+                            ))
+                          )}
+                        </div>
+                      </section>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="mt-6 overflow-hidden rounded-3xl border border-black/5">
@@ -451,7 +611,7 @@ export default function Pacientes() {
                           </td>
                         </tr>
                       ) : (
-                        filteredPacientes.map((paciente) => (
+                        paginatedPacientes.map((paciente) => (
                           <tr key={paciente.id} className="border-t border-black/5">
                             <td className="px-4 py-4">
                               <div className="font-semibold text-[var(--ink-900)]">{paciente.nome}</div>
@@ -474,6 +634,11 @@ export default function Pacientes() {
                                       : 'cursor-not-allowed border-black/8 bg-stone-50 text-[var(--ink-400)]'
                                   }`}
                                   title="Abrir conversa no WhatsApp"
+                                  aria-label={
+                                    hasValidatedWhatsapp(paciente)
+                                      ? `Abrir conversa no WhatsApp de ${paciente.nome}`
+                                      : `WhatsApp indisponível para ${paciente.nome}`
+                                  }
                                   onClick={(event) => {
                                     if (!hasValidatedWhatsapp(paciente)) {
                                       event.preventDefault()
@@ -490,6 +655,7 @@ export default function Pacientes() {
 
                                 <ActionIconButton
                                   title="Novo agendamento"
+                                  ariaLabel={`Novo agendamento para ${paciente.nome}`}
                                   onClick={() => {
                                     navigate('/agenda', {
                                       state: {

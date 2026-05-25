@@ -4,7 +4,8 @@ export const DEFAULT_SLOT_MINUTES = 30
 export const SLOT_HEIGHT = 44
 export const TIME_COLUMN_WIDTH = 64
 export const DAY_COLUMN_MIN_WIDTH = 180
-export const DEFAULT_DIAS_SEMANA = [1, 2, 3, 4, 5]
+export const WEEK_DAYS_COUNT = 7
+export const DEFAULT_DIAS_SEMANA = [0, 1, 2, 3, 4, 5, 6]
 export const DEFAULT_AGENDA_CONFIG = {
   inicio: `${String(DEFAULT_START_HOUR).padStart(2, '0')}:00`,
   fim: `${String(DEFAULT_END_HOUR).padStart(2, '0')}:00`,
@@ -122,7 +123,7 @@ export function getDayView(anchorDate = new Date()) {
 export function getWeekDays(anchorDate = new Date()) {
   const monday = getMonday(anchorDate)
 
-  return Array.from({ length: 7 }, (_, index) => buildDayMeta(addDays(monday, index)))
+  return Array.from({ length: WEEK_DAYS_COUNT }, (_, index) => buildDayMeta(addDays(monday, index)))
 }
 
 export function getMonthMatrix(anchorDate = new Date()) {
@@ -145,10 +146,10 @@ export function formatWeekLabel(anchorDate = new Date()) {
   const days = getWeekDays(anchorDate)
   const first = days[0]?.date ?? new Date()
   const last = days[days.length - 1]?.date ?? new Date()
-  const weekStart = new Intl.DateTimeFormat('pt-BR', { weekday: 'long' }).format(first)
-  const weekEnd = new Intl.DateTimeFormat('pt-BR', { weekday: 'long' }).format(last)
+  const weekStart = capitalizeWeekday(new Intl.DateTimeFormat('pt-BR', { weekday: 'long' }).format(first))
+  const weekEnd = capitalizeWeekday(new Intl.DateTimeFormat('pt-BR', { weekday: 'long' }).format(last))
 
-  return `${weekStart} ${new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(first)} — ${weekEnd} ${new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).format(last)}`
+  return `${weekStart} a ${weekEnd} • ${new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(first)} a ${new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).format(last)}`
 }
 
 export function formatDayLabel(anchorDate = new Date()) {
@@ -242,7 +243,11 @@ export function getRangeEndExclusive(anchorDate = new Date(), viewMode = 'week')
     return endOfMonthExclusive(anchorDate)
   }
 
-  return addDays(getRangeStart(anchorDate, viewMode), 7)
+  return addDays(getRangeStart(anchorDate, viewMode), WEEK_DAYS_COUNT)
+}
+
+function capitalizeWeekday(label) {
+  return `${label.charAt(0).toUpperCase()}${label.slice(1)}`
 }
 
 export function getMinutesFromStart(date, startMinute = DEFAULT_START_HOUR * 60) {

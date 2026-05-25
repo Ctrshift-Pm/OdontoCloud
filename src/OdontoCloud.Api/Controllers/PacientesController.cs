@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using OdontoCloud.Application.UseCases.Pacientes;
 using OdontoCloud.Application.UseCases.Pacientes.Commands;
 using OdontoCloud.Application.UseCases.Pacientes.Queries;
+using OdontoCloud.Domain.Enums;
+using OdontoCloud.Infrastructure.Identity;
 
 namespace OdontoCloud.Api.Controllers;
 
@@ -20,6 +22,7 @@ public sealed class PacientesController : ControllerBase
     }
 
     [HttpPost]
+    [Permission(ModuloSistema.Pacientes, AcaoPermissao.Criar)]
     public async Task<ActionResult<PacienteDto>> Create(
         [FromBody] CreatePacienteCommand command,
         CancellationToken cancellationToken)
@@ -29,9 +32,26 @@ public sealed class PacientesController : ControllerBase
     }
 
     [HttpGet]
+    [Permission(ModuloSistema.Pacientes, AcaoPermissao.Visualizar)]
     public async Task<ActionResult<IReadOnlyList<PacienteDto>>> GetAll(CancellationToken cancellationToken)
     {
         var response = await _sender.Send(new GetAllPacientesQuery(), cancellationToken);
         return Ok(response);
     }
+
+    [HttpPatch("{id:guid}/crm-kanban")]
+    [Permission(ModuloSistema.Pacientes, AcaoPermissao.Editar)]
+    public async Task<ActionResult<PacienteDto>> UpdateCrmKanbanStatus(
+        Guid id,
+        [FromBody] UpdatePacienteKanbanStatusRequest request,
+        CancellationToken cancellationToken)
+    {
+        var response = await _sender.Send(
+            new UpdatePacienteKanbanStatusCommand(id, request.CrmKanbanStatus),
+            cancellationToken);
+
+        return response is null ? NotFound() : Ok(response);
+    }
 }
+
+public sealed record UpdatePacienteKanbanStatusRequest(string CrmKanbanStatus);

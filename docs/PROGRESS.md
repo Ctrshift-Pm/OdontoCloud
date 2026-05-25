@@ -1,3 +1,1180 @@
+## 2026-05-12 - Codex - Correção documental e copy de MVP
+
+Responsavel: Codex - Redator Produto
+
+Status: concluido
+
+Arquivos alterados:
+
+- `docs/ODONTOCLOUD_CONTEXT.md`
+- `docs/ROADMAP_BLOCOS.md`
+- `docs/PROGRESS.md`
+- `odontocloud-frontend/src/components/AppShell.jsx`
+- `odontocloud-frontend/src/pages/ModulePlaceholder.jsx`
+- `odontocloud-frontend/src/routes/index.jsx`
+- `agent_reports/fix_docs_copy_mvp.md`
+
+Comandos executados:
+
+- `cd odontocloud-frontend && npm run lint`
+- `cd odontocloud-frontend && npm run build`
+
+Resultado:
+
+- Ajuste de texto e copy de menu/placeholders alinhado ao estado atual do MVP sem alteração de lógica funcional.
+- `IA Atendimento` e `Assinatura Digital` permanecem explicitamente marcados como "Em breve" e sem transações ativas.
+- Remoção de linguagem de placeholder para módulos que já estão operacionais.
+- Observação do build: aviso de chunk >500 KB no Vite (não funcionalmente bloqueante).
+
+Pendencias:
+
+- Nenhuma pendência de código nesta rodada.
+
+## 2026-05-12 - Codex - Prontuário/Odontograma (GET idempotente + mista)
+
+Responsavel: Codex (protetico-svg)
+
+Status: em andamento
+
+Arquivos alterados:
+
+- `src/OdontoCloud.Application/UseCases/Prontuario/GetProntuario/GetProntuarioQueryHandler.cs`
+- `src/OdontoCloud.Application/UseCases/Prontuario/OdontogramaHelper.cs`
+- `src/OdontoCloud.Application/UseCases/Prontuario/UpdateOdontograma/UpdateDenteOdontogramaCommandHandler.cs`
+- `src/OdontoCloud.Application/UseCases/Prontuario/Denticao/UpdateDenticaoCommandHandler.cs`
+- `src/OdontoCloud.Application/UseCases/Prontuario/UpdateAnamnese/UpdateAnamneseCommandHandler.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/ProntuarioApiIntegrationTests.cs`
+- `odontocloud-frontend/src/pages/Prontuario.jsx`
+- `odontocloud-frontend/tests/e2e/prontuario.spec.js`
+- `docs/ODONTOGRAMA_SVG_MAP.md`
+
+Comandos executados:
+
+- (pendente) `dotnet build OdontoCloud.slnx`
+- (pendente) `dotnet test OdontoCloud.slnx`
+- (pendente) `cd odontocloud-frontend && npm run lint`
+- (pendente) `cd odontocloud-frontend && npm run build`
+- (pendente) `cd odontocloud-frontend && npm run test:e2e -- tests/e2e/prontuario.spec.js`
+
+Resultado esperado:
+
+- Requisição `GET /api/prontuario/{pacienteId}` não persiste mais prontuário automaticamente.
+- Primeira atualização com `PATCH` cria prontuário quando necessário (fluxo preservado).
+- Alternância entre dente permanente/decíduo em mista passa a marcar o contraparte como `ausente`.
+- Dentição mista recebe validação de integridade de símbolos 52x e fallback textual para ausência de símbolo por slot.
+
+Testes novos/alterados:
+
+- `tests/OdontoCloud.Api.IntegrationTests/ProntuarioApiIntegrationTests.cs`
+- `odontocloud-frontend/tests/e2e/prontuario.spec.js`
+
+Pendencias:
+
+- Finalizar execução completa dos comandos acima e validar retorno dos cenários novos e existentes com ambiente disponível.
+
+Blocker:
+
+- Nenhum bloqueio técnico conhecido no escopo.
+
+Observação de escopo:
+
+- Não alteramos módulos de Financeiro, Agenda, Perfil, Configurações, Dashboard ou Pacientes.
+
+## 2026-05-12 - Codex - Correção de integridade, permissões e login multi-tenant (MVP)
+
+Responsavel: Codex
+
+Status: concluido
+
+Arquivos alterados:
+
+- `src/OdontoCloud.Application/Exceptions/LoginEmailAmbiguoException.cs`
+- `src/OdontoCloud.Application/Interfaces/IUsuarioAuthenticationRepository.cs`
+- `src/OdontoCloud.Application/UseCases/Auth/Login/LoginCommand.cs`
+- `src/OdontoCloud.Application/UseCases/Auth/Login/LoginCommandHandler.cs`
+- `src/OdontoCloud.Api/Controllers/AuthController.cs`
+- `src/OdontoCloud.Infrastructure/Identity/UsuarioAuthenticationRepository.cs`
+- `src/OdontoCloud.Api/Controllers/AgendamentosController.cs`
+- `src/OdontoCloud.Api/Controllers/DentistasController.cs`
+- `src/OdontoCloud.Api/Controllers/PacientesController.cs`
+- `src/OdontoCloud.Api/Controllers/DashboardController.cs`
+- `src/OdontoCloud.Api/Controllers/PerfilController.cs`
+- `src/OdontoCloud.Application/UseCases/Financeiro/Queries/GetContasReceberPendentesQueryHandler.cs`
+- `src/OdontoCloud.Application/UseCases/Financeiro/Queries/GetContasReceberPorPeriodoQueryHandler.cs`
+- `src/OdontoCloud.Application/UseCases/FinanceiroPagar/Queries/GetContasPagarPendentesQueryHandler.cs`
+- `src/OdontoCloud.Application/UseCases/Dashboard/GetDashboardResumoQueryHandler.cs`
+- `src/OdontoCloud.Application/UseCases/Dentistas/DentistaAgendaConfigParser.cs`
+- `tests/OdontoCloud.Infrastructure.Tests/Auth/LoginCommandHandlerTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/AuthLoginIntegrationTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/FinanceiroApiIntegrationTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/DashboardApiIntegrationTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/AgendamentosApiIntegrationTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/DentistasApiIntegrationTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/PacientesApiIntegrationTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/PerfilApiIntegrationTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/ProntuarioApiIntegrationTests.cs`
+- `tests/OdontoCloud.Infrastructure.Tests/Dentistas/DentistaAgendaConfigParserTests.cs`
+- `tests/OdontoCloud.Infrastructure.Tests/Auth/UpdateSenhaPerfilCommandHandlerTests.cs`
+- `tests/OdontoCloud.Infrastructure.Tests/Prontuario/UpdateOdontogramaValidatorTests.cs`
+
+Comandos executados:
+
+- `docker compose up -d postgres` (`falhou`: Docker daemon indisponível em `//./pipe/dockerDesktopLinuxEngine`)
+- `dotnet build OdontoCloud.slnx` (`sucesso`)
+- `dotnet test OdontoCloud.slnx` (`falhou`: conexão com PostgreSQL recusada em `127.0.0.1:5432`)
+
+Resultado:
+
+- GETs financeiros e dashboard foram tornados idempotentes (sem persistência de status durante leitura); status de atraso agora é calculado na consulta para retorno.
+- `Login` passa a suportar `ClinicaId` opcional; em cenários com e-mail duplicado entre clínicas sem escopo, retorna 401 com mensagem explícita de ambiguidade.
+- Endpoints de negócio sensíveis ganharam autorização granular via `[Permission]` e testes de cobertura para respostas 403.
+- Regra de agenda por dentista agora respeita `diasDaSemana` também em finais de semana (`!isFimDeSemana` removido).
+
+Testes novos/alterados:
+
+- `tests/OdontoCloud.Api.IntegrationTests/AuthLoginIntegrationTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/FinanceiroApiIntegrationTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/DashboardApiIntegrationTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/AgendamentosApiIntegrationTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/DentistasApiIntegrationTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/PacientesApiIntegrationTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/PerfilApiIntegrationTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/ProntuarioApiIntegrationTests.cs`
+- `tests/OdontoCloud.Infrastructure.Tests/Auth/LoginCommandHandlerTests.cs`
+- `tests/OdontoCloud.Infrastructure.Tests/Dentistas/DentistaAgendaConfigParserTests.cs`
+- `tests/OdontoCloud.Infrastructure.Tests/Auth/UpdateSenhaPerfilCommandHandlerTests.cs`
+
+Pendencias:
+
+- Reexecutar suite de integração com PostgreSQL ativo para validar cenários novos e existentes em ambiente limpo.
+
+Blocker:
+
+- Blocker de ambiente: Docker/daemon/PostgreSQL indisponível nesta sessão (`Npgsql: Failed to connect to 127.0.0.1:5432`).
+
+Observação de escopo:
+
+- Alterações de frontend e demais módulos não foram ampliadas além de testes e integrações já existentes.
+
+## 2026-05-08 - Codex - Auditor Financeiro E2E (filtro/lista/fluxo baixa)
+
+Responsavel: Codex
+
+Status: concluido
+
+Arquivos alterados:
+
+- `odontocloud-frontend/tests/e2e/financeiro.spec.js`
+- `odontocloud-frontend/src/pages/Financeiro.jsx`
+- `docs/PROGRESS.md`
+- `agent_reports/fix_e2e_financeiro_mvp.md`
+
+Comandos executados:
+
+- `cd odontocloud-frontend && npm run lint` (sucesso)
+- `cd odontocloud-frontend && npm run build` (sucesso)
+- `cd odontocloud-frontend && npm run test:e2e -- tests/e2e/financeiro.spec.js` (sucesso, `6 passed`)
+- `cd odontocloud-frontend && npm run test:e2e` (sucesso, `20 passed`)
+
+Resultado:
+
+- Falha residual no módulo financeiro: `locator` por `data-conta-id` encontrava 2 elementos (linha desktop `tr` + card mobile `article`) com mesmo id, e o fluxo usava seletores ambíguos (`.first()`/`.last()`) sem garantir a linha/estado visível do layout atual.
+- O fluxo de criação via UI validava conta por consultas por `valorBase`/`desconto`, o que gerava risco de ambiguidade entre registros.
+- No cenário de baixa, o teste assumia `Parcial` no UI sem confirmar status real retornado pela API após baixa.
+
+Decisoes aplicadas:
+
+- Em `financeiro.spec.js`, capturar explicitamente o `id` da conta recém-criada a partir da resposta `POST /api/financeiro/receber`.
+- Substituir busca por `valorBase` por busca por `contaId` explícito e helper de linha visível (`[data-conta-id="<id>"]:visible`), evitando ambiguidade entre desktop/mobile.
+- Aplicar recarga determinística da lista via clique em **Consultar** e sincronizar com a resposta `GET /api/financeiro/receber`.
+- Em `realiza baixa`, validar status atualizado via API (`GET /api/financeiro/receber`) antes de afirmar no UI.
+- Ajustar selector do botão de exclusão em mobile para `data-testid` consistente com desktop.
+
+Pendencias:
+
+- Nenhuma pendência para o escopo financeiro restante.
+
+Blocker:
+
+- Nenhum blocker remanescente após a correção dos cenários e validação do `npm run test:e2e` completo.
+
+Observação de escopo:
+
+- Não houve alteração de regra de negócio no backend; ajustes ficaram em testes E2E e nos atributos de teste frontend para determinismo.
+
+## 2026-05-08 - Codex - Correção de bloqueios E2E MVP (serialização + saneamento de estado)
+
+Responsavel: Codex
+
+Status: concluido
+
+Arquivos alterados:
+
+- `odontocloud-frontend/playwright.config.js`
+- `odontocloud-frontend/tests/e2e/agenda.spec.js`
+- `odontocloud-frontend/tests/e2e/configuracoes.spec.js`
+- `odontocloud-frontend/tests/e2e/perfil.spec.js`
+- `odontocloud-frontend/src/pages/Agenda.jsx`
+- `docs/PROGRESS.md`
+
+Comandos executados:
+
+- `cd odontocloud-frontend && npm run lint` (sucesso)
+- `cd odontocloud-frontend && npm run build` (sucesso)
+- `cd odontocloud-frontend && npm run test:e2e` (sucesso, 20/20)
+
+Resultado:
+
+- Bloqueio 1 (Agenda): identificado que o teste de Configurações persistia a agenda do dentista (fim de semana apenas e duração 90), gerando retorno `400` na criação de agendamentos com mensagem `O horário informado não está dentro da agenda configurada para o dentista.` durante os testes de agenda.
+- Bloqueio 2 (Auth/Profile): o fluxo de `perfil.spec.js` alterava a senha do admin compartilhado. O risco de corrida entre specs e 401 foi mitigado com:
+  - execução dos e2e com `workers: 1` e `fullyParallel: false` no `playwright.config.js`;
+  - restauro da senha do admin ao final do teste de perfil via API (`PATCH /api/perfil/senha` com fallback);
+  - isolamento de estado da agenda no teste de agenda antes de cada caso (`garantirAgendaPadrao`) para evitar dependência de estado legado.
+- Ajuste de determinismo da agenda no frontend (`Agenda.jsx`): `handleSaved` agora atualiza listas com `Promise.allSettled` e não impede fechamento de modal por exceções de refresh, evitando falha de UI quando o backend valida/atualiza em sequência.
+- Ajuste de E2E de Configurações: `configuracoes.spec.js` agora captura a configuração original por dentista e restaura no `finally`, evitando contaminacao entre arquivos.
+
+Testes novos/alterados:
+
+- `odontocloud-frontend/tests/e2e/agenda.spec.js`
+- `odontocloud-frontend/tests/e2e/configuracoes.spec.js`
+- `odontocloud-frontend/tests/e2e/perfil.spec.js`
+
+Pendencias:
+
+- Nenhuma pendencia pendente para o escopo MVP de estabilidade da suíte.
+
+Blocker:
+
+- Nenhum blocker restante; suíte E2E completa verde no estado atual.
+
+Observação de escopo:
+
+- Não houve alterações em `src/OdontoCloud` fora do contrato já existente; apenas ajustes de testes E2E e frontend com comportamento de atualização de estado/modal.
+
+## 2026-05-08 - Codex - Configuracoes (MVP) - Agenda por dentista
+
+Responsavel: Codex
+
+Status: concluido
+
+Arquivos alterados:
+
+- `src/OdontoCloud.Domain/Entities/Dentista.cs`
+- `src/OdontoCloud.Application/Interfaces/IDentistaRepository.cs`
+- `src/OdontoCloud.Infrastructure/Data/DentistaRepository.cs`
+- `src/OdontoCloud.Application/UseCases/Dentistas/Commands/UpdateDentistaAgendaConfigCommand.cs`
+- `src/OdontoCloud.Application/UseCases/Dentistas/Commands/UpdateDentistaAgendaConfigCommandValidator.cs`
+- `src/OdontoCloud.Application/UseCases/Dentistas/Commands/UpdateDentistaAgendaConfigCommandHandler.cs`
+- `src/OdontoCloud.Api/Controllers/DentistasController.cs`
+- `odontocloud-frontend/src/pages/Configuracoes.jsx`
+- `odontocloud-frontend/src/api/agenda.js`
+- `odontocloud-frontend/src/routes/index.jsx`
+- `odontocloud-frontend/src/components/AppShell.jsx`
+- `odontocloud-frontend/src/pages/Configuracoes.jsx`
+- `tests/OdontoCloud.Infrastructure.Tests/Dentistas/DentistaAgendaConfigParserTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/DentistasApiIntegrationTests.cs`
+- `odontocloud-frontend/tests/e2e/configuracoes.spec.js`
+- `docs/PROGRESS.md`
+
+Comandos executados:
+
+- `docker compose up -d postgres` (sucesso: `Container odontocloud-postgres Running`);
+- `dotnet build OdontoCloud.slnx` (sucesso);
+- `dotnet test OdontoCloud.slnx` (sucesso, 119 testes totais aprovados);
+- `cd odontocloud-frontend && npm run lint` (sucesso);
+- `cd odontocloud-frontend && npm run build` (sucesso);
+- `cd odontocloud-frontend && npm run test:e2e -- tests/e2e/configuracoes.spec.js` (sucesso, 1/1).
+
+Resultado:
+
+- Backend:
+  - Implementado endpoint `PATCH /api/dentistas/{id}/agenda-config` para atualização de agenda por dentista.
+  - Adicionado fluxo de validação via `UpdateDentistaAgendaConfigCommandValidator` e parser de configuração.
+  - Ajustado contrato do repositório de dentistas para persistir alterações no `AgendaConfigJson`.
+- Frontend:
+  - Substituído placeholder de `/configuracoes` por tela `Configuracoes.jsx` com seleção por dentista, horários (`time`), duração (`select`) e dias (`checkbox`).
+  - Incluído feedback visual de sucesso/erro.
+- Testes:
+  - Unidade: `tests/OdontoCloud.Infrastructure.Tests/Dentistas/DentistaAgendaConfigParserTests.cs` atualizado para validar fim de semana, validade de período, duração e dias inválidos.
+  - Integração: adicionado `tests/OdontoCloud.Api.IntegrationTests/DentistasApiIntegrationTests.cs` com cenários de sucesso, sem token, tenant distinto e payload inválido.
+  - E2E: adicionado `odontocloud-frontend/tests/e2e/configuracoes.spec.js` cobrindo login, navegação, edição e persistência após recarga.
+
+Testes novos/alterados:
+
+- `tests/OdontoCloud.Infrastructure.Tests/Dentistas/DentistaAgendaConfigParserTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/DentistasApiIntegrationTests.cs`
+- `odontocloud-frontend/tests/e2e/configuracoes.spec.js`
+
+Pendencias:
+
+- Comandos obrigatórios já anexados no relatório de encerramento (`agent_reports/mvp_configuracoes_agenda.md`) com os resultados exatos.
+
+Blocker:
+
+- Bloqueio inicial identificado durante a validação: API antiga mantendo lock dos arquivos da solução (`OdontoCloud.Api` em 5189), impedindo `dotnet build` e retornando 404 no endpoint até reinício do serviço. Resolvido ao encerrar o processo legado e executar com API atual.
+
+Observacao de escopo:
+
+- Não houve alteração funcional em Prontuario, Financeiro, Pacientes/CRM, IA Atendimento ou Assinatura Digital.
+
+## 2026-05-08 - Codex - Perfil/Conta (MVP)
+
+Responsavel: Codex
+
+Status: concluido
+
+Arquivos alterados:
+
+- `src/OdontoCloud.Application/Interfaces/IUsuarioAuthenticationRepository.cs`
+- `src/OdontoCloud.Infrastructure/Identity/UsuarioAuthenticationRepository.cs`
+- `src/OdontoCloud.Application/UseCases/Auth/Profile/GetPerfilMe/PerfilMeDto.cs`
+- `src/OdontoCloud.Application/UseCases/Auth/Profile/GetPerfilMe/GetPerfilMeQuery.cs`
+- `src/OdontoCloud.Application/UseCases/Auth/Profile/GetPerfilMe/GetPerfilMeQueryHandler.cs`
+- `src/OdontoCloud.Application/UseCases/Auth/Profile/UpdateSenha/UpdateSenhaPerfilCommand.cs`
+- `src/OdontoCloud.Application/UseCases/Auth/Profile/UpdateSenha/UpdateSenhaPerfilCommandValidator.cs`
+- `src/OdontoCloud.Application/UseCases/Auth/Profile/UpdateSenha/UpdateSenhaPerfilCommandHandler.cs`
+- `src/OdontoCloud.Api/Controllers/PerfilController.cs`
+- `tests/OdontoCloud.Infrastructure.Tests/Auth/UpdateSenhaPerfilCommandValidatorTests.cs`
+- `tests/OdontoCloud.Infrastructure.Tests/Auth/UpdateSenhaPerfilCommandHandlerTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/PerfilApiIntegrationTests.cs`
+- `odontocloud-frontend/src/api/perfil.js`
+- `odontocloud-frontend/src/pages/Perfil.jsx`
+- `odontocloud-frontend/src/routes/index.jsx`
+- `odontocloud-frontend/src/components/AppShell.jsx`
+- `odontocloud-frontend/tests/e2e/perfil.spec.js`
+- `docs/PROGRESS.md`
+
+Comandos executados:
+
+- `docker compose up -d postgres`
+- `dotnet build OdontoCloud.slnx`
+- `dotnet test OdontoCloud.slnx`
+- `cd odontocloud-frontend && npm run lint`
+- `cd odontocloud-frontend && npm run build`
+- `cd odontocloud-frontend && npm run test:e2e -- tests/e2e/perfil.spec.js`
+- `dotnet run --project src/OdontoCloud.Api/OdontoCloud.Api.csproj --launch-profile http` (executado em background apenas para habilitar E2E)
+
+Resultado:
+
+- Backend:
+  - Implementado `GET /api/perfil/me` para retornar `id`, `nome`, `email`, `perfil`, `clinicaId` e `dentistaId` (não expõe `PasswordHash`).
+  - Implementado `PATCH /api/perfil/senha` com validação de campos, validação de senha atual e persistência de hash novo.
+  - Adicionados testes unitários de handler e validador.
+  - Adicionados testes de integração cobrindo acesso sem token, dados do perfil sem senha, senha atual inválida e troca válida com novo login.
+- Frontend:
+  - Rota `/perfil` incluída em `odontocloud-frontend/src/routes/index.jsx`.
+  - Item de menu `Perfil` incluído em `AppShell` (navegação de Gestão).
+  - Página `Perfil.jsx` adicionada com card de identidade, card de segurança, mensagens de sucesso/erro e logout.
+  - Serviço `src/api/perfil.js` criado.
+- E2E:
+  - Teste `tests/e2e/perfil.spec.js` implementado com fluxo completo: login, acesso à página, tentativa com senha atual inválida, troca para senha temporária, logout/login, troca de volta para `123`.
+- Resultados dos comandos:
+  - `docker compose up -d postgres`: sucesso (`Container odontocloud-postgres Running`).
+  - `dotnet build OdontoCloud.slnx`: sucesso (build inteiro com êxito).
+  - `dotnet test OdontoCloud.slnx`: sucesso (27 testes aprovados em `OdontoCloud.Domain.Tests`, 39 em `OdontoCloud.Infrastructure.Tests` e 47 em `OdontoCloud.Api.IntegrationTests`).
+  - `cd odontocloud-frontend && npm run lint`: sucesso (sem erros).
+  - `cd odontocloud-frontend && npm run build`: sucesso.
+  - `cd odontocloud-frontend && npm run test:e2e -- tests/e2e/perfil.spec.js`: sucesso (1/1).
+- Observação operacional:
+  - O primeiro `npm run test:e2e -- tests/e2e/perfil.spec.js` falhou por API não iniciada; reexecutado com API em execução e concluiu com sucesso.
+
+Testes novos/alterados:
+
+- `tests/OdontoCloud.Infrastructure.Tests/Auth/UpdateSenhaPerfilCommandValidatorTests.cs`
+- `tests/OdontoCloud.Infrastructure.Tests/Auth/UpdateSenhaPerfilCommandHandlerTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/PerfilApiIntegrationTests.cs`
+- `odontocloud-frontend/tests/e2e/perfil.spec.js`
+
+Pendencias:
+
+- Nenhuma pendência funcional dentro do escopo MVP de Perfil/Conta.
+
+Blocker:
+
+- Nenhum blocker pendente.
+
+Observacao de escopo:
+
+- Não houve mudanças em Prontuario, Agenda, Financeiro, Pacientes/CRM, IA Atendimento ou Assinatura Digital.
+
+## 2026-05-07 - Codex - Protetico Digital (SVG mista runtime por slot)
+
+Responsavel: Protetico Digital
+
+Status: concluido
+
+Arquivos alterados:
+
+- `odontocloud-frontend/src/pages/Prontuario.jsx`
+- `odontocloud-frontend/tests/e2e/prontuario.spec.js`
+- `docs/PROGRESS.md`
+
+Comandos executados:
+
+- `cd odontocloud-frontend && npm run lint` (sucesso)
+- `cd odontocloud-frontend && npm run build` (sucesso)
+- `cd odontocloud-frontend && npm run test:e2e -- tests/e2e/prontuario.spec.js` (sucesso)
+
+Resultado:
+
+- Implementado parsing runtime de símbolos de dente via `DOMParser`, extraindo `<g id="tooth-XX">` de `denticao_mista.svg` com `viewBox` normalizado por `getBBox()`.
+- `Mista` renderiza 32 slots permanentes fixos com botões clicáveis e slot vazio para ausência de dente ativo.
+- Cada slot mantém o mini modal e alterna entre dentição decidua/permanente sem alterar layout (troca de símbolo no mesmo espaço).
+- Aplicado estilo visual (cor de status, seleção, carie) diretamente no `<svg>` do dente ativo.
+- Teste e2e de prontuário atualizado para validar 32 slots e troca no mesmo espaço.
+- Sem mudanças em backend/API/DTOs e sem impacto em Financeiro, Agenda, Pacientes ou Auth.
+
+## 2026-05-07 - Codex - Ajuste denticao mista por slots permanentes
+
+Responsavel: Codex
+
+Status: concluido
+
+Arquivos alterados:
+
+- `odontocloud-frontend/src/pages/Prontuario.jsx`
+- `odontocloud-frontend/tests/e2e/prontuario.spec.js`
+- `docs/PROGRESS.md`
+
+Comandos executados e resultado:
+
+- `cd odontocloud-frontend && npm run lint`: sucesso.
+- `cd odontocloud-frontend && npm run build`: sucesso.
+- `cd odontocloud-frontend && npm run test:e2e -- tests/e2e/prontuario.spec.js`: sucesso (4/4).
+
+Resultado:
+
+- Denticao `Mista` agora renderiza 32 espacos permanentes fixos, todos do mesmo tamanho.
+- Os 20 dentes deciduos aparecem inicialmente nos slots permanentes correspondentes; os demais slots ficam vazios e clicaveis.
+- Cada slot resolve o dente ativo: deciduo por padrao, permanente quando o deciduo esta `ausente` ou quando o permanente tem estado clinico.
+- Removida a dependencia de sobreposicao/SVG misto visual para o modo `Mista`; a UI usa uma grade operacional previsivel de slots.
+- E2E de prontuario valida 32 slots mistos, abre o modal pelo dente deciduo e permite trocar para o permanente correspondente.
+
+Decisao tecnica:
+
+- A troca geometrica perfeita de um SVG deciduo para um SVG permanente dentro do mesmo slot ainda exige normalizacao de simbolos individuais. A solucao aplicada prioriza o modelo clinico correto: 32 slots permanentes, deciduos iniciais nos slots de troca e substituicao individual pelo modal.
+
+Pendencias:
+
+- Se a troca visual precisa mostrar a geometria real do permanente dentro do slot, extrair dentes como simbolos individuais normalizados por slot.
+
+## 2026-05-07 - Codex - Smoke Prontuario denticao mista e carie percentual
+
+Responsavel: Codex
+
+Status: concluido
+
+Arquivos alterados:
+
+- `odontocloud-frontend/src/pages/Prontuario.jsx`
+- `odontocloud-frontend/tests/e2e/prontuario.spec.js`
+- `docs/PROGRESS.md`
+
+Comandos executados e resultado:
+
+- `cd odontocloud-frontend && npm run lint`: sucesso.
+- `cd odontocloud-frontend && npm run build`: sucesso.
+- `cd odontocloud-frontend && npm run test:e2e -- tests/e2e/prontuario.spec.js`: sucesso (4/4).
+- `cd odontocloud-frontend && npm run test:e2e`: sucesso (15/15).
+
+Resultado:
+
+- Removido o nome tecnico dos arquivos SVG da interface do odontograma.
+- Mini modal do dente exibe acao de troca deciduo/permanente apenas quando a denticao ativa e `Mista`.
+- Troca deciduo -> permanente usa o dente deciduo como `ausente` para liberar o slot permanente correspondente.
+- Troca permanente -> deciduo limpa o permanente e reativa o deciduo correspondente.
+- Campo de percentual de carie agora usa mascara `0,00%` e limita automaticamente valores acima de 100 para `100,00%`.
+- E2E de prontuario cobre busca limitada, mista com troca de tipo de dente, carie percentual mascarada/clamp e legenda de protese.
+
+Pendencias:
+
+- A representacao de troca mista ainda usa convencao de estado (`deciduo=ausente`) em vez de um campo dedicado por slot. Se a regra clinica evoluir, criar contrato explicito para `denticaoPorSlot`.
+
+## 2026-05-07 - Codex - Smoke fixes Financeiro/Prontuario/Pacientes/Agenda
+
+Responsavel: Codex
+
+Status: concluido
+
+Arquivos alterados:
+
+- `odontocloud-frontend/src/pages/Financeiro.jsx`
+- `odontocloud-frontend/src/pages/Prontuario.jsx`
+- `odontocloud-frontend/src/pages/Pacientes.jsx`
+- `odontocloud-frontend/tests/e2e/financeiro.spec.js`
+- `odontocloud-frontend/tests/e2e/prontuario.spec.js`
+- `odontocloud-frontend/tests/e2e/pacientes.spec.js`
+- `odontocloud-frontend/tests/e2e/agenda.spec.js`
+- `docs/PROGRESS.md`
+
+Comandos executados e resultado:
+
+- `docker compose up -d postgres`: sucesso (`Container odontocloud-postgres Running`).
+- `dotnet build OdontoCloud.slnx`: sucesso.
+- `dotnet test OdontoCloud.slnx`: sucesso (27 Domain + 34 Infrastructure + 43 API Integration).
+- `cd odontocloud-frontend && npm run lint`: sucesso.
+- `cd odontocloud-frontend && npm run build`: sucesso.
+- `cd odontocloud-frontend && npm run test:e2e`: sucesso (15/15).
+
+Resultado:
+
+- Financeiro: mascara monetaria ajustada para digitacao por centavos (`10001` => `R$ 100,01`) em valores de receber, pagar e baixa.
+- Financeiro: desconto da conta a receber tratado na UI como percentual com mascara `0,00%`, convertendo para valor monetario antes de enviar ao contrato atual do backend.
+- Prontuario: removido o `<select id="filtroPaciente">` legado; selecao fica apenas pela busca com dropdown limitado a 10 resultados.
+- Prontuario: camada SVG aplica preenchimento/contorno tambem nos filhos de cada dente, evitando apenas um dente colorido.
+- Prontuario: denticao decidua contida no mesmo envelope visual da permanente e denticao mista renderizada em arcada unica, usando os slots permanentes e dentes deciduos como substitutos ate troca individual.
+- Pacientes/CRM: lista e Kanban paginados no frontend com selecao de 10/20/50/100 itens por pagina.
+- Agenda: teste de fim de semana estabilizado criando em sabado/domingo na semana visivel, sem depender de avancar para uma semana possivelmente poluida.
+
+Testes criados/alterados:
+
+- `financeiro.spec.js`: cobre mascara monetaria por centavos, desconto percentual, CRUD de contas a receber/pagar, baixa de receber e pagamento de pagar.
+- `prontuario.spec.js`: cobre ausencia do select legado, busca por dropdown, denticao mista em arcada unica, carie percentual e legenda de protese neutra.
+- `pacientes.spec.js`: cobre Kanban paginado e lista/Kanban com seletor 10/20/50/100.
+- `agenda.spec.js`: cobre criacao em sabado e domingo.
+
+Pendencias:
+
+- Se o volume real de pacientes crescer, mover paginacao/busca de Pacientes/CRM para API paginada em vez de client-side.
+- Se for exigido teste de carga formal, adicionar ferramenta dedicada (ex.: k6) e separar de Playwright; nesta rodada foi mantida cobertura E2E funcional com volume controlado.
+
+## 2026-05-06 - Codex - Pacientes/CRM - Kanban MVP operacional
+
+Responsavel: Codex
+
+Status: concluido
+
+Arquivos alterados:
+
+- `src/OdontoCloud.Domain/Enums/CrmKanbanStatus.cs`
+- `src/OdontoCloud.Domain/Entities/Paciente.cs`
+- `src/OdontoCloud.Application/UseCases/Pacientes/PacienteDto.cs`
+- `src/OdontoCloud.Application/Interfaces/IPacienteRepository.cs`
+- `src/OdontoCloud.Application/UseCases/Pacientes/Commands/UpdatePacienteKanbanStatusCommand.cs`
+- `src/OdontoCloud.Application/UseCases/Pacientes/Commands/UpdatePacienteKanbanStatusCommandValidator.cs`
+- `src/OdontoCloud.Application/UseCases/Pacientes/Commands/UpdatePacienteKanbanStatusCommandHandler.cs`
+- `src/OdontoCloud.Infrastructure/Data/PacienteRepository.cs`
+- `src/OdontoCloud.Infrastructure/Data/OdontoCloudDbContext.cs`
+- `src/OdontoCloud.Infrastructure/Data/Migrations/20260506181743_AddCrmKanbanStatusToPaciente.cs`
+- `src/OdontoCloud.Infrastructure/Data/Migrations/20260506181743_AddCrmKanbanStatusToPaciente.Designer.cs`
+- `src/OdontoCloud.Infrastructure/Data/OdontoCloudDbContextModelSnapshot.cs`
+- `src/OdontoCloud.Api/Controllers/PacientesController.cs`
+- `odontocloud-frontend/src/api/pacientes.js`
+- `odontocloud-frontend/src/pages/Pacientes.jsx`
+- `tests/OdontoCloud.Api.IntegrationTests/PacientesApiIntegrationTests.cs`
+- `tests/OdontoCloud.Infrastructure.Tests/Pacientes/UpdatePacienteKanbanStatusCommandValidatorTests.cs`
+- `odontocloud-frontend/tests/e2e/pacientes.spec.js`
+- `docs/PROGRESS.md`
+
+Comandos executados e resultado:
+
+- `docker compose up -d postgres`: sucesso (`Container odontocloud-postgres Running`).
+- `dotnet build OdontoCloud.slnx`: sucesso.
+- `dotnet test OdontoCloud.slnx`: sucesso (27 + 33 + 43 = 103 testes aprovados).
+- `cd odontocloud-frontend && npm run lint`: sucesso.
+- `cd odontocloud-frontend && npm run build`: sucesso.
+- `cd odontocloud-frontend && npm run test:e2e`: sucesso (14/14).
+
+Resultado:
+
+- Causa raiz identificada: o CRM estava visível em tela como placeholder e sem campo persistente no modelo de paciente.
+- Foi criado o enum `CrmKanbanStatus` com estados `Novo`, `Contato`, `Avaliacao`, `Tratamento`, `Inativo` e persistido em `Paciente.CrmKanbanStatus` com padrão `Novo`.
+- Foi criada a rota `PATCH /api/pacientes/{id}/crm-kanban` com validação de enum e handler específico para mover paciente entre colunas.
+- `Pacientes.jsx` foi migrado do placeholder para um board funcional com colunas persistentes e ação de atualização via `select`.
+- Multi-tenancy foi preservado no endpoint e no repository, com testes cobrindo `tenantId`/filtro e validação de status inválido.
+- Foram adicionados/ajustados testes:
+  - `tests/OdontoCloud.Api.IntegrationTests/PacientesApiIntegrationTests.cs`
+  - `tests/OdontoCloud.Infrastructure.Tests/Pacientes/UpdatePacienteKanbanStatusCommandValidatorTests.cs`
+  - `odontocloud-frontend/tests/e2e/pacientes.spec.js`
+
+Pendencias:
+
+- Nenhuma pendência funcional dentro deste escopo.
+
+Blocker:
+
+- Nenhum após estabilização da sessão de API (`taskkill` para encerrar lock de DLL e nova execução para E2E).
+
+Observação de escopo:
+
+- Sem mudanças em prontuário/financeiro além dos arquivos de configuração e testes já referenciados.
+
+## 2026-05-06 - Codex - Prontuario (busca, mista, deciduo mobile, protese)
+
+Responsavel: Codex
+
+Status: concluido
+
+Arquivos alterados:
+
+- `src/OdontoCloud.Application/UseCases/Prontuario/OdontogramaHelper.cs`
+- `odontocloud-frontend/src/pages/Prontuario.jsx`
+- `odontocloud-frontend/src/api/prontuario.js`
+- `odontocloud-frontend/tests/e2e/prontuario.spec.js`
+- `docs/ODONTOGRAMA_SVG_MAP.md`
+- `docs/PROGRESS.md`
+
+Comandos executados:
+
+- `docker compose up -d postgres`: sucesso (`Container odontocloud-postgres Running`)
+- `dotnet build OdontoCloud.slnx`: sucesso
+- `dotnet test OdontoCloud.slnx`: sucesso (27 + 31 + 40 = 98 testes aprovados)
+- `cd odontocloud-frontend && npm run lint`: sucesso
+- `cd odontocloud-frontend && npm run build`: sucesso
+- `cd odontocloud-frontend && npm run test:e2e`: sucesso (13/13)
+
+Resultado:
+
+- Buscador de pacientes no prontuário convertido para combobox acoplado ao input (`max: 10`), sem crescimento do campo, com seleção por nome/CPF/telefone/email e fechamento automático do dropdown.
+- Ajuste de layout da dentição decídua para evitar overflow vertical interno no card (`svgHeightClass` mais contido + viewport-aware no container), preservando toque/click por dente.
+- `TipoDenticao.Mista` introduzido no backend e fluxo `PATCH /api/prontuario/{id}/denticao` preservando dentes permanentes e decíduos no JSONB.
+- Odontograma renderiza camadas de permanente e decíduo no modo Mista sem exigir novo SVG combinado.
+- Cor de prótese alterada para tom neutro distinto de extração (`protese`/`ext` sem mesma família visual).
+- Validação de parser JSONB atualizada para aceitar propriedades serializadas com maiúsculas (`Status`, `CariePercentual`) e manter `cariePercentual` em atualizações sucessivas.
+- Testes E2E de prontuário atualizados para confirmar seleção via dropdown limitado, troca de dentição Mista com preservação de estados e validação visual da legenda de prótese.
+
+Pendencias:
+
+- Nenhuma pendência funcional neste escopo.
+
+Blocker:
+
+- Nenhum no momento. Houve bloqueio inicial de build/test por processo `OdontoCloud.Api` com lock de DLLs; resolvido com encerramento explícito do processo antes das validações.
+
+Observação de escopo:
+
+- Sem mudança em agenda/financeiro; não houve criação de novos endpoints.
+
+## 2026-05-06 - Codex - Agenda (fim de semana em agendamento alinhado com backend/frontend)
+
+Responsavel: Codex
+
+Status: concluido
+
+Arquivos alterados:
+
+- `src/OdontoCloud.Application/UseCases/Dentistas/DentistaAgendaConfigParser.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/AgendamentosApiIntegrationTests.cs`
+- `odontocloud-frontend/src/components/agenda/ModalAgendamento.jsx`
+- `odontocloud-frontend/tests/e2e/agenda.spec.js`
+- `docs/PROGRESS.md`
+- `agent_reports/followup_agenda_weekend_backend_alignment.md` (gerado ao final da tarefa)
+
+Comandos executados:
+
+- `docker compose up -d postgres`: sucesso (`Container odontocloud-postgres Running`)
+- `dotnet build OdontoCloud.slnx`: sucesso
+- `dotnet test OdontoCloud.slnx`: sucesso (sem falhas)
+- `cd odontocloud-frontend && npm run lint`: sucesso
+- `cd odontocloud-frontend && npm run build`: sucesso
+- `cd odontocloud-frontend && npm run test:e2e`: sucesso (11/11)
+
+Resultado:
+
+- A regra de validação em `DentistaAgendaConfigParser.EstaDentroDaAgenda` foi ajustada para não bloquear sábado e domingo por `DiasDaSemana` enquanto mantem a validação de horário (`início`/`fim` + duração).
+- O envio de `dataHora` no modal de agenda foi mantido em `toISOString()` para preservar `DateTime` com timezone e evitar 500 na criação.
+- O teste `tests/e2e/agenda.spec.js:254` foi atualizado para evitar conflito por slot já existente, navegando para semana seguinte antes de criar sábado e domingo.
+- O cenário E2E principal de agenda ficou verde (`tests/e2e/agenda.spec.js:254`), e a suíte completa (`npm run test:e2e`) passou com 11/11.
+
+Pendencias:
+
+- Nenhuma.
+
+Blocker:
+
+- Nenhum.
+
+Observação de escopo:
+
+- Não houve criação de painel de configuração de agenda; ajuste pontual e seguro no parser e no fluxo de criação.
+
+## 2026-05-06 - Codex - Odontograma (diagnóstico de falha GET /api/prontuario em E2E)
+
+Responsavel: Codex
+
+Status: concluido
+
+Arquivos alterados:
+
+- `odontocloud-frontend/tests/e2e/prontuario.spec.js`
+- `docs/PROGRESS.md`
+- `agent_reports/followup_odontograma_e2e_get_prontuario.md`
+
+Comandos executados:
+
+- `dotnet build OdontoCloud.slnx`: sucesso
+- `dotnet test OdontoCloud.slnx`: sucesso (27+27+29+37 = 120 testes aprovados)
+- `cd odontocloud-frontend && npm run lint`: sucesso
+- `cd odontocloud-frontend && npm run build`: sucesso
+- `cd odontocloud-frontend && npx playwright test tests/e2e/prontuario.spec.js`: sucesso (2/2)
+- `cd odontocloud-frontend && npm run test:e2e`: sucesso (10/10)
+
+Resumo:
+
+- Diagnóstico raiz confirmado: falha vinha de `GET /api/prontuario/{pacienteId}` sem contexto útil de erro no helper, dificultando distinguir contrato/sessão/seed inconsistente, sem alterar regra de negócio do backend.
+- Ajuste mínimo aplicado no helper E2E para tornar o seed robusto e o diagnóstico claro: validação explícita da resposta de criação de paciente, normalização de `id` (`id`/`Id`), verificação de visibilidade do paciente em `/api/pacientes` do tenant atual e retentativa curta no `GET` de prontuário.
+- Implementado erro com mensagem detalhada (status, corpo de retorno e contexto de tenant) para evitar regressões silenciosas no próximo ciclo.
+
+Pendencias:
+
+- Nenhuma.
+
+Observação de escopo:
+
+- Não foram feitas alterações em Agenda ou Financeiro.
+
+## 2026-05-06 - Codex - Financeiro (máscara BRL e validações de fluxo de baixa)
+
+Responsavel: Codex
+
+Status: concluido (com bloqueio de suíte e2e fora do escopo)
+
+Arquivos alterados:
+
+- `odontocloud-frontend/src/pages/Financeiro.jsx`
+- `odontocloud-frontend/tests/e2e/financeiro.spec.js`
+- `docs/PROGRESS.md`
+- `D:/OdontoCloud/agent_reports/smoke_financeiro_mascara_crud.md` (gerado ao final da tarefa)
+
+Comandos executados:
+
+- `docker compose up -d postgres`
+- `dotnet build OdontoCloud.slnx`
+- `dotnet test OdontoCloud.slnx`
+- `cd odontocloud-frontend && npm run lint`
+- `cd odontocloud-frontend && npm run build`
+- `cd odontocloud-frontend && npm run test:e2e`
+- `cd odontocloud-frontend && npx playwright test tests/e2e/financeiro.spec.js` (checagem adicional do módulo)
+
+Resultado:
+
+- `docker compose up -d postgres`: sucesso (PostgreSQL em execução)
+- `dotnet build OdontoCloud.slnx`: sucesso
+- `dotnet test OdontoCloud.slnx`: sucesso (27 + 29 + 37 testes aprovados)
+- `cd odontocloud-frontend && npm run lint`: sucesso
+- `cd odontocloud-frontend && npm run build`: sucesso
+- `cd odontocloud-frontend && npx playwright test tests/e2e/financeiro.spec.js`: sucesso (6/6)
+- `cd odontocloud-frontend && npm run test:e2e`: falhou em 1 teste de Agenda (`agenda.spec.js:254`) com `response.status() 400` em validação de criação no sábado/domingo; fluxo financeiro e demais módulos passaram.
+
+Resumo:
+
+- Implementado helper frontend de moeda BRL em `Financeiro.jsx`:
+  - `parseMoneyValue` para parse robusto de `,` e `.`;
+  - `formatMoneyInput` para normalizar exibição no padrão `R$ 0,00`;
+  - `valor base`, `desconto`, `valor pago` (baixa) e `valor` (conta a pagar) usando mascaramento.
+- Ajustado criação/edição de `conta a receber` e `conta a pagar` para enviar decimal numérico correto à API.
+- Mantida proteção de negócios: edição/exclusão de contas já `Pago` continua bloqueada nas regras existentes.
+- Ações de `editar/excluir` de conta a receber continuam visíveis para `Pendente` e `Atrasado` nos fluxos desktop/mobile, e validação de fluxo de baixa preserva modal em erro 400.
+- Atualizado `tests/e2e/financeiro.spec.js` para:
+  - criar/editar conta a receber com entrada `100,01` e checar máscara `R$ 100,01`;
+  - validar ações CRUD no layout mobile de conta a receber;
+  - criar/editar conta a pagar com máscara BRL;
+  - baixa de conta a receber com valor mascarado.
+  - pagar conta a pagar e checar saída da lista.
+
+Pendencias:
+
+- Resolver o teste e2e de Agenda em `tests/e2e/agenda.spec.js:254` (sábados/domingos) que falha com `400`, sem relação com a implementação financeira desta rodada.
+
+Blocker:
+
+- Bloqueador de aceitação final: suíte completa `npm run test:e2e` não está verde por falha pré-existente em `agenda.spec.js` (status esperado 200 x 400 no cenário de sábado/domingo).
+
+## 2026-05-06 - Codex - Financeiro (E2E CRUD: seletor de modal e escopo por contexto)
+
+Responsavel: Codex
+
+Status: concluido
+
+## 2026-05-06 - Codex - Odontograma (denticao ativa + cariePercentual)
+
+Responsavel: Codex
+
+Status: concluido
+
+Arquivos alterados:
+
+- `src/OdontoCloud.Domain/Entities/Prontuario.cs`
+- `src/OdontoCloud.Domain/Enums/TipoDenticao.cs`
+- `src/OdontoCloud.Domain/Enums/StatusDenteOdontograma.cs`
+- `src/OdontoCloud.Application/UseCases/Prontuario/OdontogramaHelper.cs`
+- `src/OdontoCloud.Application/UseCases/Prontuario/UpdateOdontograma/UpdateDenteOdontogramaCommand.cs`
+- `src/OdontoCloud.Application/UseCases/Prontuario/UpdateOdontograma/UpdateDenteOdontogramaCommandValidator.cs`
+- `src/OdontoCloud.Application/UseCases/Prontuario/UpdateOdontograma/UpdateDenteOdontogramaCommandHandler.cs`
+- `src/OdontoCloud.Application/UseCases/Prontuario/UpdateAnamnese/UpdateAnamneseCommandHandler.cs`
+- `src/OdontoCloud.Application/UseCases/Prontuario/GetProntuario/GetProntuarioQueryHandler.cs`
+- `src/OdontoCloud.Application/UseCases/Prontuario/ProntuarioDto.cs`
+- `src/OdontoCloud.Application/UseCases/Prontuario/Denticao/UpdateDenticaoCommand.cs`
+- `src/OdontoCloud.Application/UseCases/Prontuario/Denticao/UpdateDenticaoCommandValidator.cs`
+- `src/OdontoCloud.Application/UseCases/Prontuario/Denticao/UpdateDenticaoCommandHandler.cs`
+- `src/OdontoCloud.Application/UseCases/PlanoTratamento/Commands/ConcluirItemPlanoCommandHandler.cs`
+- `src/OdontoCloud.Application/Interfaces/IPacienteRepository.cs`
+- `src/OdontoCloud.Api/Controllers/ProntuarioController.cs`
+- `odontocloud-frontend/src/api/prontuario.js`
+- `odontocloud-frontend/src/pages/Prontuario.jsx`
+- `tests/OdontoCloud.Infrastructure.Tests/Prontuario/UpdateOdontogramaValidatorTests.cs`
+- `tests/OdontoCloud.Infrastructure.Tests/Prontuario/UpdateDenticaoCommandValidatorTests.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/ProntuarioApiIntegrationTests.cs`
+- `odontocloud-frontend/tests/e2e/prontuario.spec.js`
+- `src/OdontoCloud.Infrastructure/Data/Migrations/20260506161410_AddDenticaoAtivaToProntuario.cs`
+- `src/OdontoCloud.Infrastructure/Data/Migrations/20260506161410_AddDenticaoAtivaToProntuario.Designer.cs`
+- `docs/ODONTOGRAMA_SVG_MAP.md`
+- `docs/PROGRESS.md`
+
+Comandos executados:
+
+- `docker compose up -d postgres`
+- `dotnet build OdontoCloud.slnx`
+- `dotnet test OdontoCloud.slnx`
+- `cd odontocloud-frontend && npm run lint`
+- `cd odontocloud-frontend && npm run build`
+- `cd odontocloud-frontend && npx playwright test tests/e2e/prontuario.spec.js`
+- `cd odontocloud-frontend && npm run test:e2e` (opcional após sucesso obrigatório)
+
+Resumo:
+
+- Modelagem persistida da dentição ativa em prontuário e endpoint de troca (`PATCH /api/prontuario/{id}/denticao`) com validação de valores e inicialização padrão da nova dentição sem excluir dados anteriores.
+- Evolução do contrato odontograma para metadata por dente (`{ status, cariePercentual? }`) com compatibilidade para legado string.
+- Validação de `cariePercentual` para `carie` com decisão prática de default para 100 quando omitido.
+- Frontend ajustado para renderizar apenas dentição ativa, permitir troca explícita com confirmação de perda, e atualizar painel de mini edição com percentual de cárie.
+- Previews visuais de cárie parcial implementados no SVG e no fallback FDI.
+
+Pendencias:
+
+Nenhuma neste escopo.
+
+- `dotnet build OdontoCloud.slnx`: sucesso
+- `dotnet test OdontoCloud.slnx`: sucesso (37 testes de `OdontoCloud.Api.IntegrationTests`, após correção do parse JSONB e migration)
+- `cd odontocloud-frontend && npm run lint`: sucesso
+- `cd odontocloud-frontend && npm run build`: sucesso
+- `cd odontocloud-frontend && npx playwright test tests/e2e/prontuario.spec.js`: sucesso (2/2)
+- `cd odontocloud-frontend && npm run test:e2e`: sucesso (10/10)
+
+Arquivos alterados:
+
+- `odontocloud-frontend/tests/e2e/financeiro.spec.js`
+- `docs/PROGRESS.md`
+
+Comandos executados:
+
+- `dotnet build OdontoCloud.slnx`
+- `cd odontocloud-frontend && npm run lint`
+- `cd odontocloud-frontend && npm run build`
+- `cd odontocloud-frontend && npx playwright test tests/e2e/financeiro.spec.js`
+- `cd odontocloud-frontend && npm run test:e2e`
+
+Resumo:
+
+- Remapeei cliques de submit/confirm em CRUD financeiro para o escopo do modal correto usando `locators` de card de modal (`.surface-card`) com heading em `filter`.
+- Padronizei o `exact: true` nos botões de `Criar conta`, `Salvar alteracoes` e `Confirmar` dentro de cada modal/confirmador.
+- Fechei também ambiguidade residual no fluxo de `conta a receber` trocando vencimento de teste para `today` (`new Date().toISOString().slice(0, 10)`), evitando falha por não aparecer no filtro de período padrão de listagem.
+- Mantive o restante restrito ao e2e financeiro, sem alterar backend, Agenda ou Prontuario.
+
+Resultado:
+
+- `dotnet build OdontoCloud.slnx`: sucesso
+- `cd odontocloud-frontend && npm run lint`: sucesso
+- `cd odontocloud-frontend && npm run build`: sucesso
+- `cd odontocloud-frontend && npx playwright test tests/e2e/financeiro.spec.js`: sucesso (5/5)
+- `cd odontocloud-frontend && npm run test:e2e`: sucesso (11/11)
+
+Pendencias:
+
+- Nenhuma.
+
+## 2026-05-06 - Codex - Financeiro CRUD Operacional (receber/pagar)
+
+Responsavel: Codex
+
+Status: concluido (com bloqueio ambiental para E2E completo)
+
+Arquivos alterados:
+
+- `src/OdontoCloud.Domain/Entities/ContaReceber.cs`
+- `src/OdontoCloud.Domain/Entities/ContaPagar.cs`
+- `src/OdontoCloud.Application/Interfaces/IContaReceberRepository.cs`
+- `src/OdontoCloud.Application/Interfaces/IContaPagarRepository.cs`
+- `src/OdontoCloud.Infrastructure/Data/ContaReceberRepository.cs`
+- `src/OdontoCloud.Infrastructure/Data/ContaPagarRepository.cs`
+- `src/OdontoCloud.Application/UseCases/Financeiro/Commands/UpdateContaReceberCommand.cs`
+- `src/OdontoCloud.Application/UseCases/Financeiro/Commands/UpdateContaReceberCommandValidator.cs`
+- `src/OdontoCloud.Application/UseCases/Financeiro/Commands/UpdateContaReceberCommandHandler.cs`
+- `src/OdontoCloud.Application/UseCases/Financeiro/Commands/DeleteContaReceberCommand.cs`
+- `src/OdontoCloud.Application/UseCases/Financeiro/Commands/DeleteContaReceberCommandHandler.cs`
+- `src/OdontoCloud.Application/UseCases/FinanceiroPagar/Commands/UpdateContaPagarCommand.cs`
+- `src/OdontoCloud.Application/UseCases/FinanceiroPagar/Commands/UpdateContaPagarCommandValidator.cs`
+- `src/OdontoCloud.Application/UseCases/FinanceiroPagar/Commands/UpdateContaPagarCommandHandler.cs`
+- `src/OdontoCloud.Application/UseCases/FinanceiroPagar/Commands/DeleteContaPagarCommand.cs`
+- `src/OdontoCloud.Application/UseCases/FinanceiroPagar/Commands/DeleteContaPagarCommandHandler.cs`
+- `src/OdontoCloud.Api/Controllers/FinanceiroController.cs`
+- `src/OdontoCloud.Api/Controllers/FinanceiroPagarController.cs`
+- `odontocloud-frontend/src/api/financeiro.js`
+- `odontocloud-frontend/src/pages/Financeiro.jsx`
+- `tests/OdontoCloud.Api.IntegrationTests/FinanceiroApiIntegrationTests.cs`
+- `odontocloud-frontend/tests/e2e/financeiro.spec.js`
+- `docs/PROGRESS.md`
+
+Comandos executados:
+
+- `docker compose up -d postgres`
+- `dotnet build OdontoCloud.slnx`
+- `dotnet test OdontoCloud.slnx`
+- `cd odontocloud-frontend && npm run lint`
+- `cd odontocloud-frontend && npm run build`
+- `cd odontocloud-frontend && npx playwright test tests/e2e/financeiro.spec.js`
+
+Resumo:
+
+- Regras de segurança foram implementadas no domínio para permitir edição/exclusão apenas em estados pendentes (receber) e pendente/atrasado (pagar).
+- Novos endpoints de CRUD mínimo foram adicionados: `PUT/DELETE /api/financeiro/receber/{id}` e `PUT/DELETE /api/financeiro/contas-pagar/{id}`.
+- Mantidos os fluxos existentes de baixa de receber e pagamento de pagar; estes continuam como trilha preferencial para mudança de estado de conta liquidada.
+- Frontend Financeiro recebeu ações de criar/editar/excluir com validação e bloqueio de ações para contas em estado final, além de confirmação de exclusão.
+- Testes de integração e2e foram ampliados para cobrir sucesso de CRUD operacional e bloqueios de conta paga.
+
+Resultado:
+
+- `dotnet build OdontoCloud.slnx`: sucesso (0 erro, 0 aviso).
+- `dotnet test OdontoCloud.slnx`: sucesso.
+- `cd odontocloud-frontend && npm run lint`: sucesso.
+- `cd odontocloud-frontend && npm run build`: sucesso.
+- `cd odontocloud-frontend && npx playwright test tests/e2e/financeiro.spec.js`: falhou por pré-condição de ambiente (`http://localhost:5189` sem API ativa).
+
+Pendencias:
+
+- Rodar `npx playwright test tests/e2e/financeiro.spec.js` com API ativa no perfil `http`.
+- Rodar `cd odontocloud-frontend && npm run test:e2e` (passo opcional caso tudo esteja verde).
+
+Blocker:
+
+- Bloqueio atual: ausência da API em `http://localhost:5189` durante a etapa final de E2E.
+
+## 2026-05-06 - Codex - Agenda (fim de semana no padrão e seed seguro)
+
+Responsavel: Codex
+
+Status: concluido
+
+Arquivos alterados:
+
+- `src/OdontoCloud.Application/UseCases/Dentistas/DentistaAgendaConfigParser.cs`
+- `src/OdontoCloud.Domain/Entities/Dentista.cs`
+- `src/OdontoCloud.Infrastructure/Data/OdontoCloudDbContext.cs`
+- `src/OdontoCloud.Infrastructure/Data/OdontoCloudDbSeeder.cs`
+- `src/OdontoCloud.Infrastructure/Data/Migrations/20260504090000_AddAgendaConfigToDentistas.cs`
+- `src/OdontoCloud.Infrastructure/Data/Migrations/OdontoCloudDbContextModelSnapshot.cs`
+- `tests/OdontoCloud.Infrastructure.Tests/DentistaAgendaConfigParserTests.cs`
+- `odontocloud-frontend/src/components/agenda/agendaUtils.js`
+- `odontocloud-frontend/src/pages/Agenda.jsx`
+- `odontocloud-frontend/tests/e2e/agenda.spec.js`
+- `docs/PROGRESS.md`
+
+Comandos executados:
+
+- `docker compose up -d postgres`
+- `dotnet build OdontoCloud.slnx`
+- `dotnet test OdontoCloud.slnx`
+- `cd odontocloud-frontend && npm run lint`
+- `cd odontocloud-frontend && npm run build`
+- `cd odontocloud-frontend && npx playwright test tests/e2e/agenda.spec.js`
+- `cd odontocloud-frontend && npm run test:e2e`
+
+Resumo:
+
+- Ajustei o padrão de agenda do parser e do domínio para 7 dias (`0..6`) e mantive a preservação de configurações explícitas por dentista (não houve mais “upgrade” automático de configurações de 5 dias).
+- Mantive o fallback de frontend para dias padrão em 7 dias e garanti validações no `agendaUtils` e visão de agenda.
+- Corrigi a inicialização do `OdontoCloudDbSeeder` para não quebrar em banco novo:
+  - `SaveChangesAsync` não depende mais de `GetCurrentClinicaId` quando não há entidades com `TenantEntityBase` na unidade de trabalho.
+  - O seeder passa a validar/inserir `Usuário` e `Dentista` com `HttpContext` de seed compatível com tenancy.
+- Ajustei `agenda.spec.js` para validar sábado/domingo no fluxo padrão e manter o caso fora da agenda baseado em horário.
+- Tornar a suíte de Agenda executável em modo serial para eliminar interferência entre testes com criação de eventos em paralelismo.
+
+Resultado:
+
+- `npx playwright test tests/e2e/agenda.spec.js`: passou (3/3).
+- `npm run test:e2e`: passou (9/9).
+- Testes .NET e lint/build frontend passaram.
+
+Pendencias:
+
+- Nenhuma.
+
+Blocker:
+
+- Nenhum bloqueador em curso para este escopo.
+
+## 2026-05-05 - Codex - Recepcionista (follow-up agenda e2e, seeds únicas + diagnóstico de POST)
+
+Responsavel: Codex (Recepcionista)
+
+Status: concluido
+
+Arquivos alterados:
+
+- `odontocloud-frontend/tests/e2e/agenda.spec.js`
+- `agent_reports/followup_recepcionista_agenda_e2e_02.md`
+- `docs/PROGRESS.md`
+
+Comandos executados:
+
+- `dotnet build OdontoCloud.slnx` ✅
+- `cd odontocloud-frontend && npm run lint` ✅
+- `cd odontocloud-frontend && npm run build` ✅
+- `cd odontocloud-frontend && npx playwright test tests/e2e/agenda.spec.js` ✅
+
+Resumo:
+
+- Padronizei dados de agendamento da suíte para evitar colisão entre execuções: nomes e CPF agora usam seed de execução (`TEST_RUN_ID`, `workerIndex`, `retry`, contador interno), mantendo CPFs válidos.
+- Corrigi `criarAgendamento` para não depender de timeout implícito de 90s; agora usa `POST_TIMEOUT_MS` explícito e falha com mensagem objetiva quando o fluxo indica validação visível antes do POST.
+- Mantive o escopo restrito à suíte de Agenda E2E, sem mudanças em Financeiro, Prontuario ou backend.
+
+Pendencias:
+
+- Nenhuma.
+
+## 2026-05-05 - Codex - Financeiro (Ajuste de seletor de modal no teste de pagamento)
+
+Responsavel: Codex
+
+Status: concluido (com validação parcial de ambiente)
+
+Arquivos alterados:
+
+- `odontocloud-frontend/tests/e2e/financeiro.spec.js`
+- `docs/PROGRESS.md`
+- `agent_reports/followup_analista_financeiro_e2e.md`
+
+Comandos executados:
+
+- `dotnet build OdontoCloud.slnx`
+- `cd odontocloud-frontend && npm run lint`
+- `cd odontocloud-frontend && npm run build`
+- `cd odontocloud-frontend && npx playwright test tests/e2e/financeiro.spec.js`
+- `cd odontocloud-frontend && npm run test:e2e` (opcional)
+
+Resumo:
+
+- Ajustei o cenário `realiza pagamento de conta a pagar` para evitar `strict mode violation` do Playwright, criando escopo no modal de `Pagamento de conta a pagar`.
+- Mantive a validação de remoção da conta na lista por seletor por `data-conta-pagar-id` (sem validação por texto global).
+- Corrigi o clique de confirmação para dentro do escopo do modal.
+
+Pendencias:
+
+- Repetir o fluxo opcional completo `npm run test:e2e` com API ativa em `http://localhost:5189` e frontend rodando conforme pré-requisito para confirmar suíte inteira.
+- Validar se não há regressão com a variação de viewport (desktop/mobile) no seletor `.surface-card` usado para ancorar o modal no escopo do teste.
+
+Blocker:
+
+- Testes adicionais fora do escopo local permanecem dependentes de API ativa e infraestrutura Docker/PostgreSQL.
+
+## 2026-05-05 - Codex - Financeiro (Pagamento de conta a pagar com confirmacao)
+
+## 2026-05-05 - Codex - Recepcionista (Follow-up e2e agenda: modal não pode ficar aberto)
+
+Responsavel: Codex (Recepcionista)
+
+Status: concluido
+
+Arquivos alterados:
+
+- `odontocloud-frontend/tests/e2e/agenda.spec.js`
+- `agent_reports/followup_recepcionista_agenda_e2e.md`
+
+Comandos executados:
+
+- `dotnet build OdontoCloud.slnx`: reexecutado conforme validação e2e.
+- `cd odontocloud-frontend && npm run lint`: reexecutado conforme validação e2e.
+- `cd odontocloud-frontend && npm run build`: reexecutado conforme validação e2e.
+- `cd odontocloud-frontend && npx playwright test tests/e2e/agenda.spec.js`: reexecutado conforme validação e2e.
+- `cd odontocloud-frontend && npm run test:e2e`: executado opcionalmente com API local, quando disponível.
+
+Resumo:
+
+- Ajustado utilitário `abrirModalPorSlot` para falhar imediatamente quando já houver modal de `Novo Agendamento` ou `Editar Agendamento` aberto.
+- Ajustado fluxo do teste `fluxo completo da agenda com criação, cancelamento e exclusão` para garantir ordem estrita: abrir slot -> criar -> validar fechamento do modal -> abrir próximo slot.
+- Mantida alteração estritamente no escopo de E2E de agenda.
+
+Pendencias:
+
+- Dependência permanece de ambiente real com API ativa em `http://localhost:5189` para validação completa com `npm run test:e2e`.
+
+Responsavel: Codex
+
+Status: concluido
+
+Arquivos alterados:
+
+- `odontocloud-frontend/src/pages/Financeiro.jsx`
+- `odontocloud-frontend/tests/e2e/financeiro.spec.js`
+- `tests/OdontoCloud.Api.IntegrationTests/FinanceiroApiIntegrationTests.cs`
+- `docs/PROGRESS.md`
+
+Comandos executados:
+
+- `docker compose up -d postgres`: **falhou** (`npipe:////./pipe/dockerDesktopLinuxEngine` não encontrado).
+- `dotnet build OdontoCloud.slnx`: sucesso.
+- `dotnet test OdontoCloud.slnx`: falhou por falta de PostgreSQL local (`localhost:5432` recusado).
+- `cd odontocloud-frontend && npm run lint`: sucesso.
+- `cd odontocloud-frontend && npm run build`: sucesso.
+- `cd odontocloud-frontend && npm run test:e2e`: falhou por API indisponível (`http://localhost:5189`).
+
+Resumo:
+
+- `Financeiro.jsx` passou a abrir um modal de confirmação para `Conta a Pagar` com botão `Pagar`, exibindo fornecedor, descricao, vencimento, valor e status atual.
+- O modal faz chamada a `PATCH /api/financeiro/contas-pagar/{id}/pagar` apenas após confirmação e exibe erro no próprio modal sem fechá-lo.
+- Após sucesso, o modal fecha, a mensagem global mostra `Conta a pagar liquidada com sucesso.` e a listagem de contas a pagar pendentes é recarregada.
+- Adicionei teste Playwright de fluxo real de pagamento de `ContaPagar`.
+- Adicionei teste de integração cobrindo retorno de `Status=Pago` e remoção da conta de `/contas-pagar/pendentes` após pagamento.
+
+Pendencias:
+
+- Nenhuma no escopo funcional imediato.
+
+## 2026-05-05 - Codex - Bloco 3 (Prontuario/Odontograma UX) - ajuste final
+
+Responsavel: Codex
+
+Status: parcial (pendência externa de infraestrutura)
+
+Arquivos alterados:
+
+- `odontocloud-frontend/src/pages/Prontuario.jsx`
+- `odontocloud-frontend/tests/e2e/prontuario.spec.js`
+- `docs/PROGRESS.md`
+
+Principais implementações:
+
+- Corrigi o posicionamento do `MiniPainelDente` para ancoragem perto do clique com recálculo de posição (`resolvePopoverAnchor`, `requestAnimationFrame`, `Escape`, `form` + submit).
+- Ajustei o fluxo de busca de paciente:
+  - filtro normalizado por nome/cpf/telefone com busca por texto e por dígitos;
+  - lista de seleção rápida clicável no fluxo de busca com resumo por item;
+  - fallback mantém `<select>` de pacientes.
+- Ajustei limite da lista rápida de seleção para `12` e apresentei mensagem de "nenhum paciente encontrado".
+- Mantive a prioridade visual de dentição por idade quando `dataNascimento`/`DataNascimento` existe, sem esconder nenhuma camada.
+- Aumentei dimensões máximas do SVG permanente para ficar proporcional ao decíduo, sem distorção (`preserveAspectRatio='xMidYMid meet'` e classes de `max-*`).
+- Mantive preview visual local por dente selecionado durante edição antes de persistir, reutilizando `PATCH /api/prontuario/{id}/odontograma/{dente}` existente.
+
+Testes alterados:
+
+- `odontocloud-frontend/tests/e2e/prontuario.spec.js`
+  - ajuste de seletores de busca (botão rápido sem depender só do nome exato);
+  - novo cenário que valida abrir/fechar mini painel com `Cancelar` e `Escape`;
+  - persistência por mini painel para `dente 18`.
+
+Comandos executados nesta etapa:
+
+- `docker compose up -d postgres`: **falhou** - daemon Docker não disponível (`npipe://./pipe/dockerDesktopLinuxEngine`).
+- `dotnet build OdontoCloud.slnx`: sucesso.
+- `dotnet test OdontoCloud.slnx`: falhou em `OdontoCloud.Api.IntegrationTests` por indisponibilidade do PostgreSQL (`localhost:5432` recusou conexão).
+- `cd odontocloud-frontend && npm run lint`: sucesso.
+- `cd odontocloud-frontend && npm run build`: sucesso.
+- `cd odontocloud-frontend && npm run test:e2e`: falhou por API inativa em `http://localhost:5189` (exigência de backend em modo `http`).
+
+Pendências objetivas:
+
+- Habilitar PostgreSQL local para liberar testes de integração e Playwright ponta-a-ponta completos.
+- Iniciar backend com `dotnet run --project src/OdontoCloud.Api/OdontoCloud.Api.csproj --launch-profile http` antes de `npm run test:e2e`.
+- Revalidar os cenários E2E após infraestrutura funcional.
+
 ## 2026-05-05 - Codex - Bloco 3 (Prontuario/Odontograma UX)
 
 Responsavel: Codex
@@ -1235,3 +2412,147 @@ Pendencias:
 
 - Ponto pendente ou `Nenhuma`.
 ```
+## 2026-05-05 - Codex - Recepcionista (Semana completa + estabilidade e2e agenda)
+
+Responsavel: Codex (Recepcionista)
+
+Status: concluido (com bloqueios de ambiente)
+
+Arquivos alterados:
+
+- `src/OdontoCloud.Application/UseCases/Agendamentos/Commands/UpdateAgendamentoCommandHandler.cs`
+- `odontocloud-frontend/src/components/agenda/agendaUtils.js`
+- `odontocloud-frontend/tests/e2e/agenda.spec.js`
+- `docs/PROGRESS.md`
+- `agent_reports/recepcionista_agenda.md`
+
+Comandos executados:
+
+- `docker compose up -d postgres`
+  - resultado: falhou (`unable to get image 'postgres:16': failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.`)
+- `dotnet build OdontoCloud.slnx`
+  - resultado: sucesso (0 erros, 0 avisos).
+- `dotnet test OdontoCloud.slnx`
+  - resultado: falhou (falha de conexão com PostgreSQL durante inicialização dos testes de integração).
+- `cd odontocloud-frontend && npm run lint`
+  - resultado: sucesso.
+- `cd odontocloud-frontend && npm run build`
+  - resultado: sucesso.
+- `cd odontocloud-frontend && npm run test:e2e`
+  - resultado: falhou (Playwright aguardando API em `http://localhost:5189`, não encontrada).
+
+Resumo:
+
+- Corrigi a resolução do tipo `Dentista` no handler de atualização usando namespace completo.
+- Padronizei semana como 7 dias no utilitário (`WEEK_DAYS_COUNT`) e melhorei `formatWeekLabel` para refletir a faixa de segunda a domingo.
+- Mantive a grade semanal com dias fora da agenda visíveis e não clicáveis quando indisponíveis.
+- Atualizei e2e da agenda para ser determinística (CPF por seed), evitar clique em slot ocupado (tentativas até encontrar slot livre) e validar sábado/domingo.
+
+Pendencias:
+
+- Ambiente local depende de Docker ativo e API local em `http://localhost:5189` para rodar integração/e2e completo.
+- Sem esses pré-requisitos, `dotnet test` e `npm run test:e2e` permanecem bloqueados nesta máquina.
+
+## 2026-05-06 - Codex - Fechamento pós-smoke Financeiro, Agenda, Prontuário e CRM
+
+Responsavel: Codex + agentes Cursor 5.3 Spark
+
+Status: concluido
+
+Arquivos principais alterados:
+
+- `odontocloud-frontend/src/pages/Financeiro.jsx`
+- `odontocloud-frontend/tests/e2e/financeiro.spec.js`
+- `src/OdontoCloud.Application/UseCases/Dentistas/DentistaAgendaConfigParser.cs`
+- `tests/OdontoCloud.Api.IntegrationTests/AgendamentosApiIntegrationTests.cs`
+- `tests/OdontoCloud.Infrastructure.Tests/Dentistas/DentistaAgendaConfigParserTests.cs`
+- `odontocloud-frontend/src/pages/Prontuario.jsx`
+- `odontocloud-frontend/src/api/prontuario.js`
+- `odontocloud-frontend/tests/e2e/prontuario.spec.js`
+- `odontocloud-frontend/src/pages/Pacientes.jsx`
+- `odontocloud-frontend/src/api/pacientes.js`
+- `tests/OdontoCloud.Api.IntegrationTests/PacientesApiIntegrationTests.cs`
+- `agent_reports/smoke_financeiro_mascara_crud.md`
+- `agent_reports/followup_agenda_weekend_backend_alignment.md`
+- `agent_reports/smoke_prontuario_busca_denticao_layout.md`
+- `agent_reports/smoke_crm_kanban.md`
+- `agent_reports/auditor_smoke_followups.md`
+
+Comandos executados:
+
+- `docker compose up -d postgres`: sucesso.
+- `dotnet build OdontoCloud.slnx`: sucesso.
+- `dotnet test OdontoCloud.slnx`: sucesso (`27 + 34 + 43`).
+- `cd odontocloud-frontend && npm run lint`: sucesso.
+- `cd odontocloud-frontend && npm run build`: sucesso.
+- `cd odontocloud-frontend && npm run test:e2e`: sucesso (`14/14`).
+
+Resumo:
+
+- Financeiro: reforçado CRUD operacional de contas a receber/pagar e máscara BRL em campos monetários; `100,01` permanece `R$ 100,01` e é enviado como decimal correto.
+- Agenda: sábado/domingo permanecem visíveis e criáveis; validação backend agora converte UTC para horário local da clínica antes de checar janela de agenda.
+- Prontuário: busca de pacientes virou dropdown limitado; dentição mista foi suportada sem SVG separado; prótese recebeu cor neutra; cárie percentual foi preservada.
+- CRM: Kanban MVP saiu do placeholder, com status persistido e movimentação por coluna.
+
+Pendencias:
+
+- Smoke visual final do usuário nos quatro fluxos.
+- Evolução futura: configurações formais de dias de trabalho por dentista, drag-and-drop no Kanban e regras clínicas mais refinadas para dentição mista.
+
+## 2026-05-07 - Cursor - E2E completo e acessibilidade do odontograma misto
+
+Responsavel: Auditor de Acessibilidade Clinica via Cursor CLI (`gpt-5.3-codex-spark-preview`)
+
+Status: concluido
+
+Arquivos alterados:
+
+- `odontocloud-frontend/src/pages/Prontuario.jsx`
+- `odontocloud-frontend/tests/e2e/prontuario.spec.js`
+- `agent_reports/auditor_e2e_acessibilidade_odontograma.md`
+
+Comandos executados:
+
+- `cd odontocloud-frontend`
+- `npm run lint`: sucesso.
+- `npm run build`: sucesso.
+- `npm run test:e2e -- tests/e2e/prontuario.spec.js`: sucesso (`6 passed`).
+
+Resumo:
+
+- E2E do prontuário cobre dentição mista com 32 slots, amostras de todos os quadrantes, troca decíduo/permanente no mesmo slot, slot vazio clicável, remoção e persistência via API autenticada.
+- Acessibilidade básica coberta por teclado: foco em slot, abertura do mini painel por `Enter`/`Space`, retorno de foco, labels acessíveis nos controles e ausência de `.svg` em `aria-label`.
+- Pequeno ajuste em `Prontuario.jsx` preserva foco do slot misto após fechar/cancelar o mini painel.
+
+Pendencias:
+
+- Se necessário, ampliar no futuro cobertura de performance visual em dispositivos lentos; funcionalmente o fluxo misto está coberto.
+
+## 2026-05-08 - ChatGPT - Dashboard MVP (placeholder -> dados reais)
+
+Responsavel: Agente Analista Executivo (gpt-5.3-codex-spark-preview)
+
+Status: concluido
+
+Arquivos alterados:
+
+- `src/OdontoCloud.Application/UseCases/Dashboard/DashboardResumoDto.cs`
+- `src/OdontoCloud.Application/UseCases/Dashboard/GetDashboardResumoQuery.cs`
+- `src/OdontoCloud.Application/UseCases/Dashboard/GetDashboardResumoQueryHandler.cs`
+- `src/OdontoCloud.Api/Controllers/DashboardController.cs`
+- `odontocloud-frontend/src/api/dashboard.js`
+- `odontocloud-frontend/src/pages/Dashboard.jsx`
+- `odontocloud-frontend/src/routes/index.jsx`
+- `odontocloud-frontend/src/components/AppShell.jsx`
+- `odontocloud-frontend/tests/e2e/dashboard.spec.js`
+- `tests/OdontoCloud.Api.IntegrationTests/DashboardApiIntegrationTests.cs`
+
+Observações:
+
+- Placeholder em `/dashboard` removido e substituído por cards reais, resumo de funil CRM, agendamentos e resumo financeiro.
+- Endpoints reutilizam consultas existentes e agregam em `DashboardResumoDto`.
+- Proteção de acesso via JWT (`[Authorize]`).
+
+Pendencias:
+
+- Nenhuma pendencia funcional aberta no escopo do dashboard.

@@ -19,6 +19,11 @@ public sealed class ContaPagarRepository : IContaPagarRepository
         return _dbContext.ContasPagar.AddAsync(contaPagar, cancellationToken).AsTask();
     }
 
+    public void Remove(ContaPagar contaPagar)
+    {
+        _dbContext.ContasPagar.Remove(contaPagar);
+    }
+
     public Task<ContaPagar?> GetByIdAsync(Guid contaPagarId, CancellationToken cancellationToken = default)
     {
         return _dbContext.ContasPagar

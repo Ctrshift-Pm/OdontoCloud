@@ -63,6 +63,37 @@ public sealed class ContaPagar : TenantEntityBase
         Status = StatusContaPagar.Pago;
     }
 
+    public void AtualizarDados(string fornecedorDestinatario, string categoria, string descricao, decimal valor, DateTime dataVencimento)
+    {
+        if (string.IsNullOrWhiteSpace(fornecedorDestinatario))
+        {
+            throw new ArgumentException("O fornecedor e obrigatorio.", nameof(fornecedorDestinatario));
+        }
+
+        if (string.IsNullOrWhiteSpace(categoria))
+        {
+            throw new ArgumentException("A categoria e obrigatoria.", nameof(categoria));
+        }
+
+        if (string.IsNullOrWhiteSpace(descricao))
+        {
+            throw new ArgumentException("A descricao e obrigatoria.", nameof(descricao));
+        }
+
+        if (valor <= 0m)
+        {
+            throw new ArgumentException("O valor deve ser maior que zero.", nameof(valor));
+        }
+
+        FornecedorDestinatario = fornecedorDestinatario;
+        Categoria = categoria;
+        Descricao = descricao;
+        Valor = valor;
+        DataVencimento = EnsureUtc(dataVencimento);
+    }
+
+    public bool PodeSerEditadaOuExcluidaNoCrud() => Status == StatusContaPagar.Pendente || Status == StatusContaPagar.Atrasado;
+
     public void MarcarComoAtrasadoSeNecessario(DateTime utcNow)
     {
         if (Status == StatusContaPagar.Pendente && utcNow.Date > DataVencimento.Date)

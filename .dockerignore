@@ -1,0 +1,15 @@
+.git
+.github
+.vs
+.vscode
+.idea
+**/bin
+**/obj
+**/node_modules
+**/dist
+**/playwright-report
+**/test-results
+**/*.user
+**/*.suo
+.codex-temp
+api.err

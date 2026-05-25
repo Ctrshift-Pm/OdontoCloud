@@ -11,6 +11,8 @@ public interface IContaReceberRepository
 
     Task AddAsync(ContaReceber contaReceber, CancellationToken cancellationToken = default);
 
+    void Remove(ContaReceber contaReceber);
+
     Task<ContaReceber?> GetByIdAsync(Guid contaReceberId, CancellationToken cancellationToken = default);
 
     Task<List<ContaReceber>> GetPendentesByPacienteIdAsync(Guid pacienteId, CancellationToken cancellationToken = default);

@@ -88,17 +88,75 @@ public sealed class AuthLoginIntegrationTests : IClassFixture<ApiTestFactory>
         Assert.Equal(seed.PasswordHash, senhaHashAtual);
     }
 
+    [Fact]
+    public async Task Login_ComEmailDuplicadoEntreClinicasSemClinicaId_DeveRetornarUnauthorizedExplicito()
+    {
+        var senhaHasher = new PasswordHasher<Usuario>();
+        var emailComum = $"duplicado-{Guid.NewGuid():N}@odontocloud.local";
+
+        await CriarUsuarioAsync(
+            UsuarioPasswordSource.Hashed,
+            senhaHasher,
+            emailComum);
+        await CriarUsuarioAsync(
+            UsuarioPasswordSource.Hashed,
+            senhaHasher,
+            emailComum);
+
+        using var client = _factory.CreateClient();
+        var response = await client.PostAsJsonAsync(
+            "/api/auth/login",
+            new { Email = emailComum, Senha = SenhaPadrao });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+
+        var payload = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+        Assert.NotNull(payload);
+        Assert.Equal("O e-mail está associado a múltiplas clínicas. Informe a clínica para autenticar.", payload["error"]);
+    }
+
+    [Fact]
+    public async Task Login_ComEmailDuplicadoEntreClinicasComClinicaId_DeveAutenticarNoClinicSelecionado()
+    {
+        var senhaHasher = new PasswordHasher<Usuario>();
+        var emailComum = $"duplicado-{Guid.NewGuid():N}@odontocloud.local";
+
+        await CriarUsuarioAsync(
+            UsuarioPasswordSource.Hashed,
+            senhaHasher,
+            emailComum);
+        var usuarioB = await CriarUsuarioAsync(
+            UsuarioPasswordSource.Hashed,
+            senhaHasher,
+            emailComum);
+
+        using var client = _factory.CreateClient();
+        var response = await client.PostAsJsonAsync(
+            "/api/auth/login",
+            new { Email = emailComum, Senha = SenhaPadrao, ClinicaId = usuarioB.ClinicaId });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var login = await response.Content.ReadFromJsonAsync<LoginResponse>();
+        Assert.NotNull(login);
+        Assert.False(string.IsNullOrWhiteSpace(login.Token));
+
+        var tokenClaims = ExtrairClaims(login.Token);
+        Assert.True(tokenClaims.TryGetValue("ClinicaId", out var clinicaClaim));
+        Assert.Equal(usuarioB.ClinicaId, Guid.Parse(clinicaClaim));
+    }
+
     private async Task<TenantUsuarioSeed> CriarUsuarioAsync(
         UsuarioPasswordSource passwordSource,
-        PasswordHasher<Usuario> passwordHasher)
+        PasswordHasher<Usuario> passwordHasher,
+        string? email = null)
     {
         using var escopo = _factory.Services.CreateScope();
         var dbContext = escopo.ServiceProvider.GetRequiredService<OdontoCloudDbContext>();
         var contextAccessor = escopo.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
 
         var clinica = new Clinica($"Clínica Login Teste {Guid.NewGuid():N}", "Pro");
-        var email = $"login-{Guid.NewGuid():N}@odontocloud.local";
-        var usuario = new Usuario(clinica.Id, "Usuario Login", email, "temp", PerfilUsuario.Admin);
+        var usuarioEmail = email ?? $"login-{Guid.NewGuid():N}@odontocloud.local";
+        var usuario = new Usuario(clinica.Id, "Usuario Login", usuarioEmail, "temp", PerfilUsuario.Admin);
         usuario.AtualizarSenhaHash(ObterSenhaInicial(passwordSource, usuario, passwordHasher, SenhaPadrao));
 
         contextAccessor.HttpContext = CriaHttpContext(Guid.NewGuid());
@@ -116,7 +174,7 @@ public sealed class AuthLoginIntegrationTests : IClassFixture<ApiTestFactory>
             contextAccessor.HttpContext = null;
         }
 
-        return new TenantUsuarioSeed(clinica.Id, usuario.Id, email, usuario.PasswordHash, usuario);
+        return new TenantUsuarioSeed(clinica.Id, usuario.Id, usuarioEmail, usuario.PasswordHash, usuario);
     }
 
     private static string ObterSenhaInicial(

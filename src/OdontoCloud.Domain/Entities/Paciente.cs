@@ -17,6 +17,7 @@ public sealed class Paciente : TenantEntityBase
         string? email = null,
         string? convenio = null,
         StatusPaciente status = StatusPaciente.Ativo,
+        CrmKanbanStatus crmKanbanStatus = CrmKanbanStatus.Novo,
         string? cidade = null,
         Guid? dentistaResponsavelId = null)
     {
@@ -27,6 +28,7 @@ public sealed class Paciente : TenantEntityBase
         Email = email is null ? null : Guard.NormalizeEmail(email, nameof(email));
         Convenio = Guard.NullIfWhiteSpace(convenio);
         Status = status;
+        CrmKanbanStatus = crmKanbanStatus;
         Cidade = Guard.NullIfWhiteSpace(cidade);
         DentistaResponsavelId = dentistaResponsavelId.HasValue
             ? Guard.AgainstDefault(dentistaResponsavelId.Value, nameof(dentistaResponsavelId))
@@ -43,7 +45,8 @@ public sealed class Paciente : TenantEntityBase
         string? convenio = null,
         StatusPaciente status = StatusPaciente.Ativo,
         string? cidade = null,
-        Guid? dentistaResponsavelId = null)
+        Guid? dentistaResponsavelId = null,
+        CrmKanbanStatus crmKanbanStatus = CrmKanbanStatus.Novo)
         : base(clinicaId)
     {
         Nome = Guard.AgainstNullOrWhiteSpace(nome, nameof(nome));
@@ -53,6 +56,7 @@ public sealed class Paciente : TenantEntityBase
         Email = email is null ? null : Guard.NormalizeEmail(email, nameof(email));
         Convenio = Guard.NullIfWhiteSpace(convenio);
         Status = status;
+        CrmKanbanStatus = crmKanbanStatus;
         Cidade = Guard.NullIfWhiteSpace(cidade);
         DentistaResponsavelId = dentistaResponsavelId.HasValue
             ? Guard.AgainstDefault(dentistaResponsavelId.Value, nameof(dentistaResponsavelId))
@@ -73,6 +77,8 @@ public sealed class Paciente : TenantEntityBase
 
     public StatusPaciente Status { get; private set; }
 
+    public CrmKanbanStatus CrmKanbanStatus { get; private set; }
+
     public string? Cidade { get; private set; }
 
     public Guid? DentistaResponsavelId { get; private set; }
@@ -80,4 +86,9 @@ public sealed class Paciente : TenantEntityBase
     public ICollection<Agendamento> Agendamentos { get; private set; } = [];
 
     public Prontuario? Prontuario { get; private set; }
+
+    public void AtualizarStatusCrmKanban(CrmKanbanStatus novoStatus)
+    {
+        CrmKanbanStatus = novoStatus;
+    }
 }

@@ -11,6 +11,7 @@ public sealed record PacienteDto(
     string TelefoneWhatsapp,
     string? Email,
     string? Convenio,
+    string CrmKanbanStatus,
     StatusPaciente Status,
     string? Cidade,
     Guid? DentistaResponsavelId)
@@ -25,6 +26,7 @@ public sealed record PacienteDto(
             paciente.TelefoneWhatsapp,
             paciente.Email,
             paciente.Convenio,
+            paciente.CrmKanbanStatus.ToString(),
             paciente.Status,
             paciente.Cidade,
             paciente.DentistaResponsavelId);

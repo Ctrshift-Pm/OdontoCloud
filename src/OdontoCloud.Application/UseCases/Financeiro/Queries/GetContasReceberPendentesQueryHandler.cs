@@ -1,5 +1,6 @@
 using MediatR;
 using OdontoCloud.Application.Interfaces;
+using OdontoCloud.Domain.Enums;
 
 namespace OdontoCloud.Application.UseCases.Financeiro.Queries;
 
@@ -16,12 +17,7 @@ public sealed class GetContasReceberPendentesQueryHandler : IRequestHandler<GetC
     {
         var contas = await _contaReceberRepository.GetPendentesByPacienteIdAsync(request.PacienteId, cancellationToken);
 
-        foreach (var conta in contas)
-        {
-            conta.MarcarComoAtrasadoSeNecessario(DateTime.UtcNow);
-        }
-
-        await _contaReceberRepository.SaveChangesAsync(cancellationToken);
+        var agoraUtc = DateTime.UtcNow;
 
         return contas
             .Select(conta => new ContaReceberDto(
@@ -35,7 +31,20 @@ public sealed class GetContasReceberPendentesQueryHandler : IRequestHandler<GetC
                 conta.DataPagamento,
                 conta.FormaPagamento,
                 conta.UsuarioBaixaId,
-                conta.Status))
+                (conta.Status != StatusContaReceber.Pendente.ToString() && conta.Status != StatusContaReceber.Parcial.ToString()
+                    ? conta.Status
+                    : ResolverStatusVisual(conta, agoraUtc))))
             .ToList();
+    }
+
+    private static string ResolverStatusVisual(Domain.Entities.ContaReceber conta, DateTime agoraUtc)
+    {
+        if ((conta.Status == StatusContaReceber.Pendente.ToString() || conta.Status == StatusContaReceber.Parcial.ToString()) &&
+            agoraUtc.Date > conta.DataVencimento.Date)
+        {
+            return StatusContaReceber.Atrasado.ToString();
+        }
+
+        return conta.Status;
     }
 }

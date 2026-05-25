@@ -28,6 +28,11 @@ public sealed class ContaReceberRepository : IContaReceberRepository
         return _dbContext.ContasReceber.AddAsync(contaReceber, cancellationToken).AsTask();
     }
 
+    public void Remove(ContaReceber contaReceber)
+    {
+        _dbContext.ContasReceber.Remove(contaReceber);
+    }
+
     public Task<ContaReceber?> GetByIdAsync(Guid contaReceberId, CancellationToken cancellationToken = default)
     {
         return _dbContext.ContasReceber

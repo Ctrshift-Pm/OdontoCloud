@@ -2,17 +2,23 @@ using System.Text.Json;
 using MediatR;
 using OdontoCloud.Application.Interfaces;
 using OdontoCloud.Domain.Entities;
+using DomainProntuario = OdontoCloud.Domain.Entities.Prontuario;
 
 namespace OdontoCloud.Application.UseCases.Prontuario.UpdateAnamnese;
 
 public sealed class UpdateAnamneseCommandHandler : IRequestHandler<UpdateAnamneseCommand, ProntuarioDto?>
 {
     private readonly IProntuarioRepository _prontuarioRepository;
+    private readonly IPacienteRepository _pacienteRepository;
     private readonly ITenantService _tenantService;
 
-    public UpdateAnamneseCommandHandler(IProntuarioRepository prontuarioRepository, ITenantService tenantService)
+    public UpdateAnamneseCommandHandler(
+        IProntuarioRepository prontuarioRepository,
+        IPacienteRepository pacienteRepository,
+        ITenantService tenantService)
     {
         _prontuarioRepository = prontuarioRepository;
+        _pacienteRepository = pacienteRepository;
         _tenantService = tenantService;
     }
 
@@ -21,7 +27,20 @@ public sealed class UpdateAnamneseCommandHandler : IRequestHandler<UpdateAnamnes
         var prontuario = await _prontuarioRepository.GetByIdForUpdateAsync(request.ProntuarioId, cancellationToken);
         if (prontuario is null)
         {
-            return null;
+            var pacienteExiste = await _prontuarioRepository.PacienteExistsAsync(request.ProntuarioId, cancellationToken);
+            if (!pacienteExiste)
+            {
+                return null;
+            }
+
+            var paciente = await _pacienteRepository.GetByIdAsync(request.ProntuarioId, cancellationToken);
+            var denticaoPadrao = OdontogramaHelper.GetDefaultDenticao(paciente?.DataNascimento);
+            prontuario = new DomainProntuario(
+                request.ProntuarioId,
+                AnamneseHelper.CreateDefaultJson(),
+                OdontogramaHelper.CreateDefaultJson(),
+                denticaoPadrao);
+            await _prontuarioRepository.AddAsync(prontuario, cancellationToken);
         }
 
         var usuarioId = _tenantService.GetCurrentUsuarioId();
@@ -53,6 +72,7 @@ public sealed class UpdateAnamneseCommandHandler : IRequestHandler<UpdateAnamnes
             false,
             updatedProntuario.AnamneseAtualizadaEmUtc,
             updatedProntuario.OdontogramaAtualizadoEmUtc,
+            updatedProntuario.DenticaoAtiva.ToString(),
             updatedProntuario.ItensPlanoTratamento
                 .Select(item => new ItemPlanoTratamentoDto(
                     item.Id,

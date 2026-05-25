@@ -12,7 +12,10 @@ public sealed record DentistaAgendaConfig(
 
 public static class DentistaAgendaConfigParser
 {
-    public const string PadraoJson = """{"inicio":"08:00","fim":"18:00","duracaoPadraoMinutos":30,"diasDaSemana":[1,2,3,4,5]}""";
+    private static readonly int[] DiasPadraoAtual = [0, 1, 2, 3, 4, 5, 6];
+    private static readonly int[] DiasDeFimDeSemana = [0, 6];
+    private static readonly Lazy<TimeZoneInfo> ClinicTimeZone = new(ResolveClinicTimeZone);
+    public const string PadraoJson = """{"inicio":"08:00","fim":"18:00","duracaoPadraoMinutos":30,"diasDaSemana":[0,1,2,3,4,5,6]}""";
 
     public static DentistaAgendaConfig Parse(string? agendaConfigJson)
     {
@@ -43,7 +46,7 @@ public static class DentistaAgendaConfigParser
 
             if (dias.Count == 0)
             {
-                dias = [1, 2, 3, 4, 5];
+                dias = DiasPadraoAtual;
             }
 
             return new DentistaAgendaConfig(inicio, fim, duracao, dias);
@@ -68,7 +71,11 @@ public static class DentistaAgendaConfigParser
 
     public static bool EstaDentroDaAgenda(this DentistaAgendaConfig config, DateTime dataHora, int duracaoMinutos)
     {
-        if (config.DiasDaSemana.Count > 0 && !config.DiasDaSemana.Contains((int)dataHora.DayOfWeek))
+        var dataHoraClinica = ToClinicLocalTime(dataHora);
+        var diaSemana = (int)dataHoraClinica.DayOfWeek;
+        var isFimDeSemana = DiasDeFimDeSemana.Contains(diaSemana);
+
+        if (config.DiasDaSemana.Count > 0 && !config.DiasDaSemana.Contains(diaSemana))
         {
             return false;
         }
@@ -78,10 +85,39 @@ public static class DentistaAgendaConfigParser
             return false;
         }
 
-        var inicio = TimeOnly.FromDateTime(dataHora);
+        var inicio = TimeOnly.FromDateTime(dataHoraClinica);
         var fim = inicio.AddMinutes(duracaoMinutos);
 
         return inicio >= config.HorarioInicio && fim <= config.HorarioFim;
+    }
+
+    private static DateTime ToClinicLocalTime(DateTime dataHora)
+    {
+        return dataHora.Kind switch
+        {
+            DateTimeKind.Utc => TimeZoneInfo.ConvertTimeFromUtc(dataHora, ClinicTimeZone.Value),
+            DateTimeKind.Local => TimeZoneInfo.ConvertTime(dataHora, ClinicTimeZone.Value),
+            _ => dataHora,
+        };
+    }
+
+    private static TimeZoneInfo ResolveClinicTimeZone()
+    {
+        foreach (var timeZoneId in new[] { "America/Sao_Paulo", "E. South America Standard Time" })
+        {
+            try
+            {
+                return TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+            }
+            catch (InvalidTimeZoneException)
+            {
+            }
+        }
+
+        return TimeZoneInfo.Local;
     }
 
     private static TimeOnly GetTimeValue(JsonElement raiz, string propriedade, string valorPadrao)

@@ -12,7 +12,7 @@ public sealed class UpdateOdontogramaValidatorTests
         var validator = new UpdateDenteOdontogramaCommandValidator();
 
         var resultado = await validator.ValidateAsync(
-            new UpdateDenteOdontogramaCommand(Guid.NewGuid(), "18", "protese"));
+            new UpdateDenteOdontogramaCommand(Guid.NewGuid(), "18", "protese", null));
 
         Assert.True(resultado.IsValid, "Status 'protese' deve ser aceito pela regra de validação.");
     }
@@ -31,7 +31,7 @@ public sealed class UpdateOdontogramaValidatorTests
     {
         var validator = new UpdateDenteOdontogramaCommandValidator();
 
-        var resultado = validator.Validate(new UpdateDenteOdontogramaCommand(Guid.NewGuid(), "55", "ok"));
+        var resultado = validator.Validate(new UpdateDenteOdontogramaCommand(Guid.NewGuid(), "55", "ok", null));
 
         Assert.True(resultado.IsValid, "Dente decíduo 55 deve ser aceito pela validação.");
     }
@@ -41,8 +41,38 @@ public sealed class UpdateOdontogramaValidatorTests
     {
         var validator = new UpdateDenteOdontogramaCommandValidator();
 
-        var resultado = validator.Validate(new UpdateDenteOdontogramaCommand(Guid.NewGuid(), "999", "ok"));
+        var resultado = validator.Validate(new UpdateDenteOdontogramaCommand(Guid.NewGuid(), "999", "ok", null));
 
         Assert.False(resultado.IsValid, "Dente fora da codificação FDI não deve ser aceito.");
+    }
+
+    [Fact]
+    public void Validador_PodeAceitarCarieSemPercentual()
+    {
+        var validator = new UpdateDenteOdontogramaCommandValidator();
+
+        var resultado = validator.Validate(new UpdateDenteOdontogramaCommand(Guid.NewGuid(), "18", "carie", null));
+
+        Assert.True(resultado.IsValid, "O percentual pode ser omitido e sera padrao 100.");
+    }
+
+    [Fact]
+    public void Validador_DeveAceitarCarieComPercentualValido()
+    {
+        var validator = new UpdateDenteOdontogramaCommandValidator();
+
+        var resultado = validator.Validate(new UpdateDenteOdontogramaCommand(Guid.NewGuid(), "18", "carie", 50));
+
+        Assert.True(resultado.IsValid, "Percentual entre 1 e 100 deve ser aceito para carie.");
+    }
+
+    [Fact]
+    public void Validador_DeveRejeitarCarieComPercentualInvalido()
+    {
+        var validator = new UpdateDenteOdontogramaCommandValidator();
+
+        var resultado = validator.Validate(new UpdateDenteOdontogramaCommand(Guid.NewGuid(), "18", "carie", 0));
+
+        Assert.False(resultado.IsValid, "Percentual fora do intervalo aceito deve ser rejeitado para carie.");
     }
 }

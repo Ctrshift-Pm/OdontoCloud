@@ -5,7 +5,7 @@ namespace OdontoCloud.Domain.Entities;
 public sealed class Dentista : TenantEntityBase
 {
     public const string RegraComissaoPadraoJson = """{"tipo":"PercentualFixo","percentual":30}""";
-    public const string AgendaConfigPadraoJson = """{"inicio":"08:00","fim":"18:00","duracaoPadraoMinutos":30,"diasDaSemana":[1,2,3,4,5]}""";
+    public const string AgendaConfigPadraoJson = """{"inicio":"08:00","fim":"18:00","duracaoPadraoMinutos":30,"diasDaSemana":[0,1,2,3,4,5,6]}""";
 
     private Dentista()
     {
@@ -66,4 +66,11 @@ public sealed class Dentista : TenantEntityBase
     public ICollection<ContaReceber> ContasReceber { get; private set; } = [];
 
     public ICollection<ContaPagar> ContasPagar { get; private set; } = [];
+
+    public void AtualizarAgendaConfig(string agendaConfigJson)
+    {
+        AgendaConfigJson = Guard.AgainstNullOrWhiteSpace(
+            agendaConfigJson,
+            nameof(agendaConfigJson));
+    }
 }

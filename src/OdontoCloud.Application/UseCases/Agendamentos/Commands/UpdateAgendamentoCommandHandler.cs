@@ -78,7 +78,7 @@ public sealed class UpdateAgendamentoCommandHandler : IRequestHandler<UpdateAgen
     }
 
     private static void GarantirDentroDaAgenda(
-        Dentista dentista,
+        OdontoCloud.Domain.Entities.Dentista dentista,
         DateTime dataHora,
         int duracaoMinutos)
     {

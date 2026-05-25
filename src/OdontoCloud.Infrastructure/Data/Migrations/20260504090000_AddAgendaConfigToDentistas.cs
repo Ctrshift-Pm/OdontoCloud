@@ -16,7 +16,7 @@ public partial class AddAgendaConfigToDentistas : Migration
             table: "Dentistas",
             type: "jsonb",
             nullable: false,
-            defaultValue: """{"inicio":"08:00","fim":"18:00","duracaoPadraoMinutos":30,"diasDaSemana":[1,2,3,4,5]}""");
+            defaultValue: """{"inicio":"08:00","fim":"18:00","duracaoPadraoMinutos":30,"diasDaSemana":[0,1,2,3,4,5,6]}""");
     }
 
     protected override void Down(MigrationBuilder migrationBuilder)

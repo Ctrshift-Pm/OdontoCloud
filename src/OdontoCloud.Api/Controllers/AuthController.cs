@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OdontoCloud.Application.Exceptions;
 using OdontoCloud.Application.UseCases.Auth.Login;
 
 namespace OdontoCloud.Api.Controllers;
@@ -21,13 +22,20 @@ public sealed class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginCommand command, CancellationToken cancellationToken)
     {
-        var response = await _sender.Send(command, cancellationToken);
-
-        if (response is null)
+        try
         {
-            return Unauthorized();
-        }
+            var response = await _sender.Send(command, cancellationToken);
 
-        return Ok(response);
+            if (response is null)
+            {
+                return Unauthorized();
+            }
+
+            return Ok(response);
+        }
+        catch (LoginEmailAmbiguoException ex)
+        {
+            return Unauthorized(new { error = ex.Message });
+        }
     }
 }

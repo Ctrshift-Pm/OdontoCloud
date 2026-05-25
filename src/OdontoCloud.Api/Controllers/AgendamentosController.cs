@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using OdontoCloud.Application.UseCases.Agendamentos;
 using OdontoCloud.Application.UseCases.Agendamentos.Commands;
 using OdontoCloud.Application.UseCases.Agendamentos.Queries;
+using OdontoCloud.Domain.Enums;
+using OdontoCloud.Infrastructure.Identity;
 
 namespace OdontoCloud.Api.Controllers;
 
@@ -20,6 +22,7 @@ public sealed class AgendamentosController : ControllerBase
     }
 
     [HttpPost]
+    [Permission(ModuloSistema.Agenda, AcaoPermissao.Criar)]
     public async Task<ActionResult<AgendamentoDto>> Create(
         [FromBody] CreateAgendamentoCommand command,
         CancellationToken cancellationToken)
@@ -29,6 +32,7 @@ public sealed class AgendamentosController : ControllerBase
     }
 
     [HttpGet]
+    [Permission(ModuloSistema.Agenda, AcaoPermissao.Visualizar)]
     public async Task<ActionResult<IReadOnlyList<AgendamentoDto>>> Get(
         [FromQuery] DateTime dataInicio,
         [FromQuery] DateTime? dataFim,
@@ -40,6 +44,7 @@ public sealed class AgendamentosController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Permission(ModuloSistema.Agenda, AcaoPermissao.Editar)]
     public async Task<ActionResult<AgendamentoDto>> Update(
         Guid id,
         [FromBody] UpdateAgendamentoRequest request,
@@ -65,6 +70,7 @@ public sealed class AgendamentosController : ControllerBase
     }
 
     [HttpPatch("{id:guid}/status")]
+    [Permission(ModuloSistema.Agenda, AcaoPermissao.Editar)]
     public async Task<ActionResult<AgendamentoDto>> AtualizarStatus(
         Guid id,
         [FromBody] AtualizarStatusAgendamentoRequest request,
@@ -80,6 +86,7 @@ public sealed class AgendamentosController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Permission(ModuloSistema.Agenda, AcaoPermissao.Excluir)]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
         var deleted = await _sender.Send(new DeleteAgendamentoCommand(id), cancellationToken);

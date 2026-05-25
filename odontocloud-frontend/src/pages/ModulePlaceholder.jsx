@@ -7,7 +7,7 @@ export default function ModulePlaceholder({ title, subtitle }) {
   return (
     <AppShell
       title={title}
-      subtitle={subtitle || 'Modulo em construcao. A navegacao ja esta preparada para a versao completa.'}
+      subtitle={subtitle || 'Módulo em breve. Esta área ainda não possui transações ativas.'}
       user={user}
       onLogout={logout}
     >
@@ -17,8 +17,8 @@ export default function ModulePlaceholder({ title, subtitle }) {
         </div>
         <h2 className="mt-4 text-2xl font-semibold text-[var(--ink-900)]">{title}</h2>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--ink-500)]">
-          Este espaco ja existe na navegacao para manter a estrutura fiel ao prototipo. O modulo sera conectado ao backend
-          em uma iteracao posterior sem quebrar o layout global.
+          Este módulo já aparece no menu para manter a navegação do MVP completa, mas ainda não está disponível para uso operacional.
+          Não há transações ativas nesta rota.
         </p>
       </div>
     </AppShell>

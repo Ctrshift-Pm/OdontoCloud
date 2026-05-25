@@ -4,6 +4,7 @@ using MediatR;
 using OdontoCloud.Application.Interfaces;
 using OdontoCloud.Domain.Entities;
 using OdontoCloud.Domain.Enums;
+using DomainProntuario = OdontoCloud.Domain.Entities.Prontuario;
 
 namespace OdontoCloud.Application.UseCases.Prontuario.UpdateOdontograma;
 
@@ -18,11 +19,16 @@ public sealed class UpdateDenteOdontogramaCommandHandler : IRequestHandler<Updat
         };
 
     private readonly IProntuarioRepository _prontuarioRepository;
+    private readonly IPacienteRepository _pacienteRepository;
     private readonly ITenantService _tenantService;
 
-    public UpdateDenteOdontogramaCommandHandler(IProntuarioRepository prontuarioRepository, ITenantService tenantService)
+    public UpdateDenteOdontogramaCommandHandler(
+        IProntuarioRepository prontuarioRepository,
+        IPacienteRepository pacienteRepository,
+        ITenantService tenantService)
     {
         _prontuarioRepository = prontuarioRepository;
+        _pacienteRepository = pacienteRepository;
         _tenantService = tenantService;
     }
 
@@ -31,23 +37,40 @@ public sealed class UpdateDenteOdontogramaCommandHandler : IRequestHandler<Updat
         var prontuario = await _prontuarioRepository.GetByIdForUpdateAsync(request.ProntuarioId, cancellationToken);
         if (prontuario is null)
         {
-            return null;
+            var pacienteExiste = await _prontuarioRepository.PacienteExistsAsync(request.ProntuarioId, cancellationToken);
+            if (!pacienteExiste)
+            {
+                return null;
+            }
+
+            var paciente = await _pacienteRepository.GetByIdAsync(request.ProntuarioId, cancellationToken);
+            var denticaoPadrao = OdontogramaHelper.GetDefaultDenticao(paciente?.DataNascimento);
+            prontuario = new DomainProntuario(
+                request.ProntuarioId,
+                AnamneseHelper.CreateDefaultJson(),
+                OdontogramaHelper.CreateDefaultJson(),
+                denticaoPadrao);
+            await _prontuarioRepository.AddAsync(prontuario, cancellationToken);
         }
 
         var odontograma = OdontogramaHelper.Parse(prontuario.OdontogramaJson);
-        var currentStatus = odontograma[request.Dente];
-        var newStatus = Enum.Parse<StatusDenteOdontograma>(request.Status, true).ToString();
+        var estadoAtual = odontograma[request.Dente];
+        var novoStatus = Enum.Parse<StatusDenteOdontograma>(request.Status, true).ToString();
+        int? percentualCarie = novoStatus.Equals(StatusDenteOdontograma.carie.ToString(), StringComparison.OrdinalIgnoreCase)
+            ? OdontogramaHelper.ResolveCariePercentualOuDefault(request.CariePercentual)
+            : null;
+        var novoEstado = new OdontogramaHelper.EstadoDenteOdontograma(novoStatus, percentualCarie);
 
-        if (string.Equals(currentStatus, StatusDenteOdontograma.ausente.ToString(), StringComparison.OrdinalIgnoreCase) &&
-            OdontogramaHelper.IsInterventionStatus(newStatus))
+        if (string.Equals(estadoAtual.Status, StatusDenteOdontograma.ausente.ToString(), StringComparison.OrdinalIgnoreCase) &&
+            OdontogramaHelper.IsInterventionStatus(novoStatus))
         {
             throw new ValidationException("Nao e possivel marcar intervencao em dente ausente.");
         }
 
-        odontograma[request.Dente] = newStatus;
+        odontograma[request.Dente] = novoEstado;
 
-        if (!string.Equals(currentStatus, newStatus, StringComparison.OrdinalIgnoreCase) &&
-            ProcedureCatalog.TryGetValue(newStatus, out var procedureDefinition))
+        if (!string.Equals(estadoAtual.Status, novoStatus, StringComparison.OrdinalIgnoreCase) &&
+            ProcedureCatalog.TryGetValue(novoStatus, out var procedureDefinition))
         {
             await _prontuarioRepository.AddItemPlanoTratamentoAsync(
                 new ItemPlanoTratamento(
@@ -56,7 +79,7 @@ public sealed class UpdateDenteOdontogramaCommandHandler : IRequestHandler<Updat
                     request.Dente,
                     int.Parse(request.Dente),
                     prontuario.Paciente?.DentistaResponsavelId,
-                    newStatus,
+                    novoStatus,
                     procedureDefinition.Procedimento,
                     procedureDefinition.ValorBase),
                 cancellationToken);
@@ -68,8 +91,9 @@ public sealed class UpdateDenteOdontogramaCommandHandler : IRequestHandler<Updat
         var detalhesJson = JsonSerializer.Serialize(new
         {
             Dente = request.Dente,
-            StatusAnterior = currentStatus,
-            NovoStatus = newStatus
+            StatusAnterior = estadoAtual.Status,
+            NovoStatus = novoStatus,
+            CariePercentual = percentualCarie
         });
 
         prontuario.AtualizarOdontograma(odontogramaJson, usuarioId, now, detalhesJson);
@@ -100,6 +124,7 @@ public sealed class UpdateDenteOdontogramaCommandHandler : IRequestHandler<Updat
             anamneseDesatualizada,
             updatedProntuario.AnamneseAtualizadaEmUtc,
             updatedProntuario.OdontogramaAtualizadoEmUtc,
+            updatedProntuario.DenticaoAtiva.ToString(),
             updatedProntuario.ItensPlanoTratamento
                 .Select(item => new ItemPlanoTratamentoDto(
                     item.Id,

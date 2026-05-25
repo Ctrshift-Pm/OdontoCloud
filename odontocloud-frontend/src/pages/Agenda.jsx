@@ -19,6 +19,8 @@ import AppShell from '../components/AppShell'
 import FeedbackMessage from '../components/FeedbackMessage'
 import { useAuth } from '../hooks/useAuth'
 
+const DEFAULT_AGENDA_DAYS = [0, 1, 2, 3, 4, 5, 6]
+
 function mapStatusToColor(status) {
   switch (String(status || '').toLowerCase().trim()) {
     case 'confirmado':
@@ -80,45 +82,48 @@ function getDentistaAgendaConfig(dentistas, selectedDentistaId) {
   }
 
   if (!selectedDentistaId) {
-    const validConfigs = dentistas
-      .map((dentista) => dentista.agendaConfig)
-      .filter(Boolean)
-
-    if (validConfigs.length === 0) {
-      return {
-        ...defaultConfig,
-        diasDaSemana: [0, 1, 2, 3, 4, 5, 6],
-      }
-    }
-
-    const dias = new Set()
-    for (const config of validConfigs) {
-      if (Array.isArray(config.diasDaSemana)) {
-        config.diasDaSemana.forEach((dia) => {
-          dias.add(dia)
-        })
-      }
-    }
-
-    const start = Math.min(
-      ...validConfigs.map((config) => parseAgendaTimeToMinutes(config?.inicio, parseAgendaTimeToMinutes(defaultConfig.inicio, 480))),
-    )
-    const end = Math.max(
-      ...validConfigs.map((config) => parseAgendaTimeToMinutes(config?.fim, parseAgendaTimeToMinutes(defaultConfig.fim, 1080))),
-    )
-    const slot = Math.min(
-      ...validConfigs.map((config) => config?.duracaoPadraoMinutos ?? defaultConfig.duracaoPadraoMinutos),
-    )
-
     return {
-      inicio: toMinuteString(start),
-      fim: toMinuteString(end),
-      duracaoPadraoMinutos: Number.isInteger(slot) && slot > 0 ? slot : defaultConfig.duracaoPadraoMinutos,
-      diasDaSemana: dias.size > 0 ? Array.from(dias).sort((left, right) => left - right) : [0, 1, 2, 3, 4, 5, 6],
+      ...defaultConfig,
+      diasDaSemana: DEFAULT_AGENDA_DAYS,
     }
   }
 
-  return defaultConfig
+  const validConfigs = dentistas
+    .map((dentista) => dentista.agendaConfig)
+    .filter(Boolean)
+
+  if (validConfigs.length === 0) {
+    return {
+      ...defaultConfig,
+      diasDaSemana: DEFAULT_AGENDA_DAYS,
+    }
+  }
+
+  const dias = new Set()
+  for (const config of validConfigs) {
+    if (Array.isArray(config.diasDaSemana)) {
+      config.diasDaSemana.forEach((dia) => {
+        dias.add(dia)
+      })
+    }
+  }
+
+  const start = Math.min(
+    ...validConfigs.map((config) => parseAgendaTimeToMinutes(config?.inicio, parseAgendaTimeToMinutes(defaultConfig.inicio, 480))),
+  )
+  const end = Math.max(
+    ...validConfigs.map((config) => parseAgendaTimeToMinutes(config?.fim, parseAgendaTimeToMinutes(defaultConfig.fim, 1080))),
+  )
+  const slot = Math.min(
+    ...validConfigs.map((config) => config?.duracaoPadraoMinutos ?? defaultConfig.duracaoPadraoMinutos),
+  )
+
+  return {
+    inicio: toMinuteString(start),
+    fim: toMinuteString(end),
+    duracaoPadraoMinutos: Number.isInteger(slot) && slot > 0 ? slot : defaultConfig.duracaoPadraoMinutos,
+    diasDaSemana: dias.size > 0 ? Array.from(dias).sort((left, right) => left - right) : DEFAULT_AGENDA_DAYS,
+  }
 }
 
 function toDateInputValue(date) {
@@ -147,6 +152,29 @@ function buildAgendaProps(items, dentistaColorMap) {
       raw: item,
     }
   })
+}
+
+function toWeekdayIso(dateInput) {
+  const dayDate = new Date(`${dateInput}T00:00:00`)
+  return Number.isNaN(dayDate.getTime()) ? null : dayDate.getDay()
+}
+
+function getDentistaDiasDaSemana(dentista) {
+  const dias = Array.isArray(dentista?.agendaConfig?.diasDaSemana) ? dentista.agendaConfig.diasDaSemana : null
+  return dias?.length ? dias : DEFAULT_AGENDA_DAYS
+}
+
+function findDentistaParaDia(dentistas, dayOfWeek) {
+  if (!Number.isInteger(dayOfWeek)) {
+    return ''
+  }
+
+  const candidate = dentistas.find((dentista) => {
+    const diasDaSemana = getDentistaDiasDaSemana(dentista)
+    return diasDaSemana.includes(dayOfWeek)
+  })
+
+  return candidate?.id || ''
 }
 
 function moveAnchorDate(currentDate, viewMode, direction) {
@@ -278,7 +306,10 @@ export default function Agenda() {
   function handleOpenCreateModal(date, horario, preselectedPatient = null) {
     setPageSuccess('')
     setModalMode('create')
-    const targetDentistaId = selectedDentistaId || (dentistas[0]?.id || '')
+    const targetDayOfWeek = toWeekdayIso(date)
+    const targetDentistaId = selectedDentistaId
+      || findDentistaParaDia(dentistas, targetDayOfWeek)
+      || (dentistas[0]?.id || '')
     const defaultConfig = getDentistaAgendaConfig(dentistas, targetDentistaId)
 
     setSelectedEventData({
@@ -300,7 +331,20 @@ export default function Agenda() {
   }
 
   async function handleSaved(message = 'Agendamento salvo com sucesso.') {
-    await Promise.all([loadAgenda(), loadReferenceData()])
+    setPageError('')
+    setPageSuccess('')
+
+    const [agendamentosResult, referenciaResult] = await Promise.allSettled([
+      loadAgenda(),
+      loadReferenceData(),
+    ])
+
+    if (agendamentosResult.status === 'rejected' || referenciaResult.status === 'rejected') {
+      const erro = agendamentosResult.reason || referenciaResult.reason
+      setPageError(getApiErrorMessage(erro, 'Nao foi possivel atualizar os dados da agenda.'))
+      return
+    }
+
     setPageSuccess(message)
   }
 

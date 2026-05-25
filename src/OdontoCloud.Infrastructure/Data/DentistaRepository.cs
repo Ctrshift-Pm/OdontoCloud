@@ -26,4 +26,9 @@ public sealed class DentistaRepository : IDentistaRepository
         return _dbContext.Dentistas
             .FirstOrDefaultAsync(dentista => dentista.Id == dentistaId, cancellationToken);
     }
+
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return _dbContext.SaveChangesAsync(cancellationToken);
+    }
 }

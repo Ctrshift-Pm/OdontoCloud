@@ -42,9 +42,23 @@ export async function getContasReceberPendentesPorPaciente(pacienteId) {
   return Array.isArray(response.data) ? response.data : []
 }
 
+export async function criarContaReceber(payload) {
+  const response = await client.post('/api/financeiro/receber', payload)
+  return response.data
+}
+
 export async function darBaixaContaReceber(contaId, payload) {
   const response = await client.patch(`/api/financeiro/receber/${contaId}`, payload)
   return response.data
+}
+
+export async function atualizarContaReceber(contaId, payload) {
+  const response = await client.put(`/api/financeiro/receber/${contaId}`, payload)
+  return response.data
+}
+
+export async function excluirContaReceber(contaId) {
+  await client.delete(`/api/financeiro/receber/${contaId}`)
 }
 
 export async function getContasPagarPendentes() {
@@ -52,7 +66,21 @@ export async function getContasPagarPendentes() {
   return Array.isArray(response.data) ? response.data : []
 }
 
+export async function criarContaPagar(payload) {
+  const response = await client.post('/api/financeiro/contas-pagar', payload)
+  return response.data
+}
+
 export async function pagarContaPagar(contaPagarId) {
   const response = await client.patch(`/api/financeiro/contas-pagar/${contaPagarId}/pagar`)
   return response.data
+}
+
+export async function atualizarContaPagar(contaPagarId, payload) {
+  const response = await client.put(`/api/financeiro/contas-pagar/${contaPagarId}`, payload)
+  return response.data
+}
+
+export async function excluirContaPagar(contaPagarId) {
+  await client.delete(`/api/financeiro/contas-pagar/${contaPagarId}`)
 }

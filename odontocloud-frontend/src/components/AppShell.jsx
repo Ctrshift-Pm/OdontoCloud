@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 
 function BrandMark({ compact = false }) {
@@ -142,31 +143,92 @@ function SettingsIcon() {
   )
 }
 
+function UserCircleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+      <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path
+        d="M4 20c0-3.5 3-6 8-6s8 2.5 8 6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function MenuIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+      <path
+        d="M4 7h16M4 12h16M4 17h16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+      <path
+        d="M6 6l12 12M18 6 6 18"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 const navSections = [
   {
     title: 'Principal',
     items: [
-      { to: '/dashboard', label: 'Dashboard', icon: DashboardIcon, upcoming: true },
-      { to: '/agenda', label: 'Agenda', icon: CalendarIcon, badge: '3' },
-      { to: '/ia-atendimento', label: 'IA Atendimento', icon: SparklesIcon, badge: '7', upcoming: true },
+      { to: '/dashboard', label: 'Dashboard', icon: DashboardIcon },
+      { to: '/agenda', label: 'Agenda', icon: CalendarIcon },
+      { to: '/ia-atendimento', label: 'IA Atendimento', icon: SparklesIcon, upcoming: true },
     ],
   },
   {
     title: 'Clinica',
     items: [
       { to: '/pacientes', label: 'Pacientes / CRM', icon: PatientsIcon },
-      { to: '/prontuario', label: 'Prontuario', icon: ClipboardIcon },
+      { to: '/prontuario', label: 'Prontuário', icon: ClipboardIcon },
       { to: '/assinatura-digital', label: 'Assinatura Digital', icon: SignatureIcon, upcoming: true },
     ],
   },
   {
-    title: 'Gestao',
+    title: 'Gestão',
     items: [
       { to: '/financeiro', label: 'Financeiro', icon: MoneyIcon },
-      { to: '/configuracoes', label: 'Configuracoes', icon: SettingsIcon, upcoming: true },
+      { to: '/perfil', label: 'Perfil', icon: UserCircleIcon },
+      { to: '/configuracoes', label: 'Configurações', icon: SettingsIcon },
     ],
   },
 ]
+
+const FOCUSABLE_ELEMENT_SELECTOR =
+  'a[href], area[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+function getFocusableElements(container) {
+  if (!container) {
+    return []
+  }
+
+  return Array.from(container.querySelectorAll(FOCUSABLE_ELEMENT_SELECTOR)).filter((element) => {
+    const isVisible = element.offsetParent !== null || element === document.activeElement
+    return isVisible
+  })
+}
 
 function NavBadge({ item, isActive }) {
   if (item.badge) {
@@ -196,12 +258,43 @@ function NavBadge({ item, isActive }) {
   return null
 }
 
+const MOBILE_MENU_ID = 'mobile-main-navigation'
+
 function NavItem({ item }) {
   const Icon = item.icon
 
   return (
     <NavLink
       to={item.to}
+      onClick={() => {}}
+      className={({ isActive }) =>
+        `flex items-center justify-between rounded-2xl px-3 py-3 text-sm font-medium transition ${
+          isActive
+            ? 'bg-[var(--brand-500)] text-white shadow-lg shadow-emerald-950/25'
+            : 'text-white/65 hover:bg-white/6 hover:text-white'
+        }`
+      }
+    >
+      {({ isActive }) => (
+        <>
+          <span className="flex items-center gap-3">
+            <Icon />
+            {item.label}
+          </span>
+          <NavBadge item={item} isActive={isActive} />
+        </>
+      )}
+    </NavLink>
+  )
+}
+
+function NavItemWithAction({ item, onLinkClick }) {
+  const Icon = item.icon
+
+  return (
+    <NavLink
+      to={item.to}
+      onClick={onLinkClick}
       className={({ isActive }) =>
         `flex items-center justify-between rounded-2xl px-3 py-3 text-sm font-medium transition ${
           isActive
@@ -224,6 +317,69 @@ function NavItem({ item }) {
 }
 
 export default function AppShell({ title, subtitle, user, onLogout, actions, children }) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const mobileMenuRef = useRef(null)
+  const previousFocusRef = useRef(null)
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) {
+      return undefined
+    }
+
+    const menu = mobileMenuRef.current
+    if (!menu) {
+      return undefined
+    }
+
+    previousFocusRef.current = document.activeElement
+    document.body.style.overflow = 'hidden'
+
+    const focusableElements = getFocusableElements(menu)
+    const firstElement = focusableElements[0] || menu
+    const lastElement = focusableElements.at(-1) || menu
+
+    if (firstElement) {
+      firstElement.focus()
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setIsMobileMenuOpen(false)
+        return
+      }
+
+      if (event.key !== 'Tab' || !focusableElements.length) {
+        return
+      }
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault()
+        lastElement.focus()
+      }
+
+      if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault()
+        firstElement.focus()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = ''
+
+      if (previousFocusRef.current?.focus) {
+        previousFocusRef.current.focus()
+      }
+    }
+  }, [isMobileMenuOpen])
+
+  function closeMobileMenu() {
+    setIsMobileMenuOpen(false)
+  }
+
   const currentDate = new Intl.DateTimeFormat('pt-BR', {
     weekday: 'long',
     day: '2-digit',
@@ -233,13 +389,114 @@ export default function AppShell({ title, subtitle, user, onLogout, actions, chi
   return (
     <div className="h-screen overflow-hidden bg-[var(--surface)] text-[var(--ink-900)]">
       <div className="flex h-screen">
+        <div className="lg:hidden">
+          <button
+            type="button"
+            onClick={() => {
+              setIsMobileMenuOpen(true)
+            }}
+            aria-controls={MOBILE_MENU_ID}
+            aria-expanded={isMobileMenuOpen}
+            className="fixed left-4 top-4 z-40 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-black/10 bg-white text-[var(--ink-900)] shadow-sm"
+            aria-label="Abrir menu principal"
+          >
+            <MenuIcon />
+          </button>
+        </div>
+
+        <aside
+          ref={mobileMenuRef}
+          id={MOBILE_MENU_ID}
+          className={`fixed inset-y-0 left-0 z-50 w-72 shrink-0 border-r border-white/8 bg-stone-950 text-white transition-transform duration-200 lg:hidden ${
+            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+          aria-label="Menu principal"
+          role="dialog"
+          aria-modal="true"
+          aria-hidden={!isMobileMenuOpen}
+        >
+          <div className="border-b border-white/8 px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <BrandMark compact />
+                <div>
+                  <div className="text-lg font-semibold">OdontoCloud</div>
+                  <div className="text-sm text-white/45">Gestão clínica multi-tenant</div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeMobileMenu}
+                className="rounded-xl border border-white/10 p-2 text-white/70 transition hover:bg-white/8 hover:text-white"
+                aria-label="Fechar menu principal"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+          </div>
+
+            <nav className="flex flex-1 flex-col px-4 py-6" aria-label="Navegação principal">
+            <div className="space-y-6">
+              {navSections.map((section) => (
+                <div key={section.title}>
+                  <div className="mb-3 px-3 text-xs font-semibold uppercase tracking-[0.24em] text-white/35">
+                    {section.title}
+                  </div>
+
+                  <div className="space-y-1">
+                    {section.items.map((item) => (
+                      <NavItemWithAction key={item.to} item={item} onLinkClick={closeMobileMenu} />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </nav>
+
+          <div className="mt-auto border-t border-white/8 px-4 py-4">
+            <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--brand-500)] text-sm font-semibold text-white">
+                {user?.nome?.slice(0, 2).toUpperCase() || 'OC'}
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-semibold text-white">{user?.nome || 'Usuário'}</div>
+                <div className="truncate text-xs text-white/45">{user?.perfil || 'Perfil não informado'}</div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  closeMobileMenu()
+                  onLogout()
+                }}
+                className="rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold text-white/70 transition hover:bg-white/8 hover:text-white"
+              >
+                Sair
+              </button>
+            </div>
+          </div>
+        </aside>
+
+        {isMobileMenuOpen ? (
+          <div
+            className="fixed inset-0 z-40 bg-stone-950/70 lg:hidden"
+            role="presentation"
+            aria-hidden="true"
+            onMouseDown={() => {
+              closeMobileMenu()
+            }}
+          />
+        ) : null}
+
         <aside className="hidden h-screen w-72 shrink-0 flex-col bg-stone-950 text-white lg:fixed lg:inset-y-0 lg:left-0 lg:flex">
           <div className="border-b border-white/8 px-6 py-6">
             <div className="flex items-center gap-3">
               <BrandMark />
               <div>
                 <div className="text-lg font-semibold">OdontoCloud</div>
-                <div className="text-sm text-white/45">Gestao clinica multi-tenant</div>
+                <div className="text-sm text-white/45">Gestão clínica multi-tenant</div>
               </div>
             </div>
           </div>
@@ -269,8 +526,8 @@ export default function AppShell({ title, subtitle, user, onLogout, actions, chi
               </div>
 
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-semibold text-white">{user?.nome || 'Usuario'}</div>
-                <div className="truncate text-xs text-white/45">{user?.perfil || 'Perfil nao informado'}</div>
+                <div className="truncate text-sm font-semibold text-white">{user?.nome || 'Usuário'}</div>
+                <div className="truncate text-xs text-white/45">{user?.perfil || 'Perfil não informado'}</div>
               </div>
 
               <button

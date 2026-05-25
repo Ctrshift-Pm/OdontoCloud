@@ -30,6 +30,11 @@ export async function atualizarStatus(id, novoStatus) {
   return response.data
 }
 
+export async function atualizarAgendaDentista(dentistaId, dados) {
+  const response = await client.patch(`/api/dentistas/${dentistaId}/agenda-config`, dados)
+  return response.data
+}
+
 export async function excluirAgendamento(id) {
   await client.delete(`/api/agendamentos/${id}`)
 }

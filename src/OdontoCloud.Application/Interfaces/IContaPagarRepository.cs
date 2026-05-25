@@ -6,6 +6,8 @@ public interface IContaPagarRepository
 {
     Task AddAsync(ContaPagar contaPagar, CancellationToken cancellationToken = default);
 
+    void Remove(ContaPagar contaPagar);
+
     Task<ContaPagar?> GetByIdAsync(Guid contaPagarId, CancellationToken cancellationToken = default);
 
     Task<List<ContaPagar>> GetPendentesEAtrasadasAsync(CancellationToken cancellationToken = default);

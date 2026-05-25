@@ -47,6 +47,31 @@ public sealed class FinanceiroApiIntegrationTests : IClassFixture<ApiTestFactory
     }
 
     [Fact]
+    public async Task GetContasReceber_PendenteVencidaNaoDevePersistirStatusAtrasado()
+    {
+        var tenant = await CriarTenantAsync();
+        var token = await ObterTokenJwtAsync(tenant.Email);
+
+        var pacienteId = await CriarPacienteAsync(tenant.ClinicaId);
+        var contaReceberId = await CriarContaReceberPendenteAsync(
+            tenant.ClinicaId,
+            pacienteId,
+            dataVencimento: DateTime.UtcNow.Date.AddDays(-2));
+
+        using var client = CriarClienteAutenticado(token);
+        var response = await client.GetAsync("/api/financeiro/pendentes?pacienteId=" + pacienteId);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var contas = await response.Content.ReadFromJsonAsync<List<ContaReceberResponse>>();
+        Assert.NotNull(contas);
+        var retorno = Assert.Single(contas, conta => conta.Id == contaReceberId);
+        Assert.Equal(StatusContaReceber.Atrasado.ToString(), retorno.Status);
+
+        var statusDb = await ObterStatusContaReceberAsync(tenant.ClinicaId, contaReceberId);
+        Assert.Equal(StatusContaReceber.Pendente.ToString(), statusDb);
+    }
+
+    [Fact]
     public async Task CreateReceber_ComDadosValidos_DeveCadastrarContaPendente()
     {
         var tenant = await CriarTenantAsync();
@@ -78,6 +103,120 @@ public sealed class FinanceiroApiIntegrationTests : IClassFixture<ApiTestFactory
         var contas = await listarResponse.Content.ReadFromJsonAsync<List<ContaReceberResponse>>();
         Assert.NotNull(contas);
         Assert.Contains(contaCriada.Id, contas.Select(item => item.Id));
+    }
+
+    [Fact]
+    public async Task UpdateReceber_Pendente_DeveAtualizarDados()
+    {
+        var tenant = await CriarTenantAsync();
+        var token = await ObterTokenJwtAsync(tenant.Email);
+
+        var pacienteId = await CriarPacienteAsync(tenant.ClinicaId);
+        var contaReceberId = await CriarContaReceberPendenteAsync(
+            tenant.ClinicaId,
+            pacienteId,
+            valorBase: 180m,
+            desconto: 10m);
+
+        using var client = CriarClienteAutenticado(token);
+        var payload = new
+        {
+            ValorBase = 220m,
+            Desconto = 30m,
+            DataVencimento = DateTime.UtcNow.Date.AddDays(8),
+        };
+
+        using var request = new HttpRequestMessage(HttpMethod.Put, $"/api/financeiro/receber/{contaReceberId}")
+        {
+            Content = JsonContent.Create(payload)
+        };
+
+        var response = await client.SendAsync(request);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var contaAtualizada = await response.Content.ReadFromJsonAsync<ContaReceberResponse>();
+        Assert.NotNull(contaAtualizada);
+        Assert.Equal(190m, contaAtualizada.ValorFinal);
+        Assert.Equal(220m, contaAtualizada.ValorBase);
+        Assert.Equal(30m, contaAtualizada.Desconto);
+    }
+
+    [Fact]
+    public async Task DeleteReceber_Pendente_DeveRemoverConta()
+    {
+        var tenant = await CriarTenantAsync();
+        var token = await ObterTokenJwtAsync(tenant.Email);
+
+        var pacienteId = await CriarPacienteAsync(tenant.ClinicaId);
+        var contaReceberId = await CriarContaReceberPendenteAsync(
+            tenant.ClinicaId,
+            pacienteId,
+            valorBase: 145m);
+
+        using var client = CriarClienteAutenticado(token);
+        var response = await client.DeleteAsync($"/api/financeiro/receber/{contaReceberId}");
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+        var listarResponse = await client.GetAsync("/api/financeiro/receber?status=Pendente");
+        var contas = await listarResponse.Content.ReadFromJsonAsync<List<ContaReceberResponse>>();
+        Assert.NotNull(contas);
+        Assert.DoesNotContain(contas, conta => conta.Id == contaReceberId);
+    }
+
+    [Fact]
+    public async Task UpdateReceber_Pago_DeveRetornarErro400()
+    {
+        var tenant = await CriarTenantAsync();
+        var token = await ObterTokenJwtAsync(tenant.Email);
+
+        var pacienteId = await CriarPacienteAsync(tenant.ClinicaId);
+        var contaReceberId = await CriarContaReceberPendenteAsync(
+            tenant.ClinicaId,
+            pacienteId,
+            valorBase: 150m);
+
+        using var clientePagador = CriarClienteAutenticado(token);
+        var baixa = await clientePagador.PatchAsJsonAsync(
+            $"/api/financeiro/receber/{contaReceberId}",
+            new ReceberRequest(150m, "Dinheiro"));
+        Assert.Equal(HttpStatusCode.OK, baixa.StatusCode);
+
+        var payload = new
+        {
+            ValorBase = 300m,
+            Desconto = 0m,
+            DataVencimento = DateTime.UtcNow.Date.AddDays(4),
+        };
+
+        using var updateRequest = new HttpRequestMessage(HttpMethod.Put, $"/api/financeiro/receber/{contaReceberId}")
+        {
+            Content = JsonContent.Create(payload)
+        };
+
+        var response = await clientePagador.SendAsync(updateRequest);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteReceber_Pago_DeveRetornarErro400()
+    {
+        var tenant = await CriarTenantAsync();
+        var token = await ObterTokenJwtAsync(tenant.Email);
+
+        var pacienteId = await CriarPacienteAsync(tenant.ClinicaId);
+        var contaReceberId = await CriarContaReceberPendenteAsync(
+            tenant.ClinicaId,
+            pacienteId,
+            valorBase: 120m);
+
+        using var clientePagador = CriarClienteAutenticado(token);
+        var baixa = await clientePagador.PatchAsJsonAsync(
+            $"/api/financeiro/receber/{contaReceberId}",
+            new ReceberRequest(120m, "Pix"));
+        Assert.Equal(HttpStatusCode.OK, baixa.StatusCode);
+
+        var response = await clientePagador.DeleteAsync($"/api/financeiro/receber/{contaReceberId}");
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
@@ -141,6 +280,145 @@ public sealed class FinanceiroApiIntegrationTests : IClassFixture<ApiTestFactory
         var ids = contasPagar.Select(item => item.Id).ToHashSet();
         Assert.Contains(contaPagarPendenteId, ids);
         Assert.Contains(contaPagarAtrasadaId, ids);
+    }
+
+    [Fact]
+    public async Task GetContasPagarPendentes_AtrasadasNaoDevemPersistirStatusAtrasado()
+    {
+        var tenant = await CriarTenantAsync();
+        var token = await ObterTokenJwtAsync(tenant.Email);
+        var contaPagarAtrasadaId = await CriarContaPagarAsync(
+            tenant.ClinicaId,
+            320m,
+            DefaultDate.AddDays(-3),
+            pagar: false);
+
+        using var client = CriarClienteAutenticado(token);
+        var resposta = await client.GetAsync("/api/financeiro/contas-pagar/pendentes");
+
+        Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
+        var contasPagar = await resposta.Content.ReadFromJsonAsync<List<ContaPagarResponse>>();
+        Assert.NotNull(contasPagar);
+        var retorno = Assert.Single(contasPagar, conta => conta.Id == contaPagarAtrasadaId);
+        Assert.Equal(StatusContaPagar.Atrasado.ToString(), retorno.Status);
+
+        var statusDb = await ObterStatusContaPagarAsync(tenant.ClinicaId, contaPagarAtrasadaId);
+        Assert.Equal(StatusContaPagar.Pendente.ToString(), statusDb);
+    }
+
+    [Fact]
+    public async Task PagarContaPagar_Pendente_DeveRetornarPagoENaoAparecerEmPendentes()
+    {
+        var tenant = await CriarTenantAsync();
+        var token = await ObterTokenJwtAsync(tenant.Email);
+
+        var contaPagarId = await CriarContaPagarAsync(tenant.ClinicaId, 220m, DefaultDate.AddDays(2), pagar: false);
+
+        using var client = CriarClienteAutenticado(token);
+        using var request = new HttpRequestMessage(HttpMethod.Patch, $"/api/financeiro/contas-pagar/{contaPagarId}/pagar");
+        var pagarResponse = await client.SendAsync(request);
+        Assert.Equal(HttpStatusCode.OK, pagarResponse.StatusCode);
+
+        var contaPagarPaga = await pagarResponse.Content.ReadFromJsonAsync<ContaPagarResponse>();
+        Assert.NotNull(contaPagarPaga);
+        Assert.Equal(contaPagarId, contaPagarPaga.Id);
+        Assert.Equal(StatusContaPagar.Pago.ToString(), contaPagarPaga.Status);
+
+        var contasPagarResponse = await client.GetAsync("/api/financeiro/contas-pagar/pendentes");
+        Assert.Equal(HttpStatusCode.OK, contasPagarResponse.StatusCode);
+
+        var contasPagar = await contasPagarResponse.Content.ReadFromJsonAsync<List<ContaPagarResponse>>();
+        Assert.NotNull(contasPagar);
+        Assert.DoesNotContain(contasPagar, conta => conta.Id == contaPagarId);
+    }
+
+    [Fact]
+    public async Task UpdateContaPagar_Pendente_DeveAtualizarDados()
+    {
+        var tenant = await CriarTenantAsync();
+        var token = await ObterTokenJwtAsync(tenant.Email);
+
+        var contaPagarId = await CriarContaPagarAsync(tenant.ClinicaId, 250m, DefaultDate.AddDays(2), pagar: false);
+
+        using var client = CriarClienteAutenticado(token);
+        var payload = new
+        {
+            FornecedorDestinatario = "Laboratorio Atualizado",
+            Categoria = "Teste",
+            Descricao = "Conta alterada em teste",
+            Valor = 333m,
+            DataVencimento = DefaultDate.AddDays(9),
+        };
+
+        using var request = new HttpRequestMessage(HttpMethod.Put, $"/api/financeiro/contas-pagar/{contaPagarId}")
+        {
+            Content = JsonContent.Create(payload)
+        };
+
+        var response = await client.SendAsync(request);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var contaAtualizada = await response.Content.ReadFromJsonAsync<ContaPagarResponse>();
+        Assert.NotNull(contaAtualizada);
+        Assert.Equal("Laboratorio Atualizado", contaAtualizada.FornecedorDestinatario);
+        Assert.Equal("Teste", contaAtualizada.Categoria);
+        Assert.Equal(333m, contaAtualizada.Valor);
+    }
+
+    [Fact]
+    public async Task DeleteContaPagar_Pendente_DeveRemoverConta()
+    {
+        var tenant = await CriarTenantAsync();
+        var token = await ObterTokenJwtAsync(tenant.Email);
+
+        var contaPagarId = await CriarContaPagarAsync(tenant.ClinicaId, 190m, DefaultDate.AddDays(2), pagar: false);
+
+        using var client = CriarClienteAutenticado(token);
+        var response = await client.DeleteAsync($"/api/financeiro/contas-pagar/{contaPagarId}");
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+        var contasPagarResponse = await client.GetAsync("/api/financeiro/contas-pagar/pendentes");
+        var contasPagar = await contasPagarResponse.Content.ReadFromJsonAsync<List<ContaPagarResponse>>();
+        Assert.NotNull(contasPagar);
+        Assert.DoesNotContain(contasPagar, conta => conta.Id == contaPagarId);
+    }
+
+    [Fact]
+    public async Task UpdateContaPagar_Pago_DeveRetornarErro400()
+    {
+        var tenant = await CriarTenantAsync();
+        var token = await ObterTokenJwtAsync(tenant.Email);
+        var contaPagarId = await CriarContaPagarAsync(tenant.ClinicaId, 400m, DefaultDate.AddDays(2), pagar: true, usuarioBaixaId: tenant.UsuarioId);
+
+        using var client = CriarClienteAutenticado(token);
+        var payload = new
+        {
+            FornecedorDestinatario = "Laboratorio Bloqueado",
+            Categoria = "Comissao",
+            Descricao = "Tentativa de alteracao indevida",
+            Valor = 500m,
+            DataVencimento = DefaultDate.AddDays(11),
+        };
+
+        using var request = new HttpRequestMessage(HttpMethod.Put, $"/api/financeiro/contas-pagar/{contaPagarId}")
+        {
+            Content = JsonContent.Create(payload)
+        };
+
+        var response = await client.SendAsync(request);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteContaPagar_Pago_DeveRetornarErro400()
+    {
+        var tenant = await CriarTenantAsync();
+        var token = await ObterTokenJwtAsync(tenant.Email);
+        var contaPagarId = await CriarContaPagarAsync(tenant.ClinicaId, 400m, DefaultDate.AddDays(2), pagar: true, usuarioBaixaId: tenant.UsuarioId);
+
+        using var client = CriarClienteAutenticado(token);
+        var response = await client.DeleteAsync($"/api/financeiro/contas-pagar/{contaPagarId}");
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
@@ -348,6 +626,74 @@ public sealed class FinanceiroApiIntegrationTests : IClassFixture<ApiTestFactory
         Assert.DoesNotContain(contaPagarB, contaPagarAIds);
     }
 
+    [Fact]
+    public async Task EndpointsCrudFinanceiros_DevemRespeitarFiltroMultiTenant()
+    {
+        var tenantA = await CriarTenantAsync();
+        var tenantB = await CriarTenantAsync();
+        var tokenA = await ObterTokenJwtAsync(tenantA.Email);
+
+        var pacienteA = await CriarPacienteAsync(tenantA.ClinicaId);
+        var contaReceberA = await CriarContaReceberPendenteAsync(tenantA.ClinicaId, pacienteA, valorBase: 180m);
+        var contaPagarA = await CriarContaPagarAsync(tenantA.ClinicaId, 210m, DefaultDate.AddDays(7), pagar: false);
+
+        var pacienteB = await CriarPacienteAsync(tenantB.ClinicaId);
+        var contaReceberB = await CriarContaReceberPendenteAsync(tenantB.ClinicaId, pacienteB, valorBase: 220m);
+        var contaPagarB = await CriarContaPagarAsync(tenantB.ClinicaId, 230m, DefaultDate.AddDays(7), pagar: false);
+
+        using var clienteA = CriarClienteAutenticado(tokenA);
+        var recebResponse = await clienteA.PutAsJsonAsync(
+            $"/api/financeiro/receber/{contaReceberA}",
+            new
+            {
+                ValorBase = 200m,
+                Desconto = 0m,
+                DataVencimento = DateTime.UtcNow.Date.AddDays(8)
+            });
+
+        Assert.Equal(HttpStatusCode.OK, recebResponse.StatusCode);
+
+        var recebBResponse = await clienteA.PutAsJsonAsync(
+            $"/api/financeiro/receber/{contaReceberB}",
+            new
+            {
+                ValorBase = 260m,
+                Desconto = 0m,
+                DataVencimento = DateTime.UtcNow.Date.AddDays(8)
+            });
+        Assert.Equal(HttpStatusCode.NotFound, recebBResponse.StatusCode);
+
+        var deletarReceberB = await clienteA.DeleteAsync($"/api/financeiro/receber/{contaReceberB}");
+        Assert.Equal(HttpStatusCode.NotFound, deletarReceberB.StatusCode);
+
+        var pagarResponse = await clienteA.PutAsJsonAsync(
+            $"/api/financeiro/contas-pagar/{contaPagarA}",
+            new
+            {
+                FornecedorDestinatario = "Pagar atualizacao tenant",
+                Categoria = "Teste",
+                Descricao = "Valido no tenant A",
+                Valor = 230m,
+                DataVencimento = DateTime.UtcNow.Date.AddDays(7),
+            });
+        Assert.Equal(HttpStatusCode.OK, pagarResponse.StatusCode);
+
+        var pagarBResponse = await clienteA.PutAsJsonAsync(
+            $"/api/financeiro/contas-pagar/{contaPagarB}",
+            new
+            {
+                FornecedorDestinatario = "Pagar bloqueado",
+                Categoria = "Teste",
+                Descricao = "Não deveria ser atualizado",
+                Valor = 250m,
+                DataVencimento = DateTime.UtcNow.Date.AddDays(7),
+            });
+        Assert.Equal(HttpStatusCode.NotFound, pagarBResponse.StatusCode);
+
+        var deleteResponseB = await clienteA.DeleteAsync($"/api/financeiro/contas-pagar/{contaPagarB}");
+        Assert.True(deleteResponseB.StatusCode == HttpStatusCode.NotFound || deleteResponseB.StatusCode == HttpStatusCode.BadRequest);
+    }
+
     private HttpClient CriarClienteAutenticado(string token)
     {
         var cliente = _factory.CreateClient();
@@ -408,6 +754,24 @@ public sealed class FinanceiroApiIntegrationTests : IClassFixture<ApiTestFactory
         }
     }
 
+    private async Task<string> ObterStatusContaReceberAsync(Guid clinicaId, Guid contaId)
+    {
+        return await ExecutarNoTenantContext(clinicaId, context =>
+        {
+            var conta = context.ContasReceber.FirstOrDefault(c => c.Id == contaId);
+            return conta?.Status ?? string.Empty;
+        });
+    }
+
+    private async Task<string> ObterStatusContaPagarAsync(Guid clinicaId, Guid contaId)
+    {
+        return await ExecutarNoTenantContext(clinicaId, context =>
+        {
+            var conta = context.ContasPagar.FirstOrDefault(c => c.Id == contaId);
+            return conta?.Status.ToString() ?? string.Empty;
+        });
+    }
+
     private async Task<Guid> CriarPacienteAsync(Guid clinicaId)
     {
         var paciente = await ExecutarNoTenantContext(clinicaId, context =>
@@ -429,7 +793,8 @@ public sealed class FinanceiroApiIntegrationTests : IClassFixture<ApiTestFactory
         Guid pacienteId,
         Guid? dentistaId = null,
         DateTime? dataVencimento = null,
-        decimal valorBase = 100m)
+        decimal valorBase = 100m,
+        decimal desconto = 0m)
     {
         var conta = await ExecutarNoTenantContext(clinicaId, context =>
         {
@@ -438,7 +803,7 @@ public sealed class FinanceiroApiIntegrationTests : IClassFixture<ApiTestFactory
                 null,
                 dentistaId,
                 valorBase,
-                desconto: 0m,
+                desconto,
                 dataVencimento ?? DateTime.UtcNow.AddDays(2));
 
             context.ContasReceber.Add(novaConta);

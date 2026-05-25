@@ -3,6 +3,7 @@ using System.IO;
 using System.Security.Claims;
 using OdontoCloud.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.HttpOverrides;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -23,6 +24,7 @@ var builder = WebApplication.CreateBuilder(args);
 var jwtKey = ResolveJwtSigningKey(builder.Configuration);
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "OdontoCloud";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "OdontoCloud.Client";
+var corsOrigins = ResolveCorsOrigins(builder.Configuration);
 const string FrontendCorsPolicy = "FrontendDevPolicy";
 
 builder.Services.AddControllers();
@@ -31,14 +33,16 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(FrontendCorsPolicy, policy =>
     {
-        policy.WithOrigins(
-                "http://localhost:5173",
-                "http://127.0.0.1:5173",
-                "https://localhost:5173",
-                "https://127.0.0.1:5173")
+        policy.WithOrigins(corsOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
+});
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
 });
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantService, TenantService>();
@@ -158,10 +162,12 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
+app.UseForwardedHeaders();
 app.UseCors(FrontendCorsPolicy);
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapGet("/healthz", () => Results.Ok(new { status = "ok", service = "OdontoCloud.Api" })).AllowAnonymous();
 app.MapControllers();
 
 app.Run();
@@ -188,6 +194,36 @@ static string ResolveJwtSigningKey(IConfiguration configuration)
     }
 
     return keyFromConfig;
+}
+
+static string[] ResolveCorsOrigins(IConfiguration configuration)
+{
+    var configuredOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+    if (configuredOrigins is { Length: > 0 })
+    {
+        return configuredOrigins
+            .Where(origin => !string.IsNullOrWhiteSpace(origin))
+            .Select(origin => origin.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
+
+    var commaSeparatedOrigins = configuration["Cors:AllowedOrigins"];
+    if (!string.IsNullOrWhiteSpace(commaSeparatedOrigins))
+    {
+        return commaSeparatedOrigins
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
+
+    return
+    [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://localhost:5173",
+        "https://127.0.0.1:5173"
+    ];
 }
 
 static void AddPermissionPolicies(AuthorizationOptions options)

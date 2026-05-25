@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: odontocloud-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./src/OdontoCloud.Api/Dockerfile
+    autoDeploy: true
+    healthCheckPath: /healthz
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://0.0.0.0:10000
+      - key: Jwt__Issuer
+        value: OdontoCloud.Api
+      - key: Jwt__Audience
+        value: OdontoCloud.Client
+      - key: Jwt__Key
+        sync: false
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: Cors__AllowedOrigins
+        sync: false

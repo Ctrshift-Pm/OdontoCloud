@@ -16,6 +16,8 @@ export default defineConfig({
   testDir: './tests',
   testMatch: /e2e[\\/].*\.(test|spec)\.[jt]s$/,
   timeout: 90_000,
+  workers: 1,
+  fullyParallel: false,
   expect: {
     timeout: 8_000,
   },

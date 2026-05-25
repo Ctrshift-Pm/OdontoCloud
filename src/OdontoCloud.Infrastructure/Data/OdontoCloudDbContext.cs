@@ -90,6 +90,7 @@ public class OdontoCloudDbContext : DbContext
             entity.Property(p => p.Convenio).HasMaxLength(100);
             entity.Property(p => p.Cidade).HasMaxLength(100);
             entity.Property(p => p.Status).HasConversion<string>().IsRequired().HasMaxLength(50);
+            entity.Property(p => p.CrmKanbanStatus).HasConversion<string>().IsRequired().HasMaxLength(50);
             entity.Property(p => p.CreatedAt).IsRequired();
             entity.HasIndex(p => new { p.ClinicaId, p.Cpf }).IsUnique();
             entity.HasQueryFilter(p => p.ClinicaId == CurrentClinicaId);
@@ -249,9 +250,10 @@ public class OdontoCloudDbContext : DbContext
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
     {
-        var clinicaId = _tenantService.GetCurrentClinicaId();
+        var tenantEntries = ChangeTracker.Entries<TenantEntityBase>().ToList();
+        var clinicaId = tenantEntries.Count == 0 ? Guid.Empty : _tenantService.GetCurrentClinicaId();
 
-        foreach (var entry in ChangeTracker.Entries<TenantEntityBase>())
+        foreach (var entry in tenantEntries)
         {
             switch (entry.State)
             {

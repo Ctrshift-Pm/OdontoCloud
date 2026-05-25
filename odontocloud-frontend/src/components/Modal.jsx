@@ -1,19 +1,75 @@
-import { useEffect } from 'react'
+import { useEffect, useId, useRef } from 'react'
+
+const FOCUSABLE_ELEMENT_SELECTOR =
+  'a[href], area[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+function getFocusableElements(container) {
+  if (!container) {
+    return []
+  }
+
+  return Array.from(container.querySelectorAll(FOCUSABLE_ELEMENT_SELECTOR)).filter((element) => {
+    const isVisible = element.offsetParent !== null || element === document.activeElement
+    return isVisible
+  })
+}
 
 export default function Modal({ isOpen, title, description, onClose, children, footer }) {
+  const modalContainerRef = useRef(null)
+  const previouslyFocusedElement = useRef(null)
+  const titleId = useId()
+  const descriptionId = useId()
+
   useEffect(() => {
     if (!isOpen) {
       return undefined
     }
 
-    function handleEscape(event) {
+    previouslyFocusedElement.current = document.activeElement
+    document.body.style.overflow = 'hidden'
+
+    function handleKeyDown(event) {
       if (event.key === 'Escape') {
+        event.preventDefault()
         onClose()
+        return
+      }
+
+      const focusableElements = getFocusableElements(modalContainerRef.current)
+      if (event.key !== 'Tab' || focusableElements.length === 0) {
+        return
+      }
+
+      const firstElement = focusableElements[0]
+      const lastElement = focusableElements.at(-1)
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault()
+        lastElement.focus()
+      }
+
+      if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault()
+        firstElement.focus()
       }
     }
 
-    window.addEventListener('keydown', handleEscape)
-    return () => window.removeEventListener('keydown', handleEscape)
+    window.addEventListener('keydown', handleKeyDown)
+
+    const focusableElements = getFocusableElements(modalContainerRef.current)
+    const firstElement = focusableElements[0] || modalContainerRef.current
+    if (firstElement) {
+      firstElement.focus()
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = ''
+
+      if (previouslyFocusedElement.current?.focus) {
+        previouslyFocusedElement.current.focus()
+      }
+    }
   }, [isOpen, onClose])
 
   if (!isOpen) {
@@ -30,14 +86,22 @@ export default function Modal({ isOpen, title, description, onClose, children, f
       }}
     >
       <div
+        ref={modalContainerRef}
         className="surface-card flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={description ? descriptionId : undefined}
+        tabIndex="-1"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="border-b border-black/5 px-6 py-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-xl font-semibold text-[var(--ink-900)]">{title}</h2>
-              {description ? <p className="mt-1 text-sm text-[var(--ink-500)]">{description}</p> : null}
+              <h2 id={titleId} className="text-xl font-semibold text-[var(--ink-900)]">
+                {title}
+              </h2>
+              {description ? <p id={descriptionId} className="mt-1 text-sm text-[var(--ink-500)]">{description}</p> : null}
             </div>
 
             <button

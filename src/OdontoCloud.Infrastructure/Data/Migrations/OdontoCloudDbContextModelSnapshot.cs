@@ -241,6 +241,12 @@ namespace OdontoCloud.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("AgendaConfigJson")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("jsonb")
+                        .HasDefaultValue("{\"inicio\":\"08:00\",\"fim\":\"18:00\",\"duracaoPadraoMinutos\":30,\"diasDaSemana\":[0,1,2,3,4,5,6]}");
+
                     b.Property<bool>("Ativo")
                         .HasColumnType("boolean");
 
@@ -264,11 +270,6 @@ namespace OdontoCloud.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("jsonb")
                         .HasDefaultValue("{\"tipo\":\"PercentualFixo\",\"percentual\":30}");
-            b.Property<string>("AgendaConfigJson")
-                .IsRequired()
-                .ValueGeneratedOnAdd()
-                .HasColumnType("jsonb")
-                .HasDefaultValue("{\"inicio\":\"08:00\",\"fim\":\"18:00\",\"duracaoPadraoMinutos\":30,\"diasDaSemana\":[1,2,3,4,5]}");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -389,6 +390,11 @@ namespace OdontoCloud.Infrastructure.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<string>("CrmKanbanStatus")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<string>("TelefoneWhatsapp")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -423,6 +429,9 @@ namespace OdontoCloud.Infrastructure.Data.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DenticaoAtiva")
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("OdontogramaAtualizadoEmUtc")
                         .HasColumnType("timestamp with time zone");

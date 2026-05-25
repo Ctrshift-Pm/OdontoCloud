@@ -4,6 +4,7 @@ using MediatR;
 using OdontoCloud.Application.Interfaces;
 using OdontoCloud.Application.UseCases.Prontuario;
 using OdontoCloud.Domain.Entities;
+using OdontoCloud.Domain.Enums;
 
 namespace OdontoCloud.Application.UseCases.PlanoTratamento.Commands;
 
@@ -50,8 +51,13 @@ public sealed class ConcluirItemPlanoCommandHandler : IRequestHandler<ConcluirIt
         {
             var dente = item.NumeroDente.Value.ToString();
             var odontograma = OdontogramaHelper.Parse(prontuario.OdontogramaJson);
-            var statusAnterior = odontograma.TryGetValue(dente, out var currentStatus) ? currentStatus : "ok";
-            odontograma[dente] = "ok";
+            var statusAnterior = odontograma.TryGetValue(dente, out var estadoAtual)
+                ? estadoAtual.Status
+                : StatusDenteOdontograma.ok.ToString();
+
+            odontograma[dente] = new OdontogramaHelper.EstadoDenteOdontograma(
+                StatusDenteOdontograma.ok.ToString(),
+                null);
 
             var now = DateTimeOffset.UtcNow;
             var usuarioId = _tenantService.GetCurrentUsuarioId();

@@ -2,7 +2,7 @@
 
 ## Produto
 
-OdontoCloud e um ERP/SaaS multi-tenant para clinicas odontologicas. O objetivo do produto e centralizar operacao clinica, agenda, CRM, financeiro, prontuario eletronico, odontograma, IA via WhatsApp e assinatura digital.
+OdontoCloud é um ERP/SaaS multi-tenant para clínicas odontológicas. O objetivo do produto é centralizar operação clínica, agenda, CRM, financeiro, prontuário eletrônico, odontograma, IA via WhatsApp e assinatura digital.
 
 O `ClinicaId` e o limite de tenant devem vir do backend, extraidos do JWT. O frontend nao deve enviar `ClinicaId` em payloads operacionais.
 
@@ -18,8 +18,8 @@ O `ClinicaId` e o limite de tenant devem vir do backend, extraidos do JWT. O fro
 - Auth esta funcional com JWT e persistencia no `localStorage`.
 - Multi-tenancy usa `TenantEntityBase`, `TenantService` e query filters no `OdontoCloudDbContext`.
 - Backend tem modulos de Pacientes, Agenda, Prontuario, PlanoTratamento, Financeiro, ContasPagar e Dentistas.
-- Frontend tem telas reais de Login, Pacientes/CRM e Agenda.
-- Rotas de Dashboard, IA Atendimento, Prontuario, Assinatura Digital, Financeiro e Configuracoes ainda estao em placeholder ou parcialmente sem UI real.
+- Frontend tem telas reais de Login, Dashboard, Agenda, Pacientes/CRM, Prontuário, Financeiro, Perfil e Configurações.
+- IA Atendimento e Assinatura Digital permanecem como placeholders com marcação "Em breve" e sem transações ativas.
 - Testes atuais de dominio passam com `dotnet test OdontoCloud.slnx`.
 
 ## Documentacao Externa Lida
@@ -64,11 +64,10 @@ Arquivos de apoio:
 - Exclusao real e apenas para corrigir erro operacional.
 - Configuracao futura por dentista: dias de atendimento, horario inicial/final, slot padrao, almoco, bloqueios pontuais e limite diario.
 
-### IA Atendimento
+### IA Atendimento (em breve)
 
-- Atendimento via WhatsApp Business API.
-- Qualifica urgencia, identifica paciente novo/retorno, sugere slots, agenda e registra historico.
-- Leads tem status, urgencia, procedimento de interesse, follow-up e conversa.
+- Fluxo em placeholder. A implementação ainda não está disponível para produção.
+- Planejamento do escopo: atendimento via WhatsApp Business API com qualificação de urgência, histórico de contato e sugestão de slots.
 
 ### Financeiro
 
@@ -92,18 +91,17 @@ Arquivos de apoio:
 - Estados documentados: Saudavel, Tratado, Carie, Extracao indicada, Ausente, Implante, Protese.
 - Plano de tratamento deve calcular total, pago e a receber.
 
-### Assinatura Digital
+### Assinatura Digital (em breve)
 
-- Documentos gerados automaticamente e enviados por WhatsApp.
-- Assinatura mobile sem login do paciente.
-- Registro com timestamp, IP, hash SHA-256, CPF e arquivo no prontuario.
+- Fluxo em placeholder. A implementação ainda não está disponível para produção.
+- Entrega prevista com documentos enviados por WhatsApp, assinatura sem login e evidência no prontuário (timestamp, IP, hash SHA-256, CPF).
 
 ### Perfis
 
 - Admin: todos os modulos.
 - Gestor: Dashboard, Agenda, Financeiro, CRM, Relatorios; nao edita prontuario.
-- Dentista: agenda propria, prontuario e assinatura; ve apenas pacientes proprios.
-- Recepcionista: Agenda, Pacientes, IA, Assinatura; sem financeiro detalhado.
+- Dentista: agenda própria, prontuário e gerenciamento clínico; a assinatura digital está em breve.
+- Recepcionista: Agenda e Pacientes; IA Atendimento e Assinatura Digital estão em breve.
 - Financeiro: Financeiro e Relatorios; sem acesso clinico.
 
 ## Diretrizes de Implementacao

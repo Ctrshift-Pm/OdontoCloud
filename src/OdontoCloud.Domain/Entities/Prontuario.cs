@@ -1,4 +1,5 @@
 using OdontoCloud.Domain.Common;
+using OdontoCloud.Domain.Enums;
 
 namespace OdontoCloud.Domain.Entities;
 
@@ -11,11 +12,16 @@ public sealed class Prontuario : TenantEntityBase
     {
     }
 
-    public Prontuario(Guid pacienteId, string anamneseJson, string odontogramaJson)
+    public Prontuario(
+        Guid pacienteId,
+        string anamneseJson,
+        string odontogramaJson,
+        TipoDenticao denticaoAtiva = TipoDenticao.Permanente)
     {
         PacienteId = Guard.AgainstDefault(pacienteId, nameof(pacienteId));
         AnamneseJson = Guard.AgainstNullOrWhiteSpace(anamneseJson, nameof(anamneseJson));
         OdontogramaJson = Guard.AgainstNullOrWhiteSpace(odontogramaJson, nameof(odontogramaJson));
+        DenticaoAtiva = denticaoAtiva;
     }
 
     public Guid PacienteId { get; private set; }
@@ -27,6 +33,8 @@ public sealed class Prontuario : TenantEntityBase
     public DateTimeOffset? AnamneseAtualizadaEmUtc { get; private set; }
 
     public DateTimeOffset? OdontogramaAtualizadoEmUtc { get; private set; }
+
+    public TipoDenticao DenticaoAtiva { get; private set; } = TipoDenticao.Permanente;
 
     public Paciente? Paciente { get; private set; }
 
@@ -49,5 +57,10 @@ public sealed class Prontuario : TenantEntityBase
     public void AdicionarItemPlanoTratamento(ItemPlanoTratamento itemPlanoTratamento)
     {
         _itensPlanoTratamento.Add(itemPlanoTratamento);
+    }
+
+    public void AtualizarDenticaoAtiva(TipoDenticao denticaoAtiva)
+    {
+        DenticaoAtiva = denticaoAtiva;
     }
 }

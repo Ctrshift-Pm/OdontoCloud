@@ -71,6 +71,32 @@ public sealed class ContaReceber : TenantEntityBase
             : StatusContaReceber.Parcial.ToString();
     }
 
+    public void AtualizarDados(decimal valorBase, decimal desconto, DateTime dataVencimento)
+    {
+        if (valorBase <= 0m)
+        {
+            throw new ArgumentException("O valor base deve ser maior que zero.", nameof(valorBase));
+        }
+
+        if (desconto < 0m)
+        {
+            throw new ArgumentException("O desconto nao pode ser negativo.", nameof(desconto));
+        }
+
+        if (desconto > valorBase)
+        {
+            throw new ArgumentException("O desconto nao pode ser maior que o valor base.", nameof(desconto));
+        }
+
+        ValorBase = valorBase;
+        Desconto = desconto;
+        ValorFinal = Math.Max(valorBase - desconto, 0m);
+        DataVencimento = EnsureUtc(dataVencimento);
+    }
+
+    public bool PodeSerEditadaOuExcluidaNoCrud() =>
+        Status is not null && (Status == StatusContaReceber.Pendente.ToString() || Status == StatusContaReceber.Atrasado.ToString());
+
     public void MarcarComoAtrasadoSeNecessario(DateTime utcNow)
     {
         if ((Status == StatusContaReceber.Pendente.ToString() || Status == StatusContaReceber.Parcial.ToString()) &&

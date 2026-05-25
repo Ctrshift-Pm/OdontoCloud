@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using OdontoCloud.Application.UseCases.Prontuario;
 using OdontoCloud.Application.UseCases.Prontuario.GetProntuario;
 using OdontoCloud.Application.UseCases.Prontuario.UpdateAnamnese;
+using OdontoCloud.Application.UseCases.Prontuario.UseCases.Prontuario.Denticao;
 using OdontoCloud.Application.UseCases.Prontuario.UpdateOdontograma;
 using OdontoCloud.Domain.Enums;
 using OdontoCloud.Infrastructure.Identity;
@@ -45,7 +46,26 @@ public sealed class ProntuarioController : ControllerBase
         CancellationToken cancellationToken)
     {
         var prontuario = await _sender.Send(
-            new UpdateDenteOdontogramaCommand(id, dente, request.Status),
+            new UpdateDenteOdontogramaCommand(id, dente, request.Status, request.CariePercentual),
+            cancellationToken);
+
+        if (prontuario is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(prontuario);
+    }
+
+    [HttpPatch("{id:guid}/denticao")]
+    [Permission(ModuloSistema.Prontuario, AcaoPermissao.Editar)]
+    public async Task<ActionResult<ProntuarioDto>> UpdateDenticao(
+        Guid id,
+        [FromBody] UpdateDenticaoRequest request,
+        CancellationToken cancellationToken)
+    {
+        var prontuario = await _sender.Send(
+            new UpdateDenticaoCommand(id, request.DenticaoAtiva),
             cancellationToken);
 
         if (prontuario is null)
@@ -75,7 +95,8 @@ public sealed class ProntuarioController : ControllerBase
         return Ok(prontuario);
     }
 
-    public sealed record UpdateOdontogramaRequest(string Status);
+    public sealed record UpdateOdontogramaRequest(string Status, int? CariePercentual);
+    public sealed record UpdateDenticaoRequest(string DenticaoAtiva);
 
     public sealed record UpdateAnamneseRequest(JsonElement Anamnese);
 }

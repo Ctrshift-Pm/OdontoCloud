@@ -7,4 +7,6 @@ public interface IDentistaRepository
     Task<IReadOnlyList<Dentista>> GetAllAsync(CancellationToken cancellationToken = default);
 
     Task<Dentista?> GetByIdAsync(Guid dentistaId, CancellationToken cancellationToken = default);
+
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

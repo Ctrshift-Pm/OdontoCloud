@@ -5,9 +5,18 @@ export async function getProntuarioPorPaciente(pacienteId) {
   return data
 }
 
-export async function atualizarOdontogramaDente(prontuarioId, dente, status) {
+export async function atualizarOdontogramaDente(prontuarioId, dente, status, cariePercentual = null) {
   const { data } = await client.patch(`/api/prontuario/${prontuarioId}/odontograma/${dente}`, {
     status,
+    cariePercentual,
+  })
+
+  return data
+}
+
+export async function atualizarDenticaoAtiva(prontuarioId, denticaoAtiva) {
+  const { data } = await client.patch(`/api/prontuario/${prontuarioId}/denticao`, {
+    denticaoAtiva,
   })
 
   return data

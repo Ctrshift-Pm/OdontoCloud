@@ -1,5 +1,7 @@
 using MediatR;
+using OdontoCloud.Application.Exceptions;
 using OdontoCloud.Application.Interfaces;
+using OdontoCloud.Domain.Entities;
 
 namespace OdontoCloud.Application.UseCases.Auth.Login;
 
@@ -27,7 +29,10 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, LoginRes
         }
 
         var sanitizedEmail = request.Email.Trim().ToLowerInvariant();
-        var usuario = await _usuarioAuthenticationRepository.GetByEmailAsync(sanitizedEmail, cancellationToken);
+        var usuario = await _usuarioAuthenticationRepository.GetByEmailAsync(
+            sanitizedEmail,
+            request.ClinicaId,
+            cancellationToken);
 
         if (usuario is null || !usuario.Ativo)
         {

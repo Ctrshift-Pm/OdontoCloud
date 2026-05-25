@@ -4,9 +4,12 @@ import { useAuth } from '../hooks/useAuth'
 import Agenda from '../pages/Agenda'
 import Login from '../pages/Login'
 import ModulePlaceholder from '../pages/ModulePlaceholder'
+import Dashboard from '../pages/Dashboard'
 import Pacientes from '../pages/Pacientes'
 import Prontuario from '../pages/Prontuario'
 import Financeiro from '../pages/Financeiro'
+import Perfil from '../pages/Perfil'
+import Configuracoes from '../pages/Configuracoes'
 
 function HomeRedirect() {
   const { isAuthenticated } = useAuth()
@@ -22,26 +25,27 @@ export default function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route
             path="/dashboard"
-            element={<ModulePlaceholder title="Dashboard" subtitle="Visao executiva da clinica em preparacao." />}
+            element={<Dashboard />}
           />
           <Route path="/agenda" element={<Agenda />} />
           <Route
             path="/ia-atendimento"
-            element={<ModulePlaceholder title="IA Atendimento" subtitle="Fluxos assistidos por IA serao conectados nesta area." />}
+            element={<ModulePlaceholder title="IA Atendimento" subtitle="Módulo em breve. A navegação está disponível, mas não há transações ativas." />}
           />
           <Route path="/pacientes" element={<Pacientes />} />
           <Route path="/prontuario" element={<Prontuario />} />
           <Route
             path="/assinatura-digital"
-            element={<ModulePlaceholder title="Assinatura Digital" subtitle="Assinaturas e documentos serao centralizados aqui." />}
+            element={<ModulePlaceholder title="Assinatura Digital" subtitle="Módulo em breve. A navegação está disponível, mas não há transações ativas." />}
           />
           <Route
             path="/financeiro"
             element={<Financeiro />}
           />
+          <Route path="/perfil" element={<Perfil />} />
           <Route
             path="/configuracoes"
-            element={<ModulePlaceholder title="Configuracoes" subtitle="Preferencias da clinica e regras operacionais serao gerenciadas aqui." />}
+            element={<Configuracoes />}
           />
         </Route>
         <Route path="*" element={<HomeRedirect />} />

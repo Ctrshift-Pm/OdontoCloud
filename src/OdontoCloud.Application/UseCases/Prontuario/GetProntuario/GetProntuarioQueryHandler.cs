@@ -1,16 +1,18 @@
 using MediatR;
 using OdontoCloud.Application.Interfaces;
-using DomainProntuario = OdontoCloud.Domain.Entities.Prontuario;
+using OdontoCloud.Domain.Enums;
 
 namespace OdontoCloud.Application.UseCases.Prontuario.GetProntuario;
 
 public sealed class GetProntuarioQueryHandler : IRequestHandler<GetProntuarioQuery, ProntuarioDto?>
 {
     private readonly IProntuarioRepository _prontuarioRepository;
+    private readonly IPacienteRepository _pacienteRepository;
 
-    public GetProntuarioQueryHandler(IProntuarioRepository prontuarioRepository)
+    public GetProntuarioQueryHandler(IProntuarioRepository prontuarioRepository, IPacienteRepository pacienteRepository)
     {
         _prontuarioRepository = prontuarioRepository;
+        _pacienteRepository = pacienteRepository;
     }
 
     public async Task<ProntuarioDto?> Handle(GetProntuarioQuery request, CancellationToken cancellationToken)
@@ -25,13 +27,19 @@ public sealed class GetProntuarioQueryHandler : IRequestHandler<GetProntuarioQue
                 return null;
             }
 
-            prontuario = new DomainProntuario(
-                request.PacienteId,
-                AnamneseHelper.CreateDefaultJson(),
-                OdontogramaHelper.CreateDefaultJson());
+            var paciente = await _pacienteRepository.GetByIdAsync(request.PacienteId, cancellationToken);
+            var denticaoPadrao = OdontogramaHelper.GetDefaultDenticao(paciente?.DataNascimento);
 
-            await _prontuarioRepository.AddAsync(prontuario, cancellationToken);
-            await _prontuarioRepository.SaveChangesAsync(cancellationToken);
+            return new ProntuarioDto(
+                request.PacienteId,
+                request.PacienteId,
+                AnamneseHelper.ToJsonElement(AnamneseHelper.CreateDefaultJson()),
+                AnamneseHelper.ToJsonElement(OdontogramaHelper.CreateDefaultJson()),
+                false,
+                null,
+                null,
+                denticaoPadrao.ToString(),
+                System.Array.Empty<ItemPlanoTratamentoDto>());
         }
 
         var anamneseDesatualizada = prontuario.AnamneseAtualizadaEmUtc is null ||
@@ -45,6 +53,7 @@ public sealed class GetProntuarioQueryHandler : IRequestHandler<GetProntuarioQue
             anamneseDesatualizada,
             prontuario.AnamneseAtualizadaEmUtc,
             prontuario.OdontogramaAtualizadoEmUtc,
+            prontuario.DenticaoAtiva.ToString(),
             prontuario.ItensPlanoTratamento
                 .Select(item => new ItemPlanoTratamentoDto(
                     item.Id,

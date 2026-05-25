@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using OdontoCloud.Application.Interfaces;
+using OdontoCloud.Application.Exceptions;
 using OdontoCloud.Domain.Entities;
 using OdontoCloud.Infrastructure.Data;
 
@@ -14,17 +15,31 @@ public sealed class UsuarioAuthenticationRepository : IUsuarioAuthenticationRepo
         _dbContext = dbContext;
     }
 
-    public async Task<Usuario?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<Usuario?> GetByEmailAsync(string email, Guid? clinicaId = null, CancellationToken cancellationToken = default)
     {
-        var usuarios = await _dbContext.Usuarios
+        var query = _dbContext.Usuarios
             .IgnoreQueryFilters()
             .AsNoTracking()
-            .Where(usuario => usuario.Email == email)
-            .ToListAsync(cancellationToken);
+            .Where(usuario => usuario.Email == email);
 
-        return usuarios.Count == 1
-            ? usuarios[0]
-            : null;
+        if (clinicaId is not null && clinicaId != Guid.Empty)
+        {
+            return await query.FirstOrDefaultAsync(u => u.ClinicaId == clinicaId, cancellationToken);
+        }
+
+        var usuarios = await query.ToListAsync(cancellationToken);
+
+        return usuarios.Count switch
+        {
+            0 => null,
+            1 => usuarios[0],
+            _ => throw new LoginEmailAmbiguoException(),
+        };
+    }
+
+    public Task<Usuario?> GetByIdAsync(Guid usuarioId, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Usuarios.FirstOrDefaultAsync(usuario => usuario.Id == usuarioId, cancellationToken);
     }
 
     public Task<int> AtualizarSenhaHashAsync(

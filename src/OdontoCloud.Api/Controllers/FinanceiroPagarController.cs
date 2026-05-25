@@ -54,4 +54,49 @@ public sealed class FinanceiroPagarController : ControllerBase
         var response = await _sender.Send(new GetContasPagarPendentesQuery(), cancellationToken);
         return Ok(response);
     }
+
+    [HttpPut("{id:guid}")]
+    [Permission(ModuloSistema.Financeiro, AcaoPermissao.Editar)]
+    public async Task<ActionResult<ContaPagarDto>> Update(
+        Guid id,
+        [FromBody] UpdateContaPagarRequest request,
+        CancellationToken cancellationToken)
+    {
+        var response = await _sender.Send(
+            new UpdateContaPagarCommand(
+                id,
+                request.FornecedorDestinatario,
+                request.Categoria,
+                request.Descricao,
+                request.Valor,
+                request.DataVencimento),
+            cancellationToken);
+
+        if (response is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(response);
+    }
+
+    [HttpDelete("{id:guid}")]
+    [Permission(ModuloSistema.Financeiro, AcaoPermissao.Excluir)]
+    public async Task<ActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    {
+        var response = await _sender.Send(new DeleteContaPagarCommand(id), cancellationToken);
+        if (!response)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
+    }
+
+    public sealed record UpdateContaPagarRequest(
+        string FornecedorDestinatario,
+        string Categoria,
+        string Descricao,
+        decimal Valor,
+        DateTime DataVencimento);
 }

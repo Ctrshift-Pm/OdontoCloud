@@ -27,15 +27,7 @@ public static class OdontoCloudDbSeeder
             await dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        httpContextAccessor.HttpContext = new DefaultHttpContext
-        {
-            User = new ClaimsPrincipal(new ClaimsIdentity(
-            [
-                new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
-                new Claim("ClinicaId", clinica.Id.ToString())
-            ], "Seeder"))
-        };
-
+        httpContextAccessor.HttpContext = CreateSeederHttpContext(clinica.Id);
         var adminExists = await dbContext.Usuarios.AnyAsync(
             usuario => usuario.Email == "admin@clinicasorrir.com.br",
             cancellationToken);
@@ -69,5 +61,17 @@ public static class OdontoCloudDbSeeder
         await dbContext.SaveChangesAsync(cancellationToken);
 
         httpContextAccessor.HttpContext = null;
+    }
+
+    private static DefaultHttpContext CreateSeederHttpContext(Guid clinicaId)
+    {
+        return new DefaultHttpContext
+        {
+            User = new ClaimsPrincipal(new ClaimsIdentity(
+                [
+                    new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
+                    new Claim("ClinicaId", clinicaId.ToString())
+                ], "Seeder"))
+        };
     }
 }

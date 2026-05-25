@@ -36,6 +36,27 @@ npm run build
 npm run test:e2e
 ```
 
+## Estado de Escopo (2026-05-12)
+
+### Concluído no MVP (funcional)
+- Dashboard.
+- Agenda.
+- CRM de Pacientes.
+- Prontuário (incluindo odontograma e atualização por dente).
+- Financeiro.
+- Perfil.
+- Configurações.
+
+### Em breve
+- IA Atendimento (placeholder no menu com texto "Em breve" e sem transações ativas).
+- Assinatura Digital (placeholder no menu com texto "Em breve" e sem transações ativas).
+
+### Follow-ups
+- Dashboard: filtros por período e dentista, e métricas complementares.
+- Prontuário: evolução da anamnese estruturada e do plano de tratamento.
+- Financeiro: fluxo de caixa completo e DRE simplificada.
+- Configurações: melhorias de notificações e automações administrativas.
+
 ## Bloco 1 - Fundacao e Segurança
 
 Objetivo: garantir que a base multi-tenant, auth, permissao e testes nao permitam vazamento entre clinicas.
@@ -182,16 +203,13 @@ Criterio de pronto:
 
 Objetivo: dar visao executiva para clinica.
 
-Status: placeholder/parcial.
+Status: MVP funcional.
 
 Pendencias:
 
-- KPIs do dia.
-- Faturamento por dentista.
-- Leads da IA.
-- Procedimentos do mes.
-- Inadimplencia e contas vencidas.
-- Filtros por periodo/dentista.
+- Filtros por período/dentista.
+- Inadimplência e contas vencidas em relatórios mais completos.
+- Integração de métricas de IA quando o módulo entrar em produção.
 
 Criterio de pronto:
 
@@ -203,7 +221,7 @@ Criterio de pronto:
 
 Objetivo: estruturar atendimento via WhatsApp e funil de leads.
 
-Status: placeholder.
+Status: em breve (placeholder funcional no menu).
 
 Pendencias:
 
@@ -223,7 +241,7 @@ Criterio de pronto:
 
 Objetivo: permitir documentos assinados pelo paciente e anexados ao prontuario.
 
-Status: placeholder.
+Status: em breve (placeholder funcional no menu).
 
 Pendencias:
 
@@ -242,7 +260,7 @@ Criterio de pronto:
 
 Objetivo: permitir operacao real por clinica sem hardcode.
 
-Status: parcial/placeholder.
+Status: MVP funcional.
 
 Pendencias:
 
