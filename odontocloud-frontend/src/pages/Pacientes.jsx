@@ -238,6 +238,8 @@ export default function Pacientes() {
     clearErrors,
     formState: { errors, isSubmitting },
   } = useForm({
+    mode: 'onSubmit',
+    reValidateMode: 'onBlur',
     defaultValues: {
       nome: '',
       cpf: '',
@@ -747,9 +749,9 @@ export default function Pacientes() {
               },
               onChange: (event) => {
                 setModalError('')
+                clearErrors('cpf')
                 setValue('cpf', maskCpfInput(event.target.value), {
                   shouldDirty: true,
-                  shouldValidate: true,
                 })
               },
             })}
@@ -767,9 +769,9 @@ export default function Pacientes() {
                 onlyDigits(value).length >= 10 || 'Informe um telefone valido.',
               onChange: (event) => {
                 setModalError('')
+                clearErrors('telefoneWhatsapp')
                 setValue('telefoneWhatsapp', maskPhoneInput(event.target.value), {
                   shouldDirty: true,
-                  shouldValidate: true,
                 })
               },
             })}
