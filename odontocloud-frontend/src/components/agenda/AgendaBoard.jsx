@@ -39,7 +39,7 @@ function ViewModeButton({ option, isActive, onClick }) {
     <button
       type="button"
       onClick={() => onClick?.(option.value)}
-      className={`rounded-xl px-3 py-2 text-[13px] font-medium transition ${
+      className={`rounded-[12px] px-3 py-1.5 text-[12px] font-medium transition ${
         isActive
           ? 'bg-[var(--brand-500)] text-white shadow-sm'
           : 'bg-white text-[var(--ink-600)] hover:bg-[var(--surface-muted)]'
@@ -58,36 +58,76 @@ function NavigationControls({ viewMode, anchorDate, onPrevious, onToday, onNext,
       : formatWeekLabel(anchorDate)
 
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="rounded-2xl border border-black/8 bg-[var(--surface-muted)] px-4 py-3">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ink-500)]">Periodo</div>
-          <div className="mt-1 text-[15px] font-semibold capitalize text-[var(--ink-900)]">{label}</div>
-        </div>
+    <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+        <button
+          type="button"
+          className="inline-flex min-w-[110px] items-center justify-center rounded-[13px] border border-black/8 bg-[var(--surface-muted)] px-3 py-1.5 text-[12px] font-medium text-[var(--ink-900)]"
+          onClick={onToday}
+        >
+          Hoje
+        </button>
 
-        <div className="inline-flex flex-wrap items-center gap-2 rounded-2xl border border-black/8 bg-white p-1.5">
-          <button type="button" className="btn-secondary px-3 py-2 text-[13px]" onClick={onPrevious}>
-            Anterior
+        <div className="inline-flex flex-wrap items-center gap-1.5 rounded-[15px] border border-black/8 bg-white px-2 py-1">
+          <button type="button" className="btn-ghost h-8 w-8 rounded-full px-0 py-0 text-[18px]" onClick={onPrevious} aria-label="Periodo anterior">
+            ‹
           </button>
-          <button type="button" className="btn-secondary px-3 py-2 text-[13px]" onClick={onToday}>
-            Hoje
-          </button>
-          <button type="button" className="btn-secondary px-3 py-2 text-[13px]" onClick={onNext}>
-            Próximo
+          <div className="min-w-[168px] text-center text-[13px] font-medium capitalize text-[var(--ink-900)]">{label}</div>
+          <button type="button" className="btn-ghost h-8 w-8 rounded-full px-0 py-0 text-[18px]" onClick={onNext} aria-label="Próximo periodo">
+            ›
           </button>
         </div>
       </div>
 
-      <div className="inline-flex items-center gap-2 rounded-2xl border border-black/8 bg-[var(--surface-muted)] p-1.5">
-        {VIEW_OPTIONS.map((option) => (
-          <ViewModeButton
-            key={option.value}
+        <div className="inline-flex items-center gap-1 rounded-[15px] border border-black/8 bg-[var(--surface-muted)] p-1">
+          {VIEW_OPTIONS.map((option) => (
+            <ViewModeButton
+              key={option.value}
             option={option}
             isActive={viewMode === option.value}
             onClick={onViewModeChange}
           />
         ))}
       </div>
+    </div>
+  )
+}
+
+function getDentistaInitials(nome) {
+  return String(nome || '')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('')
+}
+
+function getDentistaSpecialty(dentista) {
+  return dentista?.especialidade || dentista?.Especialidade || 'Clinica geral'
+}
+
+function ProfessionalStrip({ dentistas, selectedDentistaId }) {
+  const visibleDentistas = selectedDentistaId
+    ? dentistas.filter((dentista) => String(dentista.id) === String(selectedDentistaId))
+    : dentistas.slice(0, 3)
+
+  if (visibleDentistas.length < 2) {
+    return null
+  }
+
+  return (
+    <div className="grid gap-2 border-b border-black/8 bg-white px-3.5 py-3 lg:grid-cols-3 lg:px-4">
+      {visibleDentistas.map((dentista) => (
+        <article key={dentista.id || dentista.nome} className="flex items-center gap-3 rounded-[16px] border border-black/8 bg-white px-3 py-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-black/8 bg-[var(--surface-muted)] text-[13px] font-semibold text-[var(--ink-800)]">
+            {getDentistaInitials(dentista.nome)}
+          </div>
+          <div className="min-w-0">
+            <div className="truncate text-[14px] font-semibold text-[var(--ink-900)]">{dentista.nome}</div>
+            <div className="truncate text-[12px] text-[var(--ink-500)]">{getDentistaSpecialty(dentista)}</div>
+          </div>
+        </article>
+      ))}
     </div>
   )
 }
@@ -100,6 +140,7 @@ function DayColumn({
   onEventClick,
   startMinute,
   slotMinutes,
+  gridHeight,
   isAvailable,
 }) {
   const laidOutEvents = layoutDayEvents(agendamentos)
@@ -134,6 +175,7 @@ function DayColumn({
             agendamento={agendamento}
             startMinute={startMinute}
             slotMinutes={slotMinutes}
+            gridHeight={gridHeight}
             onClick={onEventClick}
           />
         ))}
@@ -152,7 +194,7 @@ function MonthView({ anchorDate, agendamentos, onSelectDate }) {
 
   return (
     <div className="overflow-auto">
-      <div className="grid min-w-[860px] grid-cols-7">
+      <div className="grid min-w-[680px] grid-cols-7">
         {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map((label) => (
           <div
             key={label}
@@ -170,7 +212,7 @@ function MonthView({ anchorDate, agendamentos, onSelectDate }) {
               key={day.iso}
               type="button"
               onClick={() => onSelectDate?.(day.date)}
-              className={`min-h-[132px] border-b border-r border-black/8 px-4 py-3 text-left transition last:border-r-0 ${
+            className={`min-h-[92px] border-b border-r border-black/8 px-2.5 py-2 text-left transition last:border-r-0 ${
                 day.isToday
                   ? 'bg-sky-50 hover:bg-sky-100/70'
                   : day.isCurrentMonth
@@ -180,7 +222,7 @@ function MonthView({ anchorDate, agendamentos, onSelectDate }) {
             >
               <div className="flex items-start justify-between gap-2">
                 <span
-                  className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
+                  className={`inline-flex h-6.5 w-6.5 items-center justify-center rounded-full text-[12px] font-semibold ${
                     day.isToday ? 'bg-sky-600 text-white' : 'text-[var(--ink-800)]'
                   }`}
                 >
@@ -188,13 +230,13 @@ function MonthView({ anchorDate, agendamentos, onSelectDate }) {
                 </span>
 
                 {count > 0 ? (
-                  <span className="rounded-full bg-[var(--brand-50)] px-2 py-1 text-[11px] font-semibold text-[var(--brand-700)]">
+                  <span className="rounded-full bg-[var(--brand-50)] px-1.5 py-0.5 text-[9px] font-semibold text-[var(--brand-700)]">
                     {count} consulta{count > 1 ? 's' : ''}
                   </span>
                 ) : null}
               </div>
 
-              <div className="mt-6 text-xs text-[var(--ink-500)]">
+              <div className="mt-3.5 text-[10px] text-[var(--ink-500)]">
                 {count > 0 ? 'Clique para abrir o dia' : 'Sem agendamentos'}
               </div>
             </button>
@@ -209,6 +251,8 @@ export default function AgendaBoard({
   agendamentos,
   anchorDate = new Date(),
   viewMode = 'week',
+  dentistas = [],
+  selectedDentistaId = '',
   onPrevious,
   onToday,
   onNext,
@@ -232,39 +276,17 @@ export default function AgendaBoard({
 
   return (
     <section className="surface-card overflow-hidden">
-      <div className="border-b border-black/8 bg-white px-5 py-4">
-        <NavigationControls
-          viewMode={viewMode}
-          anchorDate={anchorDate}
-          onPrevious={onPrevious}
-          onToday={onToday}
-          onNext={onNext}
-          onViewModeChange={onViewModeChange}
-        />
-      </div>
-
-      <div className="border-b border-black/8 bg-white px-5 py-3">
-        <div className="flex flex-wrap items-center gap-3 text-[12px] text-[var(--ink-700)]">
-          <div className="font-medium text-[var(--ink-500)]">Legenda de status</div>
-          {STATUS_LEGEND.map((status) => {
-            const style = getStatusColorStyle(status.color)
-
-            return <LegendBadge key={status.key} className={style.badge} label={status.key} />
-          })}
-        </div>
-      </div>
-
       {viewMode === 'month' ? (
         <MonthView anchorDate={anchorDate} agendamentos={agendamentos} onSelectDate={onSelectDate} />
       ) : (
         <div className="overflow-auto">
           <div
-            className="grid min-w-[964px]"
+            className="grid min-w-[780px]"
             style={{
               gridTemplateColumns: `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, minmax(${DAY_COLUMN_MIN_WIDTH}px, 1fr))`,
             }}
           >
-            <div className="sticky top-0 z-20 border-r border-black/8 border-b-2 border-black/8 bg-[#F8F7F4] px-3 py-[11px] text-center text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-500)]">
+            <div className="sticky top-0 z-20 border-r border-black/8 border-b-2 border-black/8 bg-[#F8F7F4] px-2.5 py-[8px] text-center text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--ink-500)]">
               Hora
             </div>
 
@@ -289,6 +311,7 @@ export default function AgendaBoard({
                   onEventClick={onEventClick}
                   startMinute={agenda.inicio}
                   slotMinutes={agenda.duracaoPadraoMinutos}
+                  gridHeight={gridHeight}
                 />
               </div>
             ))}
@@ -301,7 +324,7 @@ export default function AgendaBoard({
 
 function LegendBadge({ className, label }) {
   return (
-    <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${className}`}>
+    <span className={`rounded-full px-2.5 py-0.5 text-[9px] font-semibold ${className}`}>
       {label}
     </span>
   )

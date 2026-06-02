@@ -16,22 +16,89 @@ function toTimeInputValue(value) {
   return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 }
 
+function splitTimeParts(value) {
+  const [hour = '09', minute = '00'] = String(value || '09:00').split(':')
+  return {
+    hour: String(hour).padStart(2, '0'),
+    minute: String(minute).padStart(2, '0'),
+  }
+}
+
 function sanitizeDigits(value) {
   return String(value || '').replace(/\D/g, '')
 }
 
 const STATUS_OPTIONS = ['Agendado', 'Confirmado', 'Atendido', 'Pendente', 'Remarcado', 'Falta', 'Cancelado']
 const DURATION_OPTIONS = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 135, 150]
+const TIME_STEP_MINUTES = 5
+const MIN_APPOINTMENT_MINUTES = 10
 
 function getDefaultDurationFromConfig(config) {
   const duration = Number(config?.duracaoPadraoMinutos)
   return Number.isFinite(duration) && duration > 0 ? duration : 60
 }
 
+function parseTimeToMinutes(value, fallback = 0) {
+  const [hour, minute] = String(value || '').split(':').map(Number)
+  if (Number.isNaN(hour) || Number.isNaN(minute)) {
+    return fallback
+  }
+
+  return (hour * 60) + minute
+}
+
+function formatMinutesAsTime(totalMinutes) {
+  const safeMinute = Math.max(0, Number(totalMinutes) || 0)
+  const hour = Math.floor(safeMinute / 60)
+  const minute = safeMinute % 60
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+}
+
+function buildAvailableTimeOptions(config) {
+  const start = parseTimeToMinutes(config?.inicio, 8 * 60)
+  const end = parseTimeToMinutes(config?.fim, 18 * 60)
+  const lastStart = Math.max(start, end - MIN_APPOINTMENT_MINUTES)
+  const options = []
+
+  for (let minute = start; minute <= lastStart; minute += TIME_STEP_MINUTES) {
+    options.push(formatMinutesAsTime(minute))
+  }
+
+  return options
+}
+
+function buildHourOptions(times = []) {
+  return Array.from(new Set(times.map((value) => value.split(':')[0])))
+}
+
+function buildMinuteOptionsForHour(times = [], hour) {
+  return times
+    .filter((value) => value.startsWith(`${hour}:`))
+    .map((value) => value.split(':')[1])
+}
+
+function formatDurationLabel(totalMinutes) {
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+}
+
+function buildDurationHourOptions(durations = []) {
+  return Array.from(new Set(durations.map((value) => String(Math.floor(value / 60)).padStart(2, '0'))))
+}
+
+function buildDurationMinuteOptions(durations = [], hour) {
+  return durations
+    .filter((value) => String(Math.floor(value / 60)).padStart(2, '0') === hour)
+    .map((value) => String(value % 60).padStart(2, '0'))
+}
+
 function buildDefaultValues({ mode, selectedEventData, slotData, dentistas, pacientes, selectedAgendaConfig }) {
   if (mode === 'edit' && selectedEventData) {
     const date = new Date(selectedEventData.dataHora)
     const paciente = pacientes.find((item) => item.id === selectedEventData.pacienteId)
+    const timeParts = splitTimeParts(toTimeInputValue(date))
+    const durationParts = splitTimeParts(formatMinutesAsTime(selectedEventData.duracaoMinutos || 60))
 
     return {
       pacienteId: selectedEventData.pacienteId || '',
@@ -39,8 +106,11 @@ function buildDefaultValues({ mode, selectedEventData, slotData, dentistas, paci
       dentistaId: selectedEventData.dentistaId || '',
       procedimento: selectedEventData.procedimento || '',
       data: toDateInputValue(date),
-      horario: toTimeInputValue(date),
+      horarioHora: timeParts.hour,
+      horarioMinuto: timeParts.minute,
       duracaoMinutos: selectedEventData.duracaoMinutos || 60,
+      duracaoHora: durationParts.hour,
+      duracaoMinuto: durationParts.minute,
       status: selectedEventData.status || 'Agendado',
       observacoes: selectedEventData.observacoes || '',
       novoPacienteNome: '',
@@ -49,18 +119,26 @@ function buildDefaultValues({ mode, selectedEventData, slotData, dentistas, paci
     }
   }
 
-    return {
+  const initialTime = slotData?.time || '09:00'
+  const timeParts = splitTimeParts(initialTime)
+  const defaultDuration = getDefaultDurationFromConfig(
+    slotData?.duracaoPadraoMinutos
+      ? { duracaoPadraoMinutos: slotData.duracaoPadraoMinutos }
+      : selectedAgendaConfig,
+  )
+  const durationParts = splitTimeParts(formatMinutesAsTime(defaultDuration))
+
+  return {
     pacienteId: slotData?.patientId || '',
     patientSearch: slotData?.patientName || '',
-      dentistaId: slotData?.dentistaId || dentistas[0]?.id || '',
+    dentistaId: slotData?.dentistaId || dentistas[0]?.id || '',
     procedimento: '',
     data: slotData?.date || toDateInputValue(new Date()),
-    horario: slotData?.time || '09:00',
-      duracaoMinutos: getDefaultDurationFromConfig(
-        slotData?.duracaoPadraoMinutos
-          ? { duracaoPadraoMinutos: slotData.duracaoPadraoMinutos }
-          : selectedAgendaConfig,
-      ),
+    horarioHora: timeParts.hour,
+    horarioMinuto: timeParts.minute,
+    duracaoMinutos: defaultDuration,
+    duracaoHora: durationParts.hour,
+    duracaoMinuto: durationParts.minute,
     status: 'Agendado',
     observacoes: '',
     novoPacienteNome: '',
@@ -113,6 +191,10 @@ export default function ModalAgendamento({
   const patientSearch = useWatch({ control, name: 'patientSearch' })
   const selectedPacienteId = useWatch({ control, name: 'pacienteId' })
   const selectedDentistaId = useWatch({ control, name: 'dentistaId' })
+  const selectedHorarioHora = useWatch({ control, name: 'horarioHora' })
+  const selectedHorarioMinuto = useWatch({ control, name: 'horarioMinuto' })
+  const selectedDuracaoHora = useWatch({ control, name: 'duracaoHora' })
+  const selectedDuracaoMinuto = useWatch({ control, name: 'duracaoMinuto' })
 
   const selectedAgendaForForm = useMemo(() => {
     const bySelection = dentistas.find((dentista) => dentista.id === selectedDentistaId)?.agendaConfig
@@ -138,6 +220,36 @@ export default function ModalAgendamento({
       .slice(0, 8)
   }, [pacientes, patientSearch])
 
+  const availableTimeOptions = useMemo(
+    () => buildAvailableTimeOptions(selectedAgendaForForm),
+    [selectedAgendaForForm],
+  )
+  const availableTimeHours = useMemo(
+    () => buildHourOptions(availableTimeOptions),
+    [availableTimeOptions],
+  )
+  const availableTimeMinutes = useMemo(
+    () => buildMinuteOptionsForHour(availableTimeOptions, selectedHorarioHora || availableTimeHours[0] || '08'),
+    [availableTimeOptions, availableTimeHours, selectedHorarioHora],
+  )
+
+  const availableDurationOptions = useMemo(() => {
+    const startMinute = parseTimeToMinutes(selectedAgendaForForm?.inicio, 8 * 60)
+    const endMinute = parseTimeToMinutes(selectedAgendaForForm?.fim, 18 * 60)
+    const selectedMinute = parseTimeToMinutes(`${selectedHorarioHora || '08'}:${selectedHorarioMinuto || '00'}`, startMinute)
+    const remaining = Math.max(0, endMinute - selectedMinute)
+
+    return DURATION_OPTIONS.filter((value) => value <= remaining)
+  }, [selectedAgendaForForm, selectedHorarioHora, selectedHorarioMinuto])
+  const availableDurationHours = useMemo(
+    () => buildDurationHourOptions(availableDurationOptions),
+    [availableDurationOptions],
+  )
+  const availableDurationMinutes = useMemo(
+    () => buildDurationMinuteOptions(availableDurationOptions, selectedDuracaoHora || availableDurationHours[0] || '00'),
+    [availableDurationOptions, availableDurationHours, selectedDuracaoHora],
+  )
+
   useEffect(() => {
     if (!isOpen) {
       return
@@ -156,6 +268,71 @@ export default function ModalAgendamento({
       shouldValidate: true,
     })
   }, [isOpen, mode, selectedAgendaForForm, setValue])
+
+  useEffect(() => {
+    if (!isOpen || availableTimeOptions.length === 0) {
+      return
+    }
+
+    const [firstHour, firstMinute] = (availableTimeOptions[0] || '08:00').split(':')
+
+    if (!availableTimeHours.includes(selectedHorarioHora || '')) {
+      setValue('horarioHora', firstHour, {
+        shouldDirty: false,
+        shouldValidate: true,
+      })
+    }
+
+    if (!availableTimeMinutes.includes(selectedHorarioMinuto || '')) {
+      setValue('horarioMinuto', firstMinute, {
+        shouldDirty: false,
+        shouldValidate: true,
+      })
+    }
+  }, [availableTimeHours, availableTimeMinutes, availableTimeOptions, isOpen, selectedHorarioHora, selectedHorarioMinuto, setValue])
+
+  useEffect(() => {
+    if (!isOpen || availableDurationOptions.length === 0) {
+      return
+    }
+
+    const fallbackDuration = availableDurationOptions.includes(getDefaultDurationFromConfig(selectedAgendaForForm))
+      ? getDefaultDurationFromConfig(selectedAgendaForForm)
+      : availableDurationOptions[availableDurationOptions.length - 1]
+    const fallbackParts = splitTimeParts(formatDurationLabel(fallbackDuration))
+    const selectedDuration = Number(`${Number(selectedDuracaoHora || '0') * 60 + Number(selectedDuracaoMinuto || '0')}`)
+
+    if (!availableDurationOptions.includes(selectedDuration)) {
+      setValue('duracaoHora', fallbackParts.hour, {
+        shouldDirty: false,
+        shouldValidate: true,
+      })
+
+      setValue('duracaoMinuto', fallbackParts.minute, {
+        shouldDirty: false,
+        shouldValidate: true,
+      })
+    }
+
+    setValue('duracaoMinutos', availableDurationOptions.includes(selectedDuration) ? selectedDuration : fallbackDuration, {
+      shouldDirty: false,
+      shouldValidate: true,
+    })
+  }, [availableDurationOptions, isOpen, selectedDuracaoHora, selectedDuracaoMinuto, selectedAgendaForForm, setValue])
+
+  useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+
+    const totalMinutes = (Number(selectedDuracaoHora || '0') * 60) + Number(selectedDuracaoMinuto || '0')
+    if (Number.isFinite(totalMinutes) && totalMinutes > 0) {
+      setValue('duracaoMinutos', totalMinutes, {
+        shouldDirty: false,
+        shouldValidate: true,
+      })
+    }
+  }, [isOpen, selectedDuracaoHora, selectedDuracaoMinuto, setValue])
 
   function handlePatientSearchChange(value) {
     setFeedbackError('')
@@ -206,8 +383,8 @@ export default function ModalAgendamento({
       const payload = {
         pacienteId,
         dentistaId: values.dentistaId,
-        dataHora: new Date(`${values.data}T${values.horario}:00`).toISOString(),
-        duracaoMinutos: Number(values.duracaoMinutos),
+        dataHora: new Date(`${values.data}T${values.horarioHora}:${values.horarioMinuto}:00`).toISOString(),
+        duracaoMinutos: (Number(values.duracaoHora) * 60) + Number(values.duracaoMinuto),
         status: values.status,
         procedimento: values.procedimento.trim(),
         observacoes: values.observacoes?.trim() || null,
@@ -306,6 +483,7 @@ export default function ModalAgendamento({
     >
       <form id="modal-agendamento-form" className="space-y-4" onSubmit={handleSubmit(handleSave)}>
         <FeedbackMessage type="error" message={feedbackError} />
+        <input type="hidden" {...register('duracaoMinutos')} />
 
         {mode === 'create' ? (
           <div className="flex gap-2">
@@ -477,25 +655,61 @@ export default function ModalAgendamento({
 
           <label className="block">
             <span className="mb-1.5 block text-[13px] font-medium text-[var(--ink-700)]">Horario</span>
-            <input
-              type="time"
-              {...register('horario', { required: 'Informe o horario.' })}
-              className="w-full rounded-md border border-black/15 bg-white px-3.5 py-2.5 text-[14px] text-[var(--ink-900)] outline-none focus:border-[var(--brand-500)]"
-            />
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+              <select
+                {...register('horarioHora', { required: true })}
+                className="w-full rounded-md border border-black/15 bg-white px-3.5 py-2.5 text-[14px] text-[var(--ink-900)] outline-none focus:border-[var(--brand-500)]"
+              >
+                {availableTimeHours.map((hour) => (
+                  <option key={hour} value={hour}>
+                    {hour}
+                  </option>
+                ))}
+              </select>
+              <span className="text-[18px] font-medium text-[var(--ink-700)]">:</span>
+              <select
+                {...register('horarioMinuto', { required: true })}
+                className="w-full rounded-md border border-black/15 bg-white px-3.5 py-2.5 text-[14px] text-[var(--ink-900)] outline-none focus:border-[var(--brand-500)]"
+              >
+                {availableTimeMinutes.map((minute) => (
+                  <option key={minute} value={minute}>
+                    {minute}
+                  </option>
+                ))}
+              </select>
+            </div>
           </label>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <label className="block">
             <span className="mb-1.5 block text-[13px] font-medium text-[var(--ink-700)]">Duracao</span>
-            <select
-              {...register('duracaoMinutos', { required: 'Informe a duracao.' })}
-              className="w-full rounded-md border border-black/15 bg-white px-3.5 py-2.5 text-[14px] text-[var(--ink-900)] outline-none focus:border-[var(--brand-500)]"
-            >
-              {DURATION_OPTIONS.map((value) => (
-                <option key={value} value={value}>{value} min</option>
-              ))}
-            </select>
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+              <select
+                {...register('duracaoHora', { required: true })}
+                className="w-full rounded-md border border-black/15 bg-white px-3.5 py-2.5 text-[14px] text-[var(--ink-900)] outline-none focus:border-[var(--brand-500)]"
+              >
+                {availableDurationHours.map((hour) => (
+                  <option key={hour} value={hour}>
+                    {hour}
+                  </option>
+                ))}
+              </select>
+              <span className="text-[18px] font-medium text-[var(--ink-700)]">:</span>
+              <select
+                {...register('duracaoMinuto', { required: true })}
+                className="w-full rounded-md border border-black/15 bg-white px-3.5 py-2.5 text-[14px] text-[var(--ink-900)] outline-none focus:border-[var(--brand-500)]"
+              >
+                {availableDurationMinutes.map((minute) => (
+                  <option key={minute} value={minute}>
+                    {minute}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <span className="mt-1 block text-[12px] text-[var(--ink-500)]">
+              A duracao e limitada ao tempo restante da agenda do dentista a partir do horario selecionado.
+            </span>
           </label>
 
           <label className="block">

@@ -40,6 +40,10 @@ public class OdontoCloudDbContext : DbContext
 
     public DbSet<ContaPagar> ContasPagar => Set<ContaPagar>();
 
+    public DbSet<IaLead> IaLeads => Set<IaLead>();
+
+    public DbSet<IaMensagem> IaMensagens => Set<IaMensagem>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -245,6 +249,45 @@ public class OdontoCloudDbContext : DbContext
                 .WithMany(d => d.ContasPagar)
                 .HasForeignKey(conta => conta.DentistaId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<IaLead>(entity =>
+        {
+            entity.ToTable("IaLeads");
+            entity.HasKey(lead => lead.Id);
+            entity.Property(lead => lead.Nome).IsRequired().HasMaxLength(200);
+            entity.Property(lead => lead.TelefoneWhatsapp).IsRequired().HasMaxLength(20);
+            entity.Property(lead => lead.MotivoContato).IsRequired().HasMaxLength(300);
+            entity.Property(lead => lead.ResumoInteracao).HasMaxLength(1000);
+            entity.Property(lead => lead.Urgencia).IsRequired();
+            entity.Property(lead => lead.ProcedimentoInteresse).IsRequired().HasMaxLength(200);
+            entity.Property(lead => lead.Status).HasConversion<string>().IsRequired().HasMaxLength(50);
+            entity.Property(lead => lead.Sentimento).HasMaxLength(150);
+            entity.Property(lead => lead.ProximoFollowUpEm);
+            entity.Property(lead => lead.AtendimentoAssumido).IsRequired();
+            entity.Property(lead => lead.CreatedAt).IsRequired();
+            entity.HasIndex(lead => new { lead.ClinicaId, lead.Status, lead.Urgencia });
+            entity.HasIndex(lead => new { lead.ClinicaId, lead.TelefoneWhatsapp });
+            entity.HasQueryFilter(lead => lead.ClinicaId == CurrentClinicaId);
+            entity.Property(lead => lead.ClinicaId).Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
+            entity.HasMany(lead => lead.Mensagens)
+                .WithOne(mensagem => mensagem.Lead)
+                .HasForeignKey(mensagem => mensagem.IaLeadId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<IaMensagem>(entity =>
+        {
+            entity.ToTable("IaMensagens");
+            entity.HasKey(mensagem => mensagem.Id);
+            entity.Property(mensagem => mensagem.Direcao).HasConversion<string>().IsRequired().HasMaxLength(50);
+            entity.Property(mensagem => mensagem.Conteudo).IsRequired().HasMaxLength(4000);
+            entity.Property(mensagem => mensagem.EnviadaEmUtc).IsRequired();
+            entity.Property(mensagem => mensagem.Canal).IsRequired().HasMaxLength(40);
+            entity.Property(mensagem => mensagem.CreatedAt).IsRequired();
+            entity.HasIndex(mensagem => new { mensagem.ClinicaId, mensagem.IaLeadId, mensagem.EnviadaEmUtc });
+            entity.HasQueryFilter(mensagem => mensagem.ClinicaId == CurrentClinicaId);
+            entity.Property(mensagem => mensagem.ClinicaId).Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
         });
     }
 

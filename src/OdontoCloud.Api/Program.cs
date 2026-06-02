@@ -57,6 +57,7 @@ builder.Services.AddScoped<IContaReceberRepository, ContaReceberRepository>();
 builder.Services.AddScoped<IContaPagarRepository, ContaPagarRepository>();
 builder.Services.AddScoped<IItemPlanoTratamentoRepository, ItemPlanoTratamentoRepository>();
 builder.Services.AddScoped<IDentistaRepository, DentistaRepository>();
+builder.Services.AddScoped<IIaAtendimentoRepository, IaAtendimentoRepository>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreatePacienteCommandValidator>();
 builder.Services.AddMediatR(cfg =>
 {

@@ -64,6 +64,41 @@ public static class OdontoCloudDbSeeder
             dbContext.Dentistas.Add(dentista);
         }
 
+        var iaLeadExists = await dbContext.IaLeads.AnyAsync(cancellationToken);
+
+        if (!iaLeadExists)
+        {
+            var lead = new IaLead(
+                "Carlos Almeida",
+                "+55 11 98888-4422",
+                "Dor intensa e trauma em implante",
+                5,
+                "Implante",
+                "Paciente relatou dor intensa após trauma e precisa de encaixe no mesmo dia.",
+                "Ansioso / dor intensa",
+                DateTimeOffset.UtcNow.AddHours(4));
+
+            lead.AdicionarMensagem(DirecaoMensagemIa.Paciente, "Boa tarde, bati a boca e estou com muita dor no implante.");
+            lead.AdicionarMensagem(DirecaoMensagemIa.IA, "Sinto muito pela dor. Vou priorizar seu atendimento e confirmar disponibilidade para hoje.");
+
+            dbContext.IaLeads.Add(lead);
+
+            var rotina = new IaLead(
+                "Marina Costa",
+                "+55 11 97777-1919",
+                "Avaliação de clareamento",
+                2,
+                "Clareamento",
+                "Lead de rotina buscando valores e horários para avaliação estética.",
+                "Curiosa / rotina",
+                DateTimeOffset.UtcNow.AddDays(1));
+
+            rotina.AdicionarMensagem(DirecaoMensagemIa.Paciente, "Gostaria de saber horários para avaliação de clareamento.");
+            rotina.AdicionarMensagem(DirecaoMensagemIa.IA, "Claro. Vou buscar horários disponíveis para avaliação com a equipe.");
+
+            dbContext.IaLeads.Add(rotina);
+        }
+
         await dbContext.SaveChangesAsync(cancellationToken);
 
         httpContextAccessor.HttpContext = null;

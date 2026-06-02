@@ -4,22 +4,23 @@ import { obterAgendamentos, obterDentistas } from '../api/agenda'
 import { getApiErrorMessage } from '../api/client'
 import { getPacientes } from '../api/pacientes'
 import AgendaBoard from '../components/agenda/AgendaBoard'
+import AgendaProfessionalBoard from '../components/agenda/AgendaProfessionalBoard'
+import AgendaToolbar from '../components/agenda/AgendaToolbar'
 import {
   DENTIST_COLOR_PALETTE,
+  DEFAULT_AGENDA_CONFIG,
   addDays,
   addMonths,
-  DEFAULT_AGENDA_CONFIG,
-  parseAgendaTimeToMinutes,
   getRangeEndExclusive,
   getRangeStart,
+  mergeAgendaConfigs,
+  parseAgendaTimeToMinutes,
   startOfDay,
 } from '../components/agenda/agendaUtils'
 import ModalAgendamento from '../components/agenda/ModalAgendamento'
 import AppShell from '../components/AppShell'
 import FeedbackMessage from '../components/FeedbackMessage'
 import { useAuth } from '../hooks/useAuth'
-
-const DEFAULT_AGENDA_DAYS = [0, 1, 2, 3, 4, 5, 6]
 
 function mapStatusToColor(status) {
   switch (String(status || '').toLowerCase().trim()) {
@@ -67,62 +68,26 @@ function toMinuteString(totalMinutes) {
   return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
 }
 
-function getDentistaAgendaConfig(dentistas, selectedDentistaId) {
+function getCombinedAgendaConfig(dentistas, selectedDentistaIds) {
   if (dentistas.length === 0) {
     return DEFAULT_AGENDA_CONFIG
   }
 
-  const defaultConfig = DEFAULT_AGENDA_CONFIG
-  const selected = selectedDentistaId
-    ? dentistas.find((dentista) => dentista.id === selectedDentistaId)
-    : null
+  const selectedDentistas = selectedDentistaIds.length > 0
+    ? dentistas.filter((dentista) => selectedDentistaIds.includes(dentista.id))
+    : dentistas
 
-  if (selected?.agendaConfig) {
-    return selected.agendaConfig
+  if (selectedDentistas.length === 0) {
+    return DEFAULT_AGENDA_CONFIG
   }
 
-  if (!selectedDentistaId) {
-    return {
-      ...defaultConfig,
-      diasDaSemana: DEFAULT_AGENDA_DAYS,
-    }
-  }
-
-  const validConfigs = dentistas
-    .map((dentista) => dentista.agendaConfig)
-    .filter(Boolean)
-
-  if (validConfigs.length === 0) {
-    return {
-      ...defaultConfig,
-      diasDaSemana: DEFAULT_AGENDA_DAYS,
-    }
-  }
-
-  const dias = new Set()
-  for (const config of validConfigs) {
-    if (Array.isArray(config.diasDaSemana)) {
-      config.diasDaSemana.forEach((dia) => {
-        dias.add(dia)
-      })
-    }
-  }
-
-  const start = Math.min(
-    ...validConfigs.map((config) => parseAgendaTimeToMinutes(config?.inicio, parseAgendaTimeToMinutes(defaultConfig.inicio, 480))),
-  )
-  const end = Math.max(
-    ...validConfigs.map((config) => parseAgendaTimeToMinutes(config?.fim, parseAgendaTimeToMinutes(defaultConfig.fim, 1080))),
-  )
-  const slot = Math.min(
-    ...validConfigs.map((config) => config?.duracaoPadraoMinutos ?? defaultConfig.duracaoPadraoMinutos),
-  )
+  const merged = mergeAgendaConfigs(selectedDentistas)
 
   return {
-    inicio: toMinuteString(start),
-    fim: toMinuteString(end),
-    duracaoPadraoMinutos: Number.isInteger(slot) && slot > 0 ? slot : defaultConfig.duracaoPadraoMinutos,
-    diasDaSemana: dias.size > 0 ? Array.from(dias).sort((left, right) => left - right) : DEFAULT_AGENDA_DAYS,
+    inicio: toMinuteString(merged.inicio),
+    fim: toMinuteString(merged.fim),
+    duracaoPadraoMinutos: merged.duracaoPadraoMinutos,
+    diasDaSemana: merged.diasDaSemana,
   }
 }
 
@@ -154,50 +119,17 @@ function buildAgendaProps(items, dentistaColorMap) {
   })
 }
 
-function toWeekdayIso(dateInput) {
-  const dayDate = new Date(`${dateInput}T00:00:00`)
-  return Number.isNaN(dayDate.getTime()) ? null : dayDate.getDay()
-}
-
-function getDentistaDiasDaSemana(dentista) {
-  const dias = Array.isArray(dentista?.agendaConfig?.diasDaSemana) ? dentista.agendaConfig.diasDaSemana : null
-  return dias?.length ? dias : DEFAULT_AGENDA_DAYS
-}
-
-function findDentistaParaDia(dentistas, dayOfWeek) {
-  if (!Number.isInteger(dayOfWeek)) {
-    return ''
-  }
-
-  const candidate = dentistas.find((dentista) => {
-    const diasDaSemana = getDentistaDiasDaSemana(dentista)
-    return diasDaSemana.includes(dayOfWeek)
-  })
-
-  return candidate?.id || ''
-}
-
-function moveAnchorDate(currentDate, viewMode, direction) {
-  if (viewMode === 'day') {
-    return addDays(currentDate, direction)
-  }
-
-  if (viewMode === 'month') {
-    return addMonths(currentDate, direction)
-  }
-
-  return addDays(currentDate, direction * 7)
-}
-
 export default function Agenda() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [anchorDate, setAnchorDate] = useState(() => new Date())
-  const [viewMode, setViewMode] = useState('week')
   const [dentistas, setDentistas] = useState([])
   const [pacientes, setPacientes] = useState([])
-  const [selectedDentistaId, setSelectedDentistaId] = useState('')
+  const [selectedDentistaIds, setSelectedDentistaIds] = useState([])
+  const [hasInitializedDentistaSelection, setHasInitializedDentistaSelection] = useState(false)
+  const [selectedStatus, setSelectedStatus] = useState('Todos')
+  const [viewMode, setViewMode] = useState('day')
   const [agendamentos, setAgendamentos] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [pageError, setPageError] = useState('')
@@ -215,14 +147,32 @@ export default function Agenda() {
     [dentistas],
   )
 
-  const agendaProps = useMemo(
-    () => buildAgendaProps(agendamentos, dentistaColorMap),
-    [agendamentos, dentistaColorMap],
-  )
+  const visibleDentistas = useMemo(() => {
+    return dentistas.filter((dentista) => selectedDentistaIds.includes(dentista.id))
+  }, [dentistas, selectedDentistaIds])
 
   const activeAgendaConfig = useMemo(
-    () => getDentistaAgendaConfig(dentistas, selectedDentistaId),
-    [dentistas, selectedDentistaId],
+    () => getCombinedAgendaConfig(dentistas, selectedDentistaIds),
+    [dentistas, selectedDentistaIds],
+  )
+
+  const filteredAgendamentos = useMemo(() => {
+    const rangeStart = getRangeStart(anchorDate, viewMode)
+    const rangeEndExclusive = getRangeEndExclusive(anchorDate, viewMode)
+
+    return agendamentos.filter((appointment) => {
+      const appointmentDate = new Date(appointment.dataHora)
+      const matchesDate = appointmentDate >= rangeStart && appointmentDate < rangeEndExclusive
+      const matchesDentista = selectedDentistaIds.length === 0 || selectedDentistaIds.includes(appointment.dentistaId)
+      const matchesStatus = selectedStatus === 'Todos' || appointment.status === selectedStatus
+
+      return matchesDate && matchesDentista && matchesStatus
+    })
+  }, [agendamentos, anchorDate, selectedDentistaIds, selectedStatus, viewMode])
+
+  const agendaProps = useMemo(
+    () => buildAgendaProps(filteredAgendamentos, dentistaColorMap),
+    [filteredAgendamentos, dentistaColorMap],
   )
 
   const loadAgenda = useCallback(async () => {
@@ -232,11 +182,7 @@ export default function Agenda() {
     try {
       const start = getRangeStart(anchorDate, viewMode)
       const end = getRangeEndExclusive(anchorDate, viewMode)
-      const response = await obterAgendamentos(
-        start.toISOString(),
-        end.toISOString(),
-        selectedDentistaId || undefined,
-      )
+      const response = await obterAgendamentos(start.toISOString(), end.toISOString())
 
       const visibleAppointments = (Array.isArray(response) ? response : []).filter(
         (appointment) => String(appointment.status || '').trim().toLowerCase() !== 'cancelado',
@@ -249,7 +195,7 @@ export default function Agenda() {
     } finally {
       setIsLoading(false)
     }
-  }, [anchorDate, selectedDentistaId, viewMode])
+  }, [anchorDate, viewMode])
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -264,6 +210,15 @@ export default function Agenda() {
   }, [loadAgenda])
 
   useEffect(() => {
+    if (dentistas.length === 0 || hasInitializedDentistaSelection) {
+      return
+    }
+
+    setSelectedDentistaIds(dentistas.map((dentista) => dentista.id))
+    setHasInitializedDentistaSelection(true)
+  }, [dentistas, hasInitializedDentistaSelection])
+
+  useEffect(() => {
     const modalRequest = location.state?.openCreateModal
 
     if (!modalRequest || pacientes.length === 0) {
@@ -274,19 +229,19 @@ export default function Agenda() {
 
     queueMicrotask(() => {
       setAnchorDate(baseDate)
-      setViewMode('day')
       setPageSuccess('')
       setModalMode('create')
       setSelectedEventData({
         date: toDateInputValue(baseDate),
         time: toTimeInputValue(baseDate),
-        patientId: modalRequest.patientId || '',
+        pacienteId: modalRequest.patientId || '',
         patientName: modalRequest.patientName || '',
+        dentistaId: visibleDentistas[0]?.id || dentistas[0]?.id || '',
       })
       setIsModalOpen(true)
       navigate(location.pathname, { replace: true, state: {} })
     })
-  }, [location.pathname, location.state, navigate, pacientes.length])
+  }, [location.pathname, location.state, navigate, pacientes.length, visibleDentistas, dentistas])
 
   async function loadReferenceData() {
     try {
@@ -303,22 +258,18 @@ export default function Agenda() {
     }
   }
 
-  function handleOpenCreateModal(date, horario, preselectedPatient = null) {
+  function handleOpenCreateModal(dateIso, horario, dentistaId) {
     setPageSuccess('')
     setModalMode('create')
-    const targetDayOfWeek = toWeekdayIso(date)
-    const targetDentistaId = selectedDentistaId
-      || findDentistaParaDia(dentistas, targetDayOfWeek)
-      || (dentistas[0]?.id || '')
-    const defaultConfig = getDentistaAgendaConfig(dentistas, targetDentistaId)
+
+    const targetDentistaId = dentistaId || visibleDentistas[0]?.id || dentistas[0]?.id || ''
+    const defaultConfig = dentistas.find((dentista) => String(dentista.id) === String(targetDentistaId))?.agendaConfig
 
     setSelectedEventData({
-      date,
+      date: toDateInputValue(new Date(dateIso)),
       time: horario,
       dentistaId: targetDentistaId,
-      patientId: preselectedPatient?.patientId || '',
-      patientName: preselectedPatient?.patientName || '',
-      duracaoPadraoMinutos: defaultConfig.duracaoPadraoMinutos,
+      duracaoPadraoMinutos: Number(defaultConfig?.duracaoPadraoMinutos) || activeAgendaConfig.duracaoPadraoMinutos,
     })
     setIsModalOpen(true)
   }
@@ -353,56 +304,121 @@ export default function Agenda() {
     setSelectedEventData(null)
   }
 
+  function toggleDentista(dentistaId) {
+    setSelectedDentistaIds((current) => {
+      if (current.includes(dentistaId)) {
+        return current.filter((id) => id !== dentistaId)
+      }
+
+      return [...current, dentistaId]
+    })
+  }
+
+  function toggleAllDentistas() {
+    setSelectedDentistaIds((current) => {
+      if (current.length === dentistas.length) {
+        return []
+      }
+
+      return dentistas.map((dentista) => dentista.id)
+    })
+  }
+
+  function handleNavigatePrevious() {
+    setAnchorDate((current) => {
+      if (viewMode === 'month') {
+        return addMonths(current, -1)
+      }
+
+      if (viewMode === 'week') {
+        return addDays(current, -7)
+      }
+
+      return addDays(current, -1)
+    })
+  }
+
+  function handleNavigateNext() {
+    setAnchorDate((current) => {
+      if (viewMode === 'month') {
+        return addMonths(current, 1)
+      }
+
+      if (viewMode === 'week') {
+        return addDays(current, 7)
+      }
+
+      return addDays(current, 1)
+    })
+  }
+
   const modalInstanceKey = `${isModalOpen ? 'open' : 'closed'}-${modalMode}-${selectedEventData?.id || 'new'}`
+  const normalizedAgendaConfig = {
+    inicio: parseAgendaTimeToMinutes(activeAgendaConfig.inicio, 480),
+    fim: parseAgendaTimeToMinutes(activeAgendaConfig.fim, 1080),
+    duracaoPadraoMinutos: activeAgendaConfig.duracaoPadraoMinutos,
+    diasDaSemana: activeAgendaConfig.diasDaSemana,
+  }
 
   return (
     <>
       <AppShell
-        title="Agenda"
-        subtitle="Grade diaria, semanal e mensal com identidade visual separando dentista e status."
+        title="Agenda Multi-profissional"
+        subtitle=""
         user={user}
         onLogout={logout}
-        actions={
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-            <label className="flex items-center gap-2 rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-[var(--ink-700)]">
-              <span>Dentista</span>
-              <select
-                value={selectedDentistaId}
-                onChange={(event) => setSelectedDentistaId(event.target.value)}
-                className="bg-transparent text-sm text-[var(--ink-900)] outline-none"
-              >
-                <option value="">Todos</option>
-                {dentistas.map((dentista) => (
-                  <option key={dentista.id} value={dentista.id}>
-                    {dentista.nome}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-        }
+        actions={<></>}
       >
-        <div className="space-y-6">
+        <div className="space-y-4">
           <FeedbackMessage type="error" message={pageError} />
           <FeedbackMessage type="success" message={pageSuccess} />
           <FeedbackMessage type="info" message={isLoading ? 'Carregando agendamentos...' : ''} />
 
-          <AgendaBoard
-            agendamentos={agendaProps}
+          <AgendaToolbar
             anchorDate={anchorDate}
             viewMode={viewMode}
-            agendaConfig={activeAgendaConfig}
-            onPrevious={() => setAnchorDate((current) => moveAnchorDate(current, viewMode, -1))}
+            dentistas={dentistas}
+            selectedDentistaIds={selectedDentistaIds}
+            selectedStatus={selectedStatus}
+            onPrevious={handleNavigatePrevious}
             onToday={() => setAnchorDate(startOfDay(new Date()))}
-            onNext={() => setAnchorDate((current) => moveAnchorDate(current, viewMode, 1))}
+            onNext={handleNavigateNext}
+            onOpenCreate={() => handleOpenCreateModal(anchorDate.toISOString(), '09:00', visibleDentistas[0]?.id || dentistas[0]?.id)}
+            onToggleDentista={toggleDentista}
+            onSelectAllDentistas={toggleAllDentistas}
+            onStatusChange={setSelectedStatus}
             onViewModeChange={setViewMode}
-            onSlotClick={handleOpenCreateModal}
-            onEventClick={handleOpenEditModal}
-            onSelectDate={(date) => {
-              setAnchorDate(date)
-              setViewMode('day')
-            }}
           />
+
+          {viewMode === 'day' ? (
+            <AgendaProfessionalBoard
+              anchorDate={anchorDate}
+              dentistas={visibleDentistas}
+              agendamentos={agendaProps}
+              agendaConfig={normalizedAgendaConfig}
+              onSlotClick={handleOpenCreateModal}
+              onEventClick={handleOpenEditModal}
+            />
+          ) : (
+            <AgendaBoard
+              agendamentos={agendaProps}
+              anchorDate={anchorDate}
+              viewMode={viewMode}
+              dentistas={dentistas}
+              selectedDentistaId={selectedDentistaIds.length === 1 ? selectedDentistaIds[0] : ''}
+              onPrevious={handleNavigatePrevious}
+              onToday={() => setAnchorDate(startOfDay(new Date()))}
+              onNext={handleNavigateNext}
+              onViewModeChange={setViewMode}
+              onSlotClick={handleOpenCreateModal}
+              onEventClick={handleOpenEditModal}
+              onSelectDate={(date) => {
+                setAnchorDate(startOfDay(date))
+                setViewMode('day')
+              }}
+              agendaConfig={activeAgendaConfig}
+            />
+          )}
         </div>
       </AppShell>
 

@@ -1,9 +1,10 @@
 export const DEFAULT_START_HOUR = 8
 export const DEFAULT_END_HOUR = 18
 export const DEFAULT_SLOT_MINUTES = 30
-export const SLOT_HEIGHT = 44
-export const TIME_COLUMN_WIDTH = 64
-export const DAY_COLUMN_MIN_WIDTH = 180
+export const SLOT_HEIGHT = 38
+export const TIME_COLUMN_WIDTH = 84
+export const DAY_COLUMN_MIN_WIDTH = 138
+export const PROFESSIONAL_COLUMN_MIN_WIDTH = 380
 export const WEEK_DAYS_COUNT = 7
 export const DEFAULT_DIAS_SEMANA = [0, 1, 2, 3, 4, 5, 6]
 export const DEFAULT_AGENDA_CONFIG = {
@@ -14,6 +15,7 @@ export const DEFAULT_AGENDA_CONFIG = {
 }
 
 export const DENTIST_COLOR_PALETTE = [
+  '#111111',
   '#0F766E',
   '#2563EB',
   '#D97706',
@@ -21,33 +23,32 @@ export const DENTIST_COLOR_PALETTE = [
   '#DB2777',
   '#059669',
   '#DC2626',
-  '#7C3AED',
 ]
 
 export const STATUS_COLOR_STYLES = {
   blue: {
     badge: 'bg-sky-100 text-sky-700 ring-1 ring-sky-200',
-    card: 'bg-sky-50/80 ring-sky-200/70',
+    card: 'bg-white',
   },
   green: {
     badge: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200',
-    card: 'bg-emerald-50/80 ring-emerald-200/70',
+    card: 'bg-white',
   },
   amber: {
     badge: 'bg-amber-100 text-amber-700 ring-1 ring-amber-200',
-    card: 'bg-amber-50/80 ring-amber-200/70',
+    card: 'bg-white',
   },
   red: {
     badge: 'bg-red-100 text-red-700 ring-1 ring-red-200',
-    card: 'bg-red-50/80 ring-red-200/70',
+    card: 'bg-white',
   },
   pink: {
     badge: 'bg-pink-100 text-pink-700 ring-1 ring-pink-200',
-    card: 'bg-pink-50/80 ring-pink-200/70',
+    card: 'bg-white',
   },
   gray: {
     badge: 'bg-stone-100 text-stone-700 ring-1 ring-stone-200',
-    card: 'bg-stone-100/70 ring-stone-200/70',
+    card: 'bg-stone-100/80',
   },
 }
 
@@ -168,10 +169,17 @@ export function formatMonthLabel(anchorDate = new Date()) {
   }).format(anchorDate)
 }
 
+export function formatProfessionalDateLabel(anchorDate = new Date()) {
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(anchorDate)
+}
+
 export function parseAgendaTimeToMinutes(value, fallbackMinutes) {
   const [hour, minute] = String(value || '').split(':').map(Number)
-  if (Number.isNaN(hour) || Number.isNaN(minute))
-  {
+  if (Number.isNaN(hour) || Number.isNaN(minute)) {
     return fallbackMinutes
   }
 
@@ -194,8 +202,7 @@ function normalizeScheduleConfig(config) {
 
 export function normalizeWeekdayAgenda(config) {
   const normalized = normalizeScheduleConfig(config)
-  if (normalized.inicio >= normalized.fim)
-  {
+  if (normalized.inicio >= normalized.fim) {
     return {
       ...normalized,
       inicio: DEFAULT_START_HOUR * 60,
@@ -206,20 +213,52 @@ export function normalizeWeekdayAgenda(config) {
   return normalized
 }
 
+export function mergeAgendaConfigs(dentistas = []) {
+  if (dentistas.length === 0) {
+    return normalizeWeekdayAgenda(DEFAULT_AGENDA_CONFIG)
+  }
+
+  const configs = dentistas
+    .map((dentista) => normalizeWeekdayAgenda(dentista?.agendaConfig || DEFAULT_AGENDA_CONFIG))
+
+  const inicio = Math.min(...configs.map((config) => config.inicio))
+  const fim = Math.max(...configs.map((config) => config.fim))
+  const duracaoPadraoMinutos = Math.min(...configs.map((config) => config.duracaoPadraoMinutos))
+  const diasDaSemana = Array.from(new Set(configs.flatMap((config) => config.diasDaSemana || DEFAULT_DIAS_SEMANA))).sort((left, right) => left - right)
+
+  return {
+    inicio,
+    fim,
+    duracaoPadraoMinutos,
+    diasDaSemana,
+  }
+}
+
 export function buildTimeLabels(startTime = DEFAULT_START_HOUR * 60, endTime = DEFAULT_END_HOUR * 60, slotMinutes = DEFAULT_SLOT_MINUTES) {
   const labels = []
   const duration = Math.max(1, Number(slotMinutes) || DEFAULT_SLOT_MINUTES)
   const safeStart = Math.max(0, Math.min(24 * 60, Number(startTime) || DEFAULT_START_HOUR * 60))
   const safeEnd = Math.max(safeStart + duration, Math.min(24 * 60, Number(endTime) || DEFAULT_END_HOUR * 60))
 
-  for (let totalMinutes = safeStart; totalMinutes <= safeEnd; totalMinutes += duration)
-  {
+  for (let totalMinutes = safeStart; totalMinutes < safeEnd; totalMinutes += duration) {
     const hour = Math.floor(totalMinutes / 60)
     const minute = totalMinutes % 60
     labels.push(`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`)
   }
 
   return labels
+}
+
+export function buildProfessionalTimeScale(startTime = DEFAULT_START_HOUR * 60, endTime = DEFAULT_END_HOUR * 60, slotMinutes = DEFAULT_SLOT_MINUTES) {
+  const slots = buildTimeLabels(startTime, endTime, slotMinutes)
+
+  return {
+    slots,
+    markers: slots.map((label) => ({
+      label,
+      isHour: label.endsWith(':00'),
+    })),
+  }
 }
 
 export function getRangeStart(anchorDate = new Date(), viewMode = 'week') {
@@ -258,7 +297,7 @@ export function getEventPosition(event, startMinute = DEFAULT_START_HOUR * 60, s
   const start = new Date(event.start_time)
   const end = new Date(event.end_time)
   const minutesFromStart = Math.max(0, getMinutesFromStart(start, startMinute))
-  const duration = Math.max(slotMinutes, Math.round((end.getTime() - start.getTime()) / 60000))
+  const duration = Math.max(1, Math.round((end.getTime() - start.getTime()) / 60000))
 
   return {
     top: (minutesFromStart / slotMinutes) * SLOT_HEIGHT,
@@ -338,4 +377,46 @@ export function getStatusColorStyle(statusColor) {
 
 export function getDentistColor(dentistaId, dentistaColorMap) {
   return dentistaColorMap?.[dentistaId] || DENTIST_COLOR_PALETTE[0]
+}
+
+export function buildProfessionalBoardGroups(agendamentos = [], selectedDentistas = []) {
+  return selectedDentistas.map((dentista) => ({
+    dentista,
+    items: layoutDayEvents(
+      agendamentos.filter((agendamento) => String(agendamento.raw?.dentistaId) === String(dentista.id)),
+    ),
+  }))
+}
+
+export function getCurrentTimeOffset(anchorDate, startMinute, slotMinutes) {
+  const todayKey = toDateKey(new Date())
+  if (toDateKey(anchorDate) !== todayKey) {
+    return null
+  }
+
+  const now = new Date()
+  const minutesFromStart = getMinutesFromStart(now, startMinute)
+  if (minutesFromStart < 0) {
+    return null
+  }
+
+  const endMinute = now.getHours() * 60 + now.getMinutes()
+  if (endMinute > 24 * 60) {
+    return null
+  }
+
+  return (minutesFromStart / slotMinutes) * SLOT_HEIGHT
+}
+
+export function getDentistaInitials(nome) {
+  return String(nome || '')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('')
+}
+
+export function getDentistaSpecialty(dentista) {
+  return dentista?.especialidade || dentista?.Especialidade || 'Clinica geral'
 }

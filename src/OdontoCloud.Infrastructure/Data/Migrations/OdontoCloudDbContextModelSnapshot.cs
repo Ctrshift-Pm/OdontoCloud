@@ -281,6 +281,117 @@ namespace OdontoCloud.Infrastructure.Data.Migrations
                     b.ToTable("Dentistas", (string)null);
                 });
 
+            modelBuilder.Entity("OdontoCloud.Domain.Entities.IaLead", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("AtendimentoAssumido")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("ClinicaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MotivoContato")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("ProcedimentoInteresse")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTimeOffset?>("ProximoFollowUpEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ResumoInteracao")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("Sentimento")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("TelefoneWhatsapp")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Urgencia")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClinicaId", "TelefoneWhatsapp");
+
+                    b.HasIndex("ClinicaId", "Status", "Urgencia");
+
+                    b.ToTable("IaLeads", (string)null);
+                });
+
+            modelBuilder.Entity("OdontoCloud.Domain.Entities.IaMensagem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Canal")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<Guid>("ClinicaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Conteudo")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Direcao")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTimeOffset>("EnviadaEmUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("IaLeadId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IaLeadId");
+
+                    b.HasIndex("ClinicaId", "IaLeadId", "EnviadaEmUtc");
+
+                    b.ToTable("IaMensagens", (string)null);
+                });
+
             modelBuilder.Entity("OdontoCloud.Domain.Entities.ItemPlanoTratamento", b =>
                 {
                     b.Property<Guid>("Id")
@@ -370,6 +481,11 @@ namespace OdontoCloud.Infrastructure.Data.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("CrmKanbanStatus")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<DateOnly?>("DataNascimento")
                         .HasColumnType("date");
 
@@ -386,11 +502,6 @@ namespace OdontoCloud.Infrastructure.Data.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("CrmKanbanStatus")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
@@ -599,6 +710,17 @@ namespace OdontoCloud.Infrastructure.Data.Migrations
                     b.Navigation("Paciente");
                 });
 
+            modelBuilder.Entity("OdontoCloud.Domain.Entities.IaMensagem", b =>
+                {
+                    b.HasOne("OdontoCloud.Domain.Entities.IaLead", "Lead")
+                        .WithMany("Mensagens")
+                        .HasForeignKey("IaLeadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lead");
+                });
+
             modelBuilder.Entity("OdontoCloud.Domain.Entities.ItemPlanoTratamento", b =>
                 {
                     b.HasOne("OdontoCloud.Domain.Entities.Dentista", "Dentista")
@@ -685,6 +807,11 @@ namespace OdontoCloud.Infrastructure.Data.Migrations
                     b.Navigation("ContasReceber");
 
                     b.Navigation("ItensPlanoTratamento");
+                });
+
+            modelBuilder.Entity("OdontoCloud.Domain.Entities.IaLead", b =>
+                {
+                    b.Navigation("Mensagens");
                 });
 
             modelBuilder.Entity("OdontoCloud.Domain.Entities.Paciente", b =>

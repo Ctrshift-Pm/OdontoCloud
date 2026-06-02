@@ -1,219 +1,43 @@
-import { useEffect, useRef, useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link, NavLink } from 'react-router-dom'
+import {
+  BellIcon,
+  CalendarIcon,
+  ClipboardIcon,
+  CloseIcon,
+  DashboardIcon,
+  HelpIcon,
+  LogoutIcon,
+  MenuIcon,
+  MoneyIcon,
+  PatientsIcon,
+  SettingsIcon,
+  SignatureIcon,
+  SparklesIcon,
+  UserCircleIcon,
+} from './AppIcons'
 
-function BrandMark({ compact = false }) {
+function BrandMark() {
   return (
-    <div
-      className={`flex items-center justify-center rounded-2xl bg-[var(--brand-500)] text-white shadow-lg shadow-emerald-900/20 ${
-        compact ? 'h-10 w-10' : 'h-12 w-12'
-      }`}
-    >
-      <svg viewBox="0 0 24 24" className={compact ? 'h-5 w-5' : 'h-6 w-6'} aria-hidden="true">
-        <path
-          d="M12 3c-3.9 0-7 2.9-7 7.2 0 4.2 2 10.6 7 10.6s7-6.4 7-10.6C19 5.9 15.9 3 12 3Z"
-          fill="currentColor"
-          opacity="0.26"
-        />
-        <path
-          d="M8.3 8.8c0-1.1.9-2 2-2h3.4c1.1 0 2 .9 2 2s-.9 2-2 2h-3.4c-1.1 0-2-.9-2-2Zm.4 4.8c0-.9.7-1.6 1.6-1.6h3.4c.9 0 1.6.7 1.6 1.6 0 1.8-1.4 3.3-3.3 3.3s-3.3-1.5-3.3-3.3Z"
-          fill="currentColor"
-        />
-      </svg>
+    <div className="flex h-9.5 w-9.5 items-center justify-center rounded-full bg-[linear-gradient(180deg,#f6f7f7_0%,#e7ecec_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]">
+      <div className="h-5 w-5 rounded-full bg-[radial-gradient(circle_at_top,#ffffff_0%,#d8dfdf_88%)] shadow-[0_4px_10px_rgba(17,17,17,0.08)]" />
     </div>
   )
 }
 
-function DashboardIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-      <path
-        d="M4 5.5A1.5 1.5 0 0 1 5.5 4H10v6H4V5.5Zm10 0A1.5 1.5 0 0 1 15.5 4H20v10h-6V5.5ZM4 14h6v6H5.5A1.5 1.5 0 0 1 4 18.5V14Zm10 4.5a1.5 1.5 0 0 0 1.5 1.5H20v-4h-6v2.5Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
+const primaryNavItems = [
+  { to: '/dashboard', label: 'Dashboard', icon: DashboardIcon },
+  { to: '/agenda', label: 'Agendamentos', icon: CalendarIcon },
+  { to: '/pacientes', label: 'Pacientes', icon: PatientsIcon },
+  { to: '/financeiro', label: 'Faturamento', icon: MoneyIcon },
+  { to: '/prontuario', label: 'Procedimentos', icon: ClipboardIcon },
+  { to: '/configuracoes', label: 'Configuracoes', icon: SettingsIcon },
+]
 
-function CalendarIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-      <path
-        d="M7 3v3m10-3v3M4 10h16M6 5h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function SparklesIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-      <path
-        d="m12 3 1.4 4.6L18 9l-4.6 1.4L12 15l-1.4-4.6L6 9l4.6-1.4L12 3Zm6 10 0 0m0 0 .8 2.2L21 16l-2.2.8L18 19l-.8-2.2L15 16l2.2-.8L18 13ZM6 14l.9 2.1L9 17l-2.1.9L6 20l-.9-2.1L3 17l2.1-.9L6 14Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function PatientsIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-      <path
-        d="M7.5 12.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm9 0a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM2.5 19a5 5 0 0 1 10 0m2 0a4 4 0 0 1 7 0"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function ClipboardIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-      <path
-        d="M9 4h6a2 2 0 0 1 2 2v1h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1V6a2 2 0 0 1 2-2Zm0 3h6V6H9v1Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function SignatureIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-      <path
-        d="M4 17c2.5-2.8 4.6-4.2 6.2-4.2 1.4 0 1.9 1.2 2.6 1.2 1.1 0 1.8-2 3.4-2 1.2 0 2 .8 3.8 3m-9.5-6.5 2.2-2.2a1.8 1.8 0 1 1 2.5 2.5L13 11"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function MoneyIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-      <path
-        d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-9Zm8 7a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Zm-6-5h.5m11 0H18"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function SettingsIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-      <path
-        d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm7.2 3.5-.9-.5a7.7 7.7 0 0 0-.5-1.3l.4-1a1 1 0 0 0-.2-1.1l-1.1-1.1a1 1 0 0 0-1.1-.2l-1 .4c-.4-.2-.8-.4-1.3-.5l-.5-.9A1 1 0 0 0 12 4h-1.5a1 1 0 0 0-.9.6l-.5.9c-.5.1-.9.3-1.3.5l-1-.4a1 1 0 0 0-1.1.2L4.6 7a1 1 0 0 0-.2 1.1l.4 1c-.2.4-.4.8-.5 1.3l-.9.5a1 1 0 0 0-.6.9V13a1 1 0 0 0 .6.9l.9.5c.1.5.3.9.5 1.3l-.4 1a1 1 0 0 0 .2 1.1l1.1 1.1a1 1 0 0 0 1.1.2l1-.4c.4.2.8.4 1.3.5l.5.9a1 1 0 0 0 .9.6H12a1 1 0 0 0 .9-.6l.5-.9c.5-.1.9-.3 1.3-.5l1 .4a1 1 0 0 0 1.1-.2l1.1-1.1a1 1 0 0 0 .2-1.1l-.4-1c.2-.4.4-.8.5-1.3l.9-.5a1 1 0 0 0 .6-.9v-1.5a1 1 0 0 0-.6-.9Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function UserCircleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-      <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" strokeWidth="1.8" />
-      <path
-        d="M4 20c0-3.5 3-6 8-6s8 2.5 8 6"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function MenuIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-      <path
-        d="M4 7h16M4 12h16M4 17h16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function CloseIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-      <path
-        d="M6 6l12 12M18 6 6 18"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-const navSections = [
-  {
-    title: 'Principal',
-    items: [
-      { to: '/dashboard', label: 'Dashboard', icon: DashboardIcon },
-      { to: '/agenda', label: 'Agenda', icon: CalendarIcon },
-      { to: '/ia-atendimento', label: 'IA Atendimento', icon: SparklesIcon, upcoming: true },
-    ],
-  },
-  {
-    title: 'Clinica',
-    items: [
-      { to: '/pacientes', label: 'Pacientes / CRM', icon: PatientsIcon },
-      { to: '/prontuario', label: 'Prontuário', icon: ClipboardIcon },
-      { to: '/assinatura-digital', label: 'Assinatura Digital', icon: SignatureIcon, upcoming: true },
-    ],
-  },
-  {
-    title: 'Gestão',
-    items: [
-      { to: '/financeiro', label: 'Financeiro', icon: MoneyIcon },
-      { to: '/perfil', label: 'Perfil', icon: UserCircleIcon },
-      { to: '/configuracoes', label: 'Configurações', icon: SettingsIcon },
-    ],
-  },
+const secondaryNavItems = [
+  { to: '/ia-atendimento', label: 'IA Atendimento', icon: SparklesIcon },
+  { to: '/assinatura-digital', label: 'Assinatura Digital', icon: SignatureIcon, badge: 'Soon' },
+  { to: '/perfil', label: 'Perfil', icon: UserCircleIcon },
 ]
 
 const FOCUSABLE_ELEMENT_SELECTOR =
@@ -230,93 +54,123 @@ function getFocusableElements(container) {
   })
 }
 
-function NavBadge({ item, isActive }) {
-  if (item.badge) {
-    return (
-      <span
-        className={`min-w-6 rounded-full px-2 py-1 text-center text-[10px] font-semibold ${
-          isActive ? 'bg-white/18 text-white' : 'bg-white/8 text-white/70'
-        }`}
-      >
-        {item.badge}
-      </span>
-    )
-  }
-
-  if (item.upcoming) {
-    return (
-      <span
-        className={`rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] ${
-          isActive ? 'bg-white/18 text-white' : 'bg-white/8 text-white/50'
-        }`}
-      >
-        Em breve
-      </span>
-    )
-  }
-
-  return null
-}
-
-const MOBILE_MENU_ID = 'mobile-main-navigation'
-
-function NavItem({ item }) {
+function NavItem({ item, onClick }) {
   const Icon = item.icon
 
   return (
     <NavLink
       to={item.to}
-      onClick={() => {}}
+      onClick={onClick}
       className={({ isActive }) =>
-        `flex items-center justify-between rounded-2xl px-3 py-3 text-sm font-medium transition ${
+        `flex items-center gap-3 rounded-[12px] px-3 py-2.25 text-[13px] transition-colors ${
           isActive
-            ? 'bg-[var(--brand-500)] text-white shadow-lg shadow-emerald-950/25'
-            : 'text-white/65 hover:bg-white/6 hover:text-white'
+            ? 'bg-[#e8e4e4] text-[var(--ink-900)]'
+            : 'text-[var(--ink-700)] hover:bg-[#f1edec] hover:text-[var(--ink-900)]'
         }`
       }
     >
       {({ isActive }) => (
         <>
-          <span className="flex items-center gap-3">
+          <span className={isActive ? 'text-[var(--ink-900)]' : 'text-[var(--ink-700)]'}>
             <Icon />
-            {item.label}
           </span>
-          <NavBadge item={item} isActive={isActive} />
+          <span className="font-medium">{item.label}</span>
+          {item.badge ? (
+            <span className="ml-auto rounded-full bg-[#ece7e6] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--ink-700)]">
+              {item.badge}
+            </span>
+          ) : null}
         </>
       )}
     </NavLink>
   )
 }
 
-function NavItemWithAction({ item, onLinkClick }) {
-  const Icon = item.icon
-
+function SidebarContent({ onLogout, onNavigate }) {
   return (
-    <NavLink
-      to={item.to}
-      onClick={onLinkClick}
-      className={({ isActive }) =>
-        `flex items-center justify-between rounded-2xl px-3 py-3 text-sm font-medium transition ${
-          isActive
-            ? 'bg-[var(--brand-500)] text-white shadow-lg shadow-emerald-950/25'
-            : 'text-white/65 hover:bg-white/6 hover:text-white'
-        }`
-      }
-    >
-      {({ isActive }) => (
-        <>
-          <span className="flex items-center gap-3">
-            <Icon />
-            {item.label}
-          </span>
-          <NavBadge item={item} isActive={isActive} />
-        </>
-      )}
-    </NavLink>
+    <div className="flex h-full flex-col justify-between p-3">
+      <div className="flex flex-col gap-5">
+        <div className="flex items-center gap-3 px-1 py-1">
+          <BrandMark />
+          <div>
+            <div className="text-[15px] font-medium leading-tight text-[var(--ink-900)]">OdontoCloud</div>
+            <div className="text-[11px] leading-tight text-[var(--ink-500)]">Clinica Principal</div>
+          </div>
+        </div>
+
+        <nav className="flex flex-col gap-1" aria-label="Navegacao principal">
+          {primaryNavItems.map((item) => (
+            <NavItem key={item.to} item={item} onClick={onNavigate} />
+          ))}
+        </nav>
+
+        <div className="border-t border-[var(--border-strong)] pt-3">
+          <nav className="flex flex-col gap-1" aria-label="Navegacao secundaria">
+            {secondaryNavItems.map((item) => (
+              <NavItem key={item.to} item={item} onClick={onNavigate} />
+            ))}
+          </nav>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3.5">
+        <Link to="/agenda" onClick={onNavigate} className="btn-primary h-10.5 w-full px-4.5 text-[13px]">
+          Novo agendamento
+        </Link>
+
+        <div className="space-y-1">
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 rounded-[12px] px-3 py-2.25 text-left text-[13px] text-[var(--ink-700)] transition-colors hover:bg-[#f1edec] hover:text-[var(--ink-900)]"
+          >
+            <HelpIcon />
+            <span className="font-medium">Ajuda</span>
+          </button>
+          <button
+            type="button"
+            onClick={onLogout}
+            className="flex w-full items-center gap-3 rounded-[12px] px-3 py-2.25 text-left text-[13px] text-[var(--ink-700)] transition-colors hover:bg-[#f1edec] hover:text-[var(--ink-900)]"
+          >
+            <LogoutIcon />
+            <span className="font-medium">Sair</span>
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 
-export default function AppShell({ title, subtitle, user, onLogout, actions, children }) {
+function HeaderControls({ actions }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="hidden items-center gap-2 rounded-full bg-[#ece7e6] px-3 py-1.5 md:flex">
+        <span className="h-2 w-2 rounded-full bg-black" />
+        <span className="text-[12px] font-medium text-[var(--ink-900)]">Clinica Principal - Plano Starter</span>
+      </div>
+
+      <button
+        type="button"
+        className="relative inline-flex h-8.5 w-8.5 items-center justify-center rounded-full text-[var(--ink-900)] transition-colors hover:bg-[#f1edec]"
+        aria-label="Notificacoes"
+      >
+        <BellIcon />
+        <span className="absolute right-[10px] top-[10px] h-2 w-2 rounded-full bg-black ring-2 ring-[#fdf8f8]" />
+      </button>
+
+      {actions}
+    </div>
+  )
+}
+
+export default function AppShell({
+  title,
+  subtitle,
+  user,
+  onLogout,
+  actions,
+  children,
+  headerVariant = 'default',
+}) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const mobileMenuRef = useRef(null)
   const previousFocusRef = useRef(null)
@@ -338,9 +192,7 @@ export default function AppShell({ title, subtitle, user, onLogout, actions, chi
     const firstElement = focusableElements[0] || menu
     const lastElement = focusableElements.at(-1) || menu
 
-    if (firstElement) {
-      firstElement.focus()
-    }
+    firstElement?.focus()
 
     function handleKeyDown(event) {
       if (event.key === 'Escape') {
@@ -369,207 +221,132 @@ export default function AppShell({ title, subtitle, user, onLogout, actions, chi
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = ''
-
-      if (previousFocusRef.current?.focus) {
-        previousFocusRef.current.focus()
-      }
+      previousFocusRef.current?.focus?.()
     }
   }, [isMobileMenuOpen])
 
-  function closeMobileMenu() {
-    setIsMobileMenuOpen(false)
-  }
+  const currentDate = useMemo(
+    () =>
+      new Intl.DateTimeFormat('pt-BR', {
+        weekday: 'long',
+        day: '2-digit',
+        month: 'long',
+      }).format(new Date()),
+    [],
+  )
 
-  const currentDate = new Intl.DateTimeFormat('pt-BR', {
-    weekday: 'long',
-    day: '2-digit',
-    month: 'long',
-  }).format(new Date())
+  const resolvedActions = actions || (
+    <Link to="/agenda" className="btn-primary h-11 px-6">
+      Novo agendamento
+    </Link>
+  )
 
   return (
-    <div className="h-screen overflow-hidden bg-[var(--surface)] text-[var(--ink-900)]">
-      <div className="flex h-screen">
-        <div className="lg:hidden">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--ink-900)] lg:flex">
+      <button
+        type="button"
+        onClick={() => setIsMobileMenuOpen(true)}
+        className="glass-panel fixed left-4 top-4 z-40 inline-flex h-10 w-10 items-center justify-center rounded-full lg:hidden"
+        aria-label="Abrir menu principal"
+        aria-expanded={isMobileMenuOpen}
+      >
+        <MenuIcon />
+      </button>
+
+      <button
+        type="button"
+        onClick={onLogout}
+        className="glass-panel fixed right-4 top-4 z-40 inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium lg:hidden"
+        aria-label="Encerrar sessao"
+      >
+        <LogoutIcon />
+        <span>Sair</span>
+      </button>
+
+      <aside
+        ref={mobileMenuRef}
+        className={`fixed inset-y-4 left-4 z-50 w-[min(16rem,calc(100vw-2rem))] rounded-[20px] border border-[var(--border-strong)] bg-[rgba(253,248,248,0.96)] shadow-[0_20px_50px_rgba(17,17,17,0.12)] backdrop-blur-xl transition-transform duration-200 lg:hidden ${
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-[108%]'
+        }`}
+        role="dialog"
+        aria-modal="true"
+        aria-hidden={!isMobileMenuOpen}
+      >
+        <div className="flex items-center justify-between border-b border-[var(--border-strong)] px-5 py-3.5">
+          <div className="text-[13px] font-medium text-[var(--ink-900)]">Menu principal</div>
           <button
             type="button"
-            onClick={() => {
-              setIsMobileMenuOpen(true)
-            }}
-            aria-controls={MOBILE_MENU_ID}
-            aria-expanded={isMobileMenuOpen}
-            className="fixed left-4 top-4 z-40 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-black/10 bg-white text-[var(--ink-900)] shadow-sm"
-            aria-label="Abrir menu principal"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[var(--ink-900)] transition-colors hover:bg-[#f1edec]"
+            aria-label="Fechar menu principal"
           >
-            <MenuIcon />
+            <CloseIcon />
           </button>
         </div>
+        <SidebarContent onLogout={onLogout} onNavigate={() => setIsMobileMenuOpen(false)} />
+      </aside>
 
-        <aside
-          ref={mobileMenuRef}
-          id={MOBILE_MENU_ID}
-          className={`fixed inset-y-0 left-0 z-50 w-72 shrink-0 border-r border-white/8 bg-stone-950 text-white transition-transform duration-200 lg:hidden ${
-            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
-          aria-label="Menu principal"
-          role="dialog"
-          aria-modal="true"
-          aria-hidden={!isMobileMenuOpen}
-        >
-          <div className="border-b border-white/8 px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <BrandMark compact />
-                <div>
-                  <div className="text-lg font-semibold">OdontoCloud</div>
-                  <div className="text-sm text-white/45">Gestão clínica multi-tenant</div>
-                </div>
-              </div>
+      {isMobileMenuOpen ? (
+        <div
+          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden"
+          role="presentation"
+          onMouseDown={() => setIsMobileMenuOpen(false)}
+        />
+      ) : null}
 
-              <button
-                type="button"
-                onClick={closeMobileMenu}
-                className="rounded-xl border border-white/10 p-2 text-white/70 transition hover:bg-white/8 hover:text-white"
-                aria-label="Fechar menu principal"
-              >
-                <CloseIcon />
-              </button>
-            </div>
-          </div>
+      <aside
+        className="hidden h-screen shrink-0 border-r border-[var(--border-strong)] bg-[rgba(253,248,248,0.58)] backdrop-blur-xl lg:fixed lg:left-0 lg:top-0 lg:block"
+        style={{ width: 'var(--app-sidebar-width)' }}
+      >
+        <SidebarContent onLogout={onLogout} />
+      </aside>
 
-            <nav className="flex flex-1 flex-col px-4 py-6" aria-label="Navegação principal">
-            <div className="space-y-6">
-              {navSections.map((section) => (
-                <div key={section.title}>
-                  <div className="mb-3 px-3 text-xs font-semibold uppercase tracking-[0.24em] text-white/35">
-                    {section.title}
-                  </div>
-
-                  <div className="space-y-1">
-                    {section.items.map((item) => (
-                      <NavItemWithAction key={item.to} item={item} onLinkClick={closeMobileMenu} />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </nav>
-
-          <div className="mt-auto border-t border-white/8 px-4 py-4">
-            <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--brand-500)] text-sm font-semibold text-white">
-                {user?.nome?.slice(0, 2).toUpperCase() || 'OC'}
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-semibold text-white">{user?.nome || 'Usuário'}</div>
-                <div className="truncate text-xs text-white/45">{user?.perfil || 'Perfil não informado'}</div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  closeMobileMenu()
-                  onLogout()
-                }}
-                className="rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold text-white/70 transition hover:bg-white/8 hover:text-white"
-              >
-                Sair
-              </button>
-            </div>
-          </div>
-        </aside>
-
-        {isMobileMenuOpen ? (
+      <main className="min-h-screen flex-1" style={{ marginLeft: 'var(--app-sidebar-offset)' }}>
+        <header className="sticky top-0 z-20 border-b border-[var(--border-strong)] bg-[rgba(253,248,248,0.82)] backdrop-blur-xl">
           <div
-            className="fixed inset-0 z-40 bg-stone-950/70 lg:hidden"
-            role="presentation"
-            aria-hidden="true"
-            onMouseDown={() => {
-              closeMobileMenu()
-            }}
-          />
-        ) : null}
-
-        <aside className="hidden h-screen w-72 shrink-0 flex-col bg-stone-950 text-white lg:fixed lg:inset-y-0 lg:left-0 lg:flex">
-          <div className="border-b border-white/8 px-6 py-6">
-            <div className="flex items-center gap-3">
-              <BrandMark />
-              <div>
-                <div className="text-lg font-semibold">OdontoCloud</div>
-                <div className="text-sm text-white/45">Gestão clínica multi-tenant</div>
-              </div>
-            </div>
-          </div>
-
-          <nav className="flex flex-1 flex-col px-4 py-6">
-            <div className="space-y-6">
-              {navSections.map((section) => (
-                <div key={section.title}>
-                  <div className="mb-3 px-3 text-xs font-semibold uppercase tracking-[0.24em] text-white/35">
-                    {section.title}
-                  </div>
-
-                  <div className="space-y-1">
-                    {section.items.map((item) => (
-                      <NavItem key={item.to} item={item} />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </nav>
-
-          <div className="mt-auto border-t border-white/8 px-4 py-4">
-            <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--brand-500)] text-sm font-semibold text-white">
-                {user?.nome?.slice(0, 2).toUpperCase() || 'OC'}
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-semibold text-white">{user?.nome || 'Usuário'}</div>
-                <div className="truncate text-xs text-white/45">{user?.perfil || 'Perfil não informado'}</div>
-              </div>
-
-              <button
-                type="button"
-                onClick={onLogout}
-                className="rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold text-white/70 transition hover:bg-white/8 hover:text-white"
-              >
-                Sair
-              </button>
-            </div>
-          </div>
-        </aside>
-
-        <main className="flex h-screen flex-1 flex-col overflow-hidden lg:ml-72">
-          <header className="border-b border-black/5 bg-white/80 px-4 py-4 backdrop-blur lg:px-8">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex items-start gap-3">
-                <div className="lg:hidden">
-                  <BrandMark compact />
-                </div>
+            className="mx-auto flex w-full items-center justify-between gap-3.5 px-[var(--app-page-x)] pb-3 pt-14 sm:px-6 lg:px-[var(--app-page-x-lg)] lg:py-0"
+            style={{ maxWidth: 'var(--app-max-width)', minHeight: 'var(--app-header-height)' }}
+          >
+            <div className="min-w-0">
+              {headerVariant === 'dashboard' ? (
+                <h1 className="truncate text-[1.48rem] font-medium tracking-[-0.045em] text-[var(--ink-900)] lg:text-[1.68rem]">
+                  {title}
+                </h1>
+              ) : (
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--brand-700)]">
-                    OdontoCloud
-                  </p>
-                  <h1 className="mt-1 text-2xl font-semibold text-[var(--ink-900)]">{title}</h1>
-                  {subtitle ? <p className="mt-1 text-sm text-[var(--ink-500)]">{subtitle}</p> : null}
+                  <h1 className="text-[1.48rem] font-medium tracking-[-0.045em] text-[var(--ink-900)] lg:text-[1.6rem]">
+                    {title}
+                  </h1>
+                  {subtitle ? <p className="mt-1 text-[11px] text-[var(--ink-500)] lg:text-[12px]">{subtitle}</p> : null}
                 </div>
-              </div>
-
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <div className="text-sm capitalize text-[var(--ink-500)]">{currentDate}</div>
-                <div className="flex items-center gap-3">{actions}</div>
-                <button type="button" onClick={onLogout} className="btn-secondary lg:hidden">
-                  Sair
-                </button>
-              </div>
+              )}
             </div>
-          </header>
 
-          <div className="flex-1 overflow-y-auto px-4 py-6 lg:px-8">{children}</div>
-        </main>
-      </div>
+            <div className="hidden shrink-0 lg:flex">
+              <HeaderControls actions={resolvedActions} />
+            </div>
+          </div>
+
+          {headerVariant !== 'dashboard' ? (
+            <div className="border-t border-[var(--border-strong)]/70 px-6 py-2.5 text-[11px] capitalize text-[var(--ink-500)] lg:hidden">
+              {currentDate}
+            </div>
+          ) : null}
+        </header>
+
+        <div
+          className="mx-auto w-full px-[var(--app-page-x)] pb-6 pt-3.5 sm:px-5 lg:px-[var(--app-page-x-lg)] lg:pt-4.5"
+          style={{ maxWidth: 'var(--app-max-width)' }}
+        >
+          {headerVariant === 'dashboard' ? null : (
+            <div className="mb-4 flex flex-wrap items-center gap-2 lg:hidden">
+              <span className="stat-pill capitalize">{currentDate}</span>
+              {user?.perfil ? <span className="stat-pill">{user.perfil}</span> : null}
+            </div>
+          )}
+          {children}
+        </div>
+      </main>
     </div>
   )
 }
